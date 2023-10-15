@@ -1,5 +1,6 @@
 import Image from "next/image";
 import headerImage from '/public/images/header.jpg';
+import Ticker from "./Ticker";
 
 function List(props: {items:any}){
     return(
@@ -18,20 +19,22 @@ function List(props: {items:any}){
 }
 
 function Header() {
-    const items = ['Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5'];
+    const items = ['श्री शिव महिम्नः स्तोत्रं।', '3 Eggs and 3 Lessons', 'Achyutam Keshavam', 'मीठे रस से भरी रे राधा रानी लागे', 'Hello world!'];
     return (<>
         <header className="mb-3">
             <div className="">
                 <Image
                     src={headerImage} 
-                    alt="Er. Sujan Kumal" />
+                    alt="Er. Sujan Kumal" 
+                    priority={true}
+                />
             </div>
             <div className="bg-gray-900 px-2 border-b-4 border-b-teal-600">
                 <div className="md:flex text-white ">    
-                    <div className="bg-teal-600 w-full p-4 inline-block md:w-1/6 float-left px-4 text-center font-semibold">Latest</div>
+                    <div className="bg-teal-600 w-full p-2 inline-block md:w-1/6 float-left px-4 text-center font-semibold">Latest</div>
                     <div className="w-full">
-                        <List items={items}/>
-                        
+                        {/* <List items={items}/> */}
+                        <Ticker items={items} />
                     </div>
                 </div>
             </div>
@@ -84,7 +87,7 @@ function Header() {
             <div id="mgs-menu-wrap" className="bottom-header-wrapper clearfix">
                 <div className="mgs-container">
                     <div className="home-icon"><a href="/" rel="home"> <i className="fa fa-home"> </i> </a></div>
-                    <a href="javascript:void(0)" className="menu-toggle"> <i className="fa fa-navicon"> </i> </a>
+                    <a href="#" className="menu-toggle"> <i className="fa fa-navicon"> </i> </a>
                     <nav id="site-navigation" className="main-navigation">
                         <div className="menu">
                             <ul>
@@ -102,7 +105,7 @@ function Header() {
                             <form role="search" method="get" className="search-form" action="">
                                 <label>
                                     <span className="screen-reader-text">Search for:</span>
-                                    <input type="search" className="search-field" placeholder="Search &hellip;" value=""
+                                    <input type="search" className="search-field" readOnly placeholder="Search &hellip;"
                                         name="s" />
                                 </label>
                                 <input type="submit" className="search-submit" value="Search" />
