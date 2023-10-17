@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 function Ticker({items}:{items:Array<string>}) {
     const [activeIndex, setActiveIndex] = useState(0);
@@ -32,7 +33,7 @@ function Ticker({items}:{items:Array<string>}) {
                                 }
                             }}
                             >
-                            {item}
+                            <Link href={"#"}>{item}</Link> 
                         </motion.li>
                 })}
             </ul>
