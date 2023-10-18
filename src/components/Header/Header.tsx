@@ -6,6 +6,7 @@ import {Facebook, Twitter, Instagram, GitHub} from '@mui/icons-material';
 
 import Link from "next/link";
 import DigitalClock from "../DigitalClock";
+import Navbar from "./Navbar";
 
 const items = ['श्री शिव महिम्नः स्तोत्रं।', '3 Eggs and 3 Lessons', 'Achyutam Keshavam', 'मीठे रस से भरी रे राधा रानी लागे', 'Hello world!'];
     
@@ -20,7 +21,7 @@ function Header() {
                     priority={true}
                 />
             </div>
-            <div className="bg-gray-900 px-2">
+            <div className="bg-gray-800 px-2">
                 <div className="md:flex text-white ">    
                     <div className="bg-teal-600 h-8 w-full flex flex-col justify-center  md:w-1/6 md:ml-20 float-left px-3 text-center font-semibold">Latest</div>
                     <div className="w-full h-8 text-sm inline-block">
@@ -29,7 +30,7 @@ function Header() {
                     </div>
                 </div>
             </div>
-            <div className="border-t-2 border-t-teal-600 bg-gray-900 px-2">
+            <div className="border-t-2 border-t-teal-600 bg-gray-800 px-2">
                 <div className="p-2">
                     <div className="text-sm text-white text-center md:inline-block mb-1">
                         <div className="inline-flex float-none text-xs">
@@ -50,7 +51,7 @@ function Header() {
                         </span>
                         <span className="mx-2">
                             <Link href={"https://www.instagram.com/sujan_03_/"} target="_blank">
-                                <Instagram htmlColor="#ff7900"/>
+                                <Instagram htmlColor="#ff7800"/>
                             </Link>
                         </span>
                         <span className="mx-2">
@@ -76,6 +77,7 @@ function Header() {
                     </div>
                 </div>
             </div>
+            <Navbar/>
         </header>
 
     </>);
