@@ -1,3 +1,40 @@
+# Sujan Kumal - Software Engineer Portfolio
+
+Welcome to my GitHub Pages portfolio repository! This repository hosts my personal website, where you can learn more about me, my work, and projects I'm passionate about.
+
+## About Me
+
+I'm Sujan Kumal, a software engineer with a strong passion for creating innovative solutions and exploring the world of technology. Here's a little bit about me:
+
+- 🌐 Software Engineer
+- 🚀 Full-Stack Developer
+- 💼 Tech Enthusiast
+
+## Portfolio Sections
+
+Feel free to explore my portfolio website to learn more about my work and interests:
+
+- 📂 **Projects:** You can find a collection of my software projects, both personal and professional.
+- 📝 **Blog:** I occasionally write about topics related to technology and software development.
+- 📄 **Resume:** Download my latest resume to learn more about my professional background and skills.
+- 📬 **Contact:** If you'd like to get in touch with me, you can find my contact information here.
+
+## Live Site
+
+Visit my live portfolio site: [Sujan Kumal - Portfolio](https://sujankumal.com.np)
+
+## Contributing
+
+If you have suggestions for improvements or have found any issues with the site, please feel free to open an issue or submit a pull request. Your contributions are greatly appreciated!
+
+## License
+
+This repository and the content of the portfolio are under the [Apache License Version 2.0](LICENSE). Please respect the licensing terms when using the code or content from this repository.
+
+Thank you for visiting my portfolio and for your interest in my work. If you have any questions or want to connect, feel free to reach out to me. Enjoy exploring!
+
+## Nextjs 
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
