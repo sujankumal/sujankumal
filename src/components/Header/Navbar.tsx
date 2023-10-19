@@ -8,10 +8,10 @@ import Searchbar from "../Searchbar";
 
 const menu = [
   { name: "About", url: "/About" },
-  { name: "Articles", url: "/"},
-  { name: "Privacy Policy", url: "/" },
-  { name: "Twitter", url: "/" },
-  { name: "Jokes", url: "/" },
+  { name: "Articles", url: "/Articles"},
+  { name: "Privacy Policy", url: "/Privacy-Policy" },
+  { name: "Twitter", url: "/Twitter" },
+  { name: "Jokes", url: "/Jokes" },
 ];
 
 const Navbar = () => {
