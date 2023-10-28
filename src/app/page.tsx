@@ -19,6 +19,11 @@ export default function Home() {
             </div>
         </article>
         <hr className="w-full h-1 my-8 bg-gray-700 border-0 dark:bg-gray-700" />
+        <div className="w-auto">
+          {
+
+          }
+        </div>
       </div>
       <aside className="w-full md:col-span-1">
         <div className="h-full px-3 py-4 overflow-y-auto dark:bg-gray-800">
