@@ -5,7 +5,7 @@ export default function Home() {
     <main className="grid md:grid-cols-4 min-h-screen justify-between">
       <div className="mb-8 p-4 md:m-8 md:col-span-3">
         <article className="block text-gray-800">
-            <h3 className="mb-4">Welcome to Sujan Kumal's Site</h3>
+            <h3 className="mb-4">Welcome to Sujan Kumal&apos;s Site</h3>
             <div>
                 <p className='mb-4'>
                     <i>Experienced Software Engineer | Innovative Problem Solver | Passionate About Technology</i>
