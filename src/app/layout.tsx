@@ -1,7 +1,7 @@
 import Footer from '@/components/Footer'
 import './globals.css'
 import type { Metadata } from 'next'
-import { Inter, Noto_Sans } from 'next/font/google'
+import { Noto_Sans } from 'next/font/google'
 import Header from '@/components/Header/Header'
 
 const noto = Noto_Sans({
