@@ -9,7 +9,7 @@ const sites:Array<SiteType> = await fetchSite().then((data)=>{
   return data;
 });
 
-export async function generateMetadata(parent: ResolvingMetadata):Promise<Metadata>{
+export async function generateMetadata():Promise<Metadata>{
   return {
     title: sites.slice(-1)[0].title
   }
