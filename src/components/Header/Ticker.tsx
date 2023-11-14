@@ -2,8 +2,10 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { PostType } from "@/types/post";
+import { APP_BASE_URL } from "@/constants/config";
 
-function Ticker({items}:{items:Array<string>}) {
+function Ticker({items}:{items:Array<PostType>}) {
     const [activeIndex, setActiveIndex] = useState(0);
    
     useEffect(()=>{
@@ -33,7 +35,7 @@ function Ticker({items}:{items:Array<string>}) {
                                 }
                             }}
                             >
-                            <Link href={"#"}>{item}</Link> 
+                            <Link href={APP_BASE_URL+"/post/"+item.id}>{item.title}</Link> 
                         </motion.li>
                 })}
             </ul>

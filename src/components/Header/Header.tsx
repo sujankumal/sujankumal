@@ -7,9 +7,22 @@ import {Facebook, Twitter, Instagram, GitHub} from '@mui/icons-material';
 import Link from "next/link";
 import DigitalClock from "../DigitalClock";
 import Navbar from "./Navbar";
+import { SiteType } from "@/types/site";
+import { fetchPostTitle, fetchSite } from "@/services/data_access";
+import { PostType } from "@/types/post";
 
 const items = ['श्री शिव महिम्नः स्तोत्रं।', '3 Eggs and 3 Lessons', 'Achyutam Keshavam', 'मीठे रस से भरी रे राधा रानी लागे', 'Hello world!'];
+
+const posts:Array<PostType> = await fetchPostTitle().then((data)=>{
     
+    console.log(data, data[0].title);
+    return data;
+});
+
+const sites:Array<SiteType> = await fetchSite().then((data)=>{
+    return data;
+  });
+      
 function Header() {
     
     return (<>
@@ -26,7 +39,7 @@ function Header() {
                     <div className="bg-teal-600 h-8 w-full flex flex-col justify-center  md:w-1/6 md:ml-20 float-left px-3 text-center font-semibold">Latest</div>
                     <div className="w-full h-8 text-sm inline-block">
                         {/* <List items={items}/> */}
-                        <Ticker items={items} />
+                        <Ticker items={posts} />
                     </div>
                 </div>
             </div>

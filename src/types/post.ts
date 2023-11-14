@@ -1,13 +1,14 @@
+import { User } from "@prisma/client";
+
 export interface PostType{
     id:number,
     title:string,
     description:string,
-    url:string,
+    content:Array<Object>,
     main_image:string,
     main_image_credit?:string,
-    date:string,
-    content:Array<Object>,
-    comment:Array<string>,
-    categories:Array<number>,
-    author:string,
+    date:Date,
+    categories:Array<Object>,
+    published:Boolean,
+    author:User,
 }

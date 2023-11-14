@@ -13,6 +13,8 @@ datasource db {
 
 model Site {
   id            Int   @default(autoincrement()) @id
+  header_image  String  @default("header.jpg")
+  header_image_credit  String?
   title         String
   name          String
   motto         String
