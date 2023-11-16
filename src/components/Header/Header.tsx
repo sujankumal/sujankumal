@@ -125,7 +125,7 @@ function Header() {
                     <div className="text-center md:text-left">
                         <div className="mt-5">
                             <h1 className="uppercase font-bold text-2xl">
-                                <Link className="text-teal-600" href={APP_BASE_URL} rel="home">{sites.slice(-1)[0].name}</Link>
+                                <Link className="text-teal-600" href={APP_BASE_URL || '/'} rel="home">{sites.slice(-1)[0].name}</Link>
                             </h1>
                             <p className="text-light">{sites.slice(-1)[0].motto}</p>
                         </div>
