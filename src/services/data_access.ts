@@ -1,19 +1,10 @@
-import { APP_BASE_URL } from "@/constants/config";
+import { API_BASE_URL } from "@/constants/config";
 import { PostType } from "@/types/post";
 import { SiteType } from "@/types/site";
 import { SocialType } from "@/types/social";
 import path from "path";
 
 const dataDirectory = path.join(process.cwd(), 'data'); // Path to your JSON data files
-
-export function isNodeJs() {
-    if ((typeof process !== 'undefined') && process.release &&
-        (process.release.name.search(/node|io.js/) !== -1)) {
-        return true;
-    } else {
-        return false;
-    }
-}
 
 export async function readJsonFile(url: URL): Promise<Array<PostType>> {
     const response = await fetch(url)
@@ -29,7 +20,7 @@ export async function readJsonFile(url: URL): Promise<Array<PostType>> {
     return response
 }
 export async function isServerApiResponding() {
-    return await fetch(APP_BASE_URL+'/api/check').then(() => {
+    return await fetch(API_BASE_URL+'/api/check').then(() => {
         return true;
     })
     .catch((error) => {
@@ -41,7 +32,7 @@ export async function isServerApiResponding() {
 export async function fetchSite(): Promise<Array<SiteType>> {
     return await isServerApiResponding().then((value) =>{
         if (value){
-            return fetch(APP_BASE_URL+'/api/site',{
+            return fetch(API_BASE_URL+'/api/site',{
                     method:"GET",
                     credentials:"same-origin",
                     next:{
@@ -66,7 +57,7 @@ export async function fetchSite(): Promise<Array<SiteType>> {
 export async function fetchPostTitle():Promise<Array<PostType>>{
     return await isServerApiResponding().then((value)=>{
         if (value){
-            return fetch(APP_BASE_URL+'/api/post/id/title',{
+            return fetch(API_BASE_URL+'/api/post/id/title',{
                 method:"GET",
                 credentials:"same-origin",
                 next:{
@@ -91,7 +82,7 @@ export async function fetchPostTitle():Promise<Array<PostType>>{
 export async function fetchSocial():Promise<Array<SocialType>> {
     return await isServerApiResponding().then((value)=>{
         if (value){
-            return fetch(APP_BASE_URL+'/api/social/',{
+            return fetch(API_BASE_URL+'/api/social/',{
                 method:"GET",
                 credentials:"same-origin",
                 next:{
@@ -123,7 +114,7 @@ export async function fetchData(
     return await isServerApiResponding().then((value) => {
         if (value) {
             console.log("Fetch Data, isnodejs");
-            return fetch(APP_BASE_URL+'/api/data/',{
+            return fetch(API_BASE_URL+'/api/data/',{
                 method:"POST",
                 credentials:"same-origin",
                 headers:{

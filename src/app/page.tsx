@@ -3,7 +3,7 @@
 import Sidebar from '@/components/Sidebar'
 import { fetchSite } from '@/services/data_access';
 import { SiteType } from '@/types/site';
-import { Metadata, ResolvingMetadata } from 'next';
+import { Metadata } from 'next';
 
 const sites:Array<SiteType> = await fetchSite().then((data)=>{
   return data;

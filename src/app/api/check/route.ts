@@ -1,4 +1,4 @@
-import { isNodeJs } from "@/services/data_access";
+import { isNodeJs } from "@/services/check_node";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest){
