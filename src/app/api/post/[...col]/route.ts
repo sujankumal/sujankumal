@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "../../../../../prisma/prisma";
-import { Prisma } from "@prisma/client";
 
 export async function GET(request: NextRequest, {params}: {params: { col: Array<String>}}){
     console.log("Hello I am server get post method", typeof(params.col),params.col);

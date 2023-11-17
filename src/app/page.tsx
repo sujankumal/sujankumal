@@ -1,11 +1,21 @@
 // "use client";
 
+import CategoryButton from '@/components/Category/CategoryButton';
 import Sidebar from '@/components/Sidebar'
-import { fetchSite } from '@/services/data_access';
+import { APP_BASE_URL } from '@/constants/config';
+import { fetchPostHome, fetchSite } from '@/services/data_access';
+import { CatergoryType } from '@/types/category';
+import { PostType } from '@/types/post';
 import { SiteType } from '@/types/site';
 import { Metadata } from 'next';
+import Link from 'next/link';
 
 const sites:Array<SiteType> = await fetchSite().then((data)=>{
+  return data;
+});
+
+const posts:Array<PostType> = await fetchPostHome().then((data)=>{
+  console.log("Post HOme: ",data);
   return data;
 });
 
@@ -31,13 +41,26 @@ export default async function Home() {
             </div>
         </article>
         <hr className="w-full h-1 my-8 bg-gray-700 border-0 dark:bg-gray-700" />
-        <div className="w-auto">
+        <div className="w-auto block">
           {
-            // sites.map((site, index:number)=>{
-            //   return <div key={index}>{site.title}
-            //   </div>
-            // })
-            <div>Applications here</div>
+            posts.map((post:PostType, index:number)=>{
+              
+              return <div key={index} className="mt-2 mb-5 pb-5 border-b border-dashed border-gray-300">
+                  <header className="mt-5 text-center">
+                    <div className="block m-1 p-1">
+                      <CategoryButton categories={post.categories}/>
+                    </div>
+                    <div className="mb-2">
+                      <h2>
+                        <Link href={APP_BASE_URL+"/articles/"+post.id} className="text-teal-600">{post.title}</Link>
+                      </h2>
+                    </div>
+                  </header>
+                  <div></div>
+                  <footer></footer>
+              </div>
+            })
+            // <div>Applications here</div>
           }
         </div>
       </div>

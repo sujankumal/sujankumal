@@ -78,7 +78,31 @@ export async function fetchPostTitle():Promise<Array<PostType>>{
         }
     });
 }
-
+export async function fetchPostHome():Promise<Array<PostType>>{
+    
+    return await isServerApiResponding().then((value)=>{
+        if (value){
+            return fetch(API_BASE_URL+'/api/post/home',{
+                method:"GET",
+                credentials:"same-origin",
+                next:{
+                    revalidate: 10,
+                }
+            }).then((response)=>{
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            }).catch((error)=>{
+                console.log(error);
+                return [];
+            });
+        }else{
+            // json
+            return []
+        }
+    });
+}
 export async function fetchSocial():Promise<Array<SocialType>> {
     return await isServerApiResponding().then((value)=>{
         if (value){
