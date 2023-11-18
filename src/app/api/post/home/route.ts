@@ -23,7 +23,13 @@ export async function GET(request: NextRequest){
                         id:true,
                         name:true
                     }
-                }
+                },
+                author:{
+                    select:{
+                        id:true,
+                        name:true,
+                    }
+                },
             }
         }
     ).catch((exception)=>{

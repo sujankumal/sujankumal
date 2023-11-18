@@ -1,7 +1,9 @@
 // "use client";
 
 import CategoryButton from '@/components/Category/CategoryButton';
+import DateTime from '@/components/DateTime/DateTime';
 import Sidebar from '@/components/Sidebar'
+import UserLinkButton from '@/components/User/UserLinkButton';
 import { APP_BASE_URL } from '@/constants/config';
 import { fetchPostHome, fetchSite } from '@/services/data_access';
 import { CatergoryType } from '@/types/category';
@@ -52,12 +54,21 @@ export default async function Home() {
                     </div>
                     <div className="mb-2">
                       <h2>
-                        <Link href={APP_BASE_URL+"/articles/"+post.id} className="text-teal-600">{post.title}</Link>
+                        <Link href={APP_BASE_URL+"articles/"+post.id} className="text-teal-600">{post.title}</Link>
                       </h2>
                     </div>
                   </header>
-                  <div></div>
-                  <footer></footer>
+                  <div className="text-center">
+                    <p>{post.description}</p>
+                  </div>
+                  <footer className="mt-5 text-center text-xs">
+                    <div className="inline-flex justify-center mr-4">
+                      <DateTime datetime={post.date}/>
+                    </div>
+                    <div className="inline-flex">
+                      <UserLinkButton user={post.author}/>
+                    </div>
+                  </footer>
               </div>
             })
             // <div>Applications here</div>

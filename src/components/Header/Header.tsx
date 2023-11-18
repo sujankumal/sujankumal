@@ -5,7 +5,7 @@ import { Facebook, Twitter, Instagram, GitHub, LinkedIn, Link as SocialLink } fr
 
 
 import Link from "next/link";
-import DigitalClock from "../DigitalClock";
+import DigitalClock from "../DateTime/DigitalClock";
 import Navbar from "./Navbar";
 import { SiteType } from "@/types/site";
 import { fetchPostTitle, fetchSite, fetchSocial } from "@/services/data_access";

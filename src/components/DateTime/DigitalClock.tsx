@@ -28,8 +28,8 @@ function DigitalClock() {
     const timeJSX_ = <>{hours % 12 === 0 ? 12 : hours % 12}:{time.getMinutes()}:{('0' + time.getSeconds()).slice(-2)} {hours >= 12 ? 'pm' : 'am'}</>
     
     return  <div className="flex">
-                <AccessTime className="inline-block text-sm"/>            
-                <span className="ml-1 inline-flex flex-row justify-center">
+                <AccessTime className="flex-row self-center" fontSize="inherit"/>            
+                <span className="ml-1 inline-flex justify-center">
                     {day}, {time.getDate().toString()} {month} {time.getFullYear().toString()} {timeJSX_}
                 </span>
             </div>;
