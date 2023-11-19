@@ -7,11 +7,11 @@ import Link from "next/link";
 import Searchbar from "../Searchbar";
 
 const menu = [
-  { name: "About", url: "/About" },
-  { name: "Articles", url: "/Articles"},
-  { name: "Privacy Policy", url: "/Privacy-Policy" },
-  { name: "Twitter", url: "/Twitter" },
-  { name: "Jokes", url: "/Jokes" },
+  { name: "About", url: "/about" },
+  { name: "Articles", url: "/articles"},
+  { name: "Privacy Policy", url: "/privacy-policy" },
+  { name: "Twitter", url: "/twitter" },
+  { name: "Jokes", url: "/jokes" },
 ];
 
 const Navbar = () => {
@@ -47,7 +47,7 @@ const Navbar = () => {
         >
           <ul className="items-center space-y-8 pl-6 pt-6 md:flex md:pl-0 md:pt-0 md:space-x-6 md:space-y-0">
             {menu.map(({ name, url }, index) => (
-              <li key={index} className="text-white text-sm uppercase">
+              <li key={index} className="text-white text-sm uppercase hover:text-teal-600">
                 <Link href={url}>{name}</Link>
               </li>
             ))}

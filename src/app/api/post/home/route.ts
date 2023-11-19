@@ -11,13 +11,18 @@ export async function GET(request: NextRequest){
                 categories:{
                     some:{
                         name:{
-                            equals:'Uncategorized',
+                            equals:'index',
                             mode:'insensitive',
                         },
                     },
                 },
             },
-            include:{
+            select:{
+                id:true,
+                title: true,
+                description:true,
+                date:true,
+                published:true,
                 categories:{
                     select:{
                         id:true,

@@ -21,19 +21,7 @@ export async function GET(request: NextRequest){
                 id:'desc'
             },
             take:1,
-            include:{
-                categories:{
-                    select:{
-                        id:true,
-                        name:true
-                    }
-                },
-                author:{
-                    select:{
-                        id:true,
-                        name:true,
-                    }
-                },
+            select:{
                 content:true,
             }
         }
