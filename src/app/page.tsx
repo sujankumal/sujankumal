@@ -31,7 +31,7 @@ export default async function Home() {
   return (
     <main className="grid md:grid-cols-4 min-h-screen justify-between">
       <div className="mb-8 p-4 md:m-8 md:col-span-3">
-        <article className="block text-gray-800">
+        <article className="block text-gray-800 dark:text-inherit">
             <h3 className="mb-4">{sites.slice(-1)[0].greeting}</h3>
             <div>
                 <p className='mb-4'>
@@ -75,9 +75,9 @@ export default async function Home() {
           }
         </div>
       </div>
-      <aside className="w-full md:col-span-1">
-        <div className="h-full px-3 py-4 overflow-y-auto dark:bg-gray-800">
-        <Sidebar/>
+      <aside className="w-full md:col-span-1 mb-3">
+        <div className="h-full px-3 py-4 overflow-y-auto dark:bg-gray-800 dark:text-inherit">
+          <Sidebar/>
         </div>
       </aside>
     </main>

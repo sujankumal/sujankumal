@@ -61,7 +61,7 @@ const Navbar = () => {
           </button>
         </div>
       </div>
-      <div className={(search)?"float-right border-t-2 border-teal-600 m-2 rounded-md":"hidden"}>
+      <div className={(search)?"border-t-2 w-max absolute right-3 border-teal-600 m-2 rounded-md":"hidden"}>
         <Searchbar onSubmit={(searchTerm:string)=>{
           console.log("Searched For:", searchTerm); 
         }} inputProps={{}} />

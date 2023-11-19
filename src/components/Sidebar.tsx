@@ -30,7 +30,7 @@ function Sidebar() {
                     {
                         recentPost.map(({name,url}, index)=>(
                         <li key={index} className="text-gray-400 border-b border-gray-300 my-1 py-1 before:content-['\00BB'] hover:text-teal-600">
-                            <Link href={url} className="pl-2 text-sm text-gray-800 hover:text-inherit">{name}</Link>
+                            <Link href={url} className="pl-2 text-sm text-gray-800 dark:text-inherit hover:text-inherit">{name}</Link>
                         </li>
                         ))
                     }
@@ -44,7 +44,7 @@ function Sidebar() {
                     {
                         archives.map(({name,url}, index)=>(
                         <li key={index} className="text-gray-400 border-b border-gray-300 my-1 py-1 before:content-['\1F5BF'] hover:text-teal-600">
-                            <Link href={url} className="pl-2 text-sm text-gray-800 hover:text-inherit">{name}</Link>
+                            <Link href={url} className="pl-2 text-sm text-gray-800 dark:text-inherit hover:text-inherit">{name}</Link>
                         </li>
                         ))
                     }
@@ -58,7 +58,7 @@ function Sidebar() {
                     {
                         catogries.map(({name,url}, index)=>(
                         <li key={index} className="text-gray-400 border-b border-gray-300 my-1 py-1 before:content-['\2756'] hover:text-teal-600">
-                            <Link href={url} className="pl-2 text-sm text-gray-800 hover:text-inherit">{name}</Link>
+                            <Link href={url} className="pl-2 text-sm text-gray-800 dark:text-inherit hover:text-inherit">{name}</Link>
                         </li>
                         ))
                     }

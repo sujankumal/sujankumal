@@ -10,7 +10,7 @@ Hello! I'm Sujan Kumal, a passionate software engineer born in September 1995 in
 - **Previous Roles:**
   - System Support at NIC Asia Bank (2019)
   - Python Developer at All Spark (2022)
-- **Email:** setobhagera@gmail.com
+- **Email:** [setobhagera@gmail.com](mailto:setobhagera@gmail.com)
 
 ## Education
 
