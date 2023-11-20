@@ -7,6 +7,18 @@ export async function GET(request: NextRequest){
     
     const posts = await prisma.post.findMany(
         {
+            where:{
+                categories:{
+                    some:{
+                        category:{
+                            name:{
+                                equals:'joke',
+                                mode:'insensitive',
+                            },
+                        },
+                    },
+                },
+            },
             select:{
                 id: true,
                 title: true,
@@ -14,22 +26,14 @@ export async function GET(request: NextRequest){
                 date:true,
                 published:true,
                 categories:{
-                    where:{
-                        category:{
-                            name:{
-                                in:['about'],
-                                mode:'insensitive',
-                            },
-                        },
-                    },
                     select:{
                         category:{
                             select:{
                                 id:true,
-                                name:true,
-                            },
+                                name:true
+                            },  
                         },
-                    }
+                    },
                 },
                 author:{
                     select:{

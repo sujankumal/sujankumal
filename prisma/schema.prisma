@@ -42,7 +42,7 @@ model Post {
   main_image              String
   main_image_credit       String?
   date                    DateTime
-  categories              Category[]
+  categories              CategoriesOnPosts[]
   published               Boolean @default(false)
   author                  User?   @relation(fields: [authorId], references: [id])
   authorId                Int?
@@ -62,9 +62,17 @@ model Content {
 model Category {
   id            Int     @default(autoincrement()) @id
   name          String
-  post          Post? @relation(fields: [postId], references: [id])
-  postId        Int? //is Foreign Key
+  posts          CategoriesOnPosts[]
   @@map(name: "categories")
+}
+
+model CategoriesOnPosts {
+  post          Post     @relation(fields: [postId], references: [id])
+  postId        Int
+  category      Category @relation(fields: [categoryId], references: [id])
+  categoryId    Int
+  @@id([postId, categoryId])
+  @@map(name :"categoriesonposts")
 }
 
 model User {

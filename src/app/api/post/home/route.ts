@@ -10,10 +10,12 @@ export async function GET(request: NextRequest){
             where:{
                 categories:{
                     some:{
-                        name:{
-                            equals:'index',
-                            mode:'insensitive',
-                        },
+                        category:{    
+                            name:{
+                                equals:'index',
+                                mode:'insensitive',
+                            },
+                        }
                     },
                 },
             },
@@ -25,9 +27,13 @@ export async function GET(request: NextRequest){
                 published:true,
                 categories:{
                     select:{
-                        id:true,
-                        name:true
-                    }
+                        category:{
+                            select:{
+                                id:true,
+                                name:true,
+                            },
+                        },
+                    },
                 },
                 author:{
                     select:{

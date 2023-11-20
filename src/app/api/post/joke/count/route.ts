@@ -1,30 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "../../../../../prisma/prisma";
+import prisma from "../../../../../../prisma/prisma";
 
 export async function GET(request: NextRequest){
     
-    // console.log("Hello I am server get post for about method");
+    // console.log("Hello I am server get post for home method");
     
     const posts = await prisma.post.findMany(
         {
+            select:{
+                id:true
+            },
             where:{
                 categories:{
                     some:{
                         category:{
                             name:{
-                                equals:'about',
+                                equals:'joke',
                                 mode:'insensitive',
-                            }
+                            },
                         },
                     },
                 },
-            },
-            orderBy:{
-                id:'desc'
-            },
-            take:1,
-            select:{
-                content:true,
             }
         }
     ).catch((exception)=>{

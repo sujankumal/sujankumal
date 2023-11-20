@@ -1,15 +1,16 @@
 import { APP_BASE_URL } from "@/constants/config";
-import { CatergoryType } from "@/types/category";
+import { CategoriesOnPosts } from "@/types/category-post";
 import Link from "next/link";
 
-function CategoryButton({categories}:{categories:Array<CatergoryType>}) {
+function CategoryButton({categories}:{categories:Array<CategoriesOnPosts>}) {
     
-    return categories.map((category, index)=>{
-        if (category.name.toLowerCase() == "index"){
+    return categories.map((categoryonpost, index)=>{
+        
+      if (categoryonpost.category.name.toLowerCase() == "index"){
           return;
         }
         return <span key={index}>
-          <Link href={APP_BASE_URL+"category/"+category.id} className="bg-teal-600 p-1 m-1 text-xs text-white">{category.name}</Link>
+          <Link href={APP_BASE_URL+"category/"+categoryonpost.category.id} className="bg-teal-600 p-1 m-1 text-xs text-white">{categoryonpost.category.name}</Link>
         </span>
       });
 }

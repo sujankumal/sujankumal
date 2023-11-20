@@ -7,7 +7,6 @@ import Searchbar from "../Searchbar";
 const menu = [
   { name: "About", url: "/about" },
   { name: "Articles", url: "/articles"},
-  { name: "Privacy Policy", url: "/privacy-policy" },
   { name: "Twitter", url: "/twitter" },
   { name: "Jokes", url: "/jokes" },
 ];

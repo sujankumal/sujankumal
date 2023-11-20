@@ -1,9 +1,9 @@
-import { Post } from "@prisma/client";
+import { PostType } from "./post";
 
 export interface ContentType {
     id:number,
-    type:String,
-    content:String,
+    type:string,
+    content:string,
     sequence:number,
-    posts: Post,
+    posts: PostType,
 }

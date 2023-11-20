@@ -1,4 +1,4 @@
-import { Post } from "@prisma/client";
+import { PostType } from "./post";
 
 export interface UserType {
     id:number,
@@ -6,5 +6,5 @@ export interface UserType {
     email:String,
     createdAt:Date,
     updatedAt:Date,
-    posts: Post,
+    posts: PostType,
 }

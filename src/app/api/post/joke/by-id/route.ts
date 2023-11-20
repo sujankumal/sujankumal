@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "../../../../../../prisma/prisma";
-import { fetchPostCountIdArray } from "@/services/data_access";
+import { fetchJokeCountIdArray } from "@/services/data_access";
 
 export async function GET(request: NextRequest, {params}: {params: { id: string}}){
     // console.log("Hello I am server get post by-id method", typeof(params.id),params.id);
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest, {params}: {params: { id: string}
                     select:{
                         category:{
                             select:{
-                                id:true,
+                                id: true,
                                 name:true,
                             },
                         },
@@ -47,7 +47,7 @@ export const revalidate = 10
 export async function generateStaticParams() {
     // Generate the possible values for the parameter
     
-    const possibleValues = await fetchPostCountIdArray().then((data)=>{
+    const possibleValues = await fetchJokeCountIdArray().then((data)=>{
         // console.log("Array of post ids: ", data);
         return data.map((item)=>{
             return item.id;

@@ -1,34 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "../../../../../../prisma/prisma";
+import prisma from "../../../../../prisma/prisma";
 import { fetchPostCountIdArray } from "@/services/data_access";
 
-export async function GET(request: NextRequest, {params}: {params: { id: string}}){
+export async function GET(request: NextRequest){
     // console.log("Hello I am server get post by-id method", typeof(params.id),params.id);
-    const id = Number.parseInt(params.id);
-    const site = await prisma.post.findUnique(
+    const site = await prisma.social.findMany(
         {
             where:{
-                id:id,
+                name:{
+                    equals:'twitter',
+                    mode:'insensitive',
+                },
             },
-            include:{
-                categories:{
-                    select:{
-                        category:{
-                            select:{
-                                id:true,
-                                name:true,
-                            },
-                        },
-                    },
-                },
-                author:{
-                    select:{
-                        id:true,
-                        name:true,
-                    }
-                },
-                content:true,
-            }
+            select:{
+                embed:true,
+                username:true
+            },
         }
     ).catch((exception)=>{
         // console.log("Server Error:", exception);
