@@ -20,7 +20,7 @@ export async function readJsonFile(url: URL): Promise<Array<PostType>> {
     return response
 }
 export async function isServerApiResponding() {
-    return await fetch(API_BASE_URL+"api/check").then(() => {
+    return await fetch(API_BASE_URL+"/api/check").then(() => {
         return true;
     })
     .catch((error) => {
@@ -32,7 +32,7 @@ export async function isServerApiResponding() {
 export async function fetchSite(): Promise<Array<SiteType>> {
     return await isServerApiResponding().then((value) =>{
         if (value){
-            return fetch(API_BASE_URL+"api/site",{
+            return fetch(API_BASE_URL+"/api/site",{
                     method:"GET",
                     credentials:"same-origin",
                     next:{
@@ -57,7 +57,7 @@ export async function fetchSite(): Promise<Array<SiteType>> {
 export async function fetchPostTitle():Promise<Array<PostType>>{
     return await isServerApiResponding().then((value)=>{
         if (value){
-            return fetch(API_BASE_URL+"api/post/id/title",{
+            return fetch(API_BASE_URL+"/api/post/id/title",{
                 method:"GET",
                 credentials:"same-origin",
                 next:{
@@ -82,7 +82,7 @@ export async function fetchPostHome():Promise<Array<PostType>>{
     
     return await isServerApiResponding().then((value)=>{
         if (value){
-            return fetch(API_BASE_URL+"api/post/home",{
+            return fetch(API_BASE_URL+"/api/post/home",{
                 method:"GET",
                 credentials:"same-origin",
                 next:{
@@ -108,7 +108,7 @@ export async function fetchAbout():Promise<Array<PostType>>{
     
     return await isServerApiResponding().then((value)=>{
         if (value){
-            return fetch(API_BASE_URL+"api/post/about",{
+            return fetch(API_BASE_URL+"/api/post/about",{
                 method:"GET",
                 credentials:"same-origin",
                 next:{
@@ -134,7 +134,7 @@ export async function fetchArticles():Promise<Array<PostType>>{
     
     return await isServerApiResponding().then((value)=>{
         if (value){
-            return fetch(API_BASE_URL+"api/post/article",{
+            return fetch(API_BASE_URL+"/api/post/article",{
                 method:"GET",
                 credentials:"same-origin",
                 next:{
@@ -160,7 +160,7 @@ export async function fetchPostByID(id:number):Promise<PostType>{
     
     return await isServerApiResponding().then((value)=>{
         if (value){
-            return fetch(API_BASE_URL+"api/post/by-id/"+id, {
+            return fetch(API_BASE_URL+"/api/post/by-id/"+id, {
                 method:"GET",
                 credentials:"same-origin",
                 next:{
@@ -185,7 +185,7 @@ export async function fetchPostByID(id:number):Promise<PostType>{
 export async function fetchSocial():Promise<Array<SocialType>> {
     return await isServerApiResponding().then((value)=>{
         if (value){
-            return fetch(API_BASE_URL+"api/social/",{
+            return fetch(API_BASE_URL+"/api/social/",{
                 method:"GET",
                 credentials:"same-origin",
                 next:{
@@ -217,7 +217,7 @@ export async function fetchData(
     return await isServerApiResponding().then((value) => {
         if (value) {
             console.log("Fetch Data, isnodejs");
-            return fetch(API_BASE_URL+"api/data/",{
+            return fetch(API_BASE_URL+"/api/data/",{
                 method:"POST",
                 credentials:"same-origin",
                 headers:{
