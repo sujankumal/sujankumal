@@ -1,6 +1,5 @@
 import CategoryButton from "@/components/Category/CategoryButton";
 import DateTime from "@/components/DateTime/DateTime";
-import MarkdownComponent from "@/components/MarkdownComponent";
 import Sidebar from "@/components/Sidebar";
 import UserLinkButton from "@/components/User/UserLinkButton";
 import { APP_BASE_URL } from "@/constants/config";

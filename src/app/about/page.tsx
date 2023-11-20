@@ -7,7 +7,7 @@ const about:Array<PostType> = await fetchAbout().then((data)=>{
     // console.log("Post ABOUT: ",data);
     return data;
   });    
-const mds = about.slice(-1)[0].content?.map((content, index)=>{
+const mds = about.slice(-1)[0]?.content?.map((content, index)=>{
     // console.log(content, "cont");
     return (content.content)?<MarkdownComponent key={index} content={content.content} />:<div></div>;
 });

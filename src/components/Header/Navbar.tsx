@@ -1,7 +1,5 @@
 "use client";
 import { useState } from "react";
-// import { AiOutlineMenu } from "react-icons/ai";
-// import { RxCross1 } from "react-icons/rx";
 import { Search, Menu, MenuOpen, Cottage } from "@mui/icons-material";
 import Link from "next/link";
 import Searchbar from "../Searchbar";

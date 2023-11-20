@@ -2,11 +2,10 @@
 
 import CategoryButton from '@/components/Category/CategoryButton';
 import DateTime from '@/components/DateTime/DateTime';
-import Sidebar from '@/components/Sidebar'
+import Sidebar from '@/components/Sidebar';
 import UserLinkButton from '@/components/User/UserLinkButton';
 import { APP_BASE_URL } from '@/constants/config';
 import { fetchPostHome, fetchSite } from '@/services/data_access';
-import { CatergoryType } from '@/types/category';
 import { PostType } from '@/types/post';
 import { SiteType } from '@/types/site';
 import { Metadata } from 'next';
