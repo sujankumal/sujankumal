@@ -3,7 +3,7 @@ import prisma from "../../../../../prisma/prisma";
 
 export async function GET(request: NextRequest){
     
-    console.log("Hello I am server get post for home method");
+    // console.log("Hello I am server get post for home method");
     
     const posts = await prisma.post.findMany(
         {
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest){
             }
         }
     ).catch((exception)=>{
-        console.log("Server Error:", exception);
+        // console.log("Server Error:", exception);
         return "Server Error!";
     });
     return NextResponse.json(posts);

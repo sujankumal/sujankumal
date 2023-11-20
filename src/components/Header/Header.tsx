@@ -15,13 +15,13 @@ import { APP_BASE_URL } from "@/constants/config";
 import { SvgIcon } from "@mui/material";
 
 const social: Array<SocialType> = await fetchSocial().then((data) => {
-    console.log("Social Data:", data);
+    // console.log("Social Data:", data);
     return data;
 });
 
 const posts: Array<PostType> = await fetchPostTitle().then((data) => {
 
-    console.log(data, data[0]?.title);
+    // console.log(data, data[0]?.title);
     return data;
 });
 

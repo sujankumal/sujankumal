@@ -10,11 +10,11 @@ async function Page({params}:{params: {id:number}}) {
     const {id} = params;
     
     const article = await fetchPostByID(id).then((data)=>{
-        console.log("Received data: ", data);
+        // console.log("Received data: ", data);
         return data;
     });
     const article_mds = article.content?.map((content, index)=>{
-        console.log(content, "cont");
+        // console.log(content, "cont");
         return (content.content)?<MarkdownComponent key={index} content={content.content} />:<div></div>;
     });
 
@@ -84,17 +84,17 @@ export async function generateStaticParams() {
     // Generate the possible values for the parameter
     
     const possibleValues = await fetchPostCountIdArray().then((data)=>{
-        console.log("Array of post ids: ", data);
+        // console.log("Array of post ids: ", data);
         return data.map((item)=>{
             return item.id;
         });
     }); // Adjust based on your data
-    console.log(possibleValues);
+    // console.log(possibleValues);
 
     // Generate an array of objects with the correct structure for static generation
     const paths = (await possibleValues).map((value) => ({
       id: value.toString(),
     }));
-    console.log("Paths ", paths);
+    // console.log("Paths ", paths);
     return paths;
   }

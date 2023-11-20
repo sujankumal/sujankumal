@@ -4,7 +4,7 @@ import prisma from "../../../../prisma/prisma";
 import { Prisma } from "@prisma/client";
 
 export async function GET(request: NextRequest){
-    console.log("Hello I am server data api get metheod:");
+    // console.log("Hello I am server data api get metheod:");
     return NextResponse.json({data:true})
 }    
 

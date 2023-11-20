@@ -17,7 +17,7 @@ const sites:Array<SiteType> = await fetchSite().then((data)=>{
 });
 
 const posts:Array<PostType> = await fetchPostHome().then((data)=>{
-  console.log("Post HOme: ",data);
+  // console.log("Post HOme: ",data);
   return data;
 });
 

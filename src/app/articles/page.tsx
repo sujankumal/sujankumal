@@ -9,7 +9,7 @@ import { PostType } from "@/types/post";
 import Link from "next/link";
 
 const articles:Array<PostType> = await fetchArticles().then((data)=>{
-    console.log("Post Articles:",data);
+    // console.log("Post Articles:",data);
     return data;
   });    
   

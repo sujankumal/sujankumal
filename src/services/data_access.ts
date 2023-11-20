@@ -15,7 +15,7 @@ export async function readJsonFile(url: URL): Promise<Array<PostType>> {
             return response.json();
         })
         .catch((error) => {
-            console.log('Error fetching data:', error);
+            // console.log('Error fetching data:', error);
         });
     return response
 }
@@ -24,7 +24,7 @@ export async function isServerApiResponding() {
         return true;
     })
     .catch((error) => {
-        console.log("Error: ", error);
+        // console.log("Error: ", error);
         return false;
     });
 }
@@ -44,7 +44,7 @@ export async function fetchSite(): Promise<Array<SiteType>> {
                     }
                     return response.json();
                 }).catch((error)=>{
-                    console.log(error);
+                    // console.log(error);
                     return [];
             });
         }else{
@@ -69,7 +69,7 @@ export async function fetchPostTitle():Promise<Array<PostType>>{
                 }
                 return response.json();
             }).catch((error)=>{
-                console.log(error);
+                // console.log(error);
                 return [];
             });
         }else{
@@ -94,7 +94,7 @@ export async function fetchPostHome():Promise<Array<PostType>>{
                 }
                 return response.json();
             }).catch((error)=>{
-                console.log(error);
+                // console.log(error);
                 return [];
             });
         }else{
@@ -120,7 +120,7 @@ export async function fetchAbout():Promise<Array<PostType>>{
                 }
                 return response.json();
             }).catch((error)=>{
-                console.log(error);
+                // console.log(error);
                 return [];
             });
         }else{
@@ -146,7 +146,7 @@ export async function fetchArticles():Promise<Array<PostType>>{
                 }
                 return response.json();
             }).catch((error)=>{
-                console.log(error);
+                // console.log(error);
                 return [];
             });
         }else{
@@ -172,7 +172,7 @@ export async function fetchPostByID(id:number):Promise<PostType>{
                 }
                 return response.json();
             }).catch((error)=>{
-                console.log(error);
+                // console.log(error);
                 return [];
             });
         }else{
@@ -197,7 +197,7 @@ export async function fetchPostCountIdArray():Promise<Array<{id:number}>>{
                 }
                 return response.json();
             }).catch((error)=>{
-                console.log(error);
+                // console.log(error);
                 return [];
             });
         }else{
@@ -222,7 +222,7 @@ export async function fetchSocial():Promise<Array<SocialType>> {
                 }
                 return response.json();
             }).catch((error)=>{
-                console.log(error);
+                // console.log(error);
                 return [];
             });
         }else{
@@ -241,7 +241,7 @@ export async function fetchData(
     
     return await isServerApiResponding().then((value) => {
         if (value) {
-            console.log("Fetch Data, isnodejs");
+            // console.log("Fetch Data, isnodejs");
             return fetch(API_BASE_URL+"/api/data/",{
                 method:"POST",
                 credentials:"same-origin",
@@ -260,11 +260,11 @@ export async function fetchData(
                 }
                 return response.json()
             }).catch((error)=>{
-                console.log(error);
+                // console.log(error);
                 return [];
             });
         } else {
-            console.log("Fetch Data, json");
+            // console.log("Fetch Data, json");
             return readJsonFile(
                 new URL(
                     path.join(dataDirectory, `${table}.json`), window.location.href
