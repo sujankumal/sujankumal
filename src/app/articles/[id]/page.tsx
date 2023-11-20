@@ -3,10 +3,8 @@ import DateTime from "@/components/DateTime/DateTime";
 import MarkdownComponent from "@/components/MarkdownComponent";
 import Sidebar from "@/components/Sidebar";
 import UserLinkButton from "@/components/User/UserLinkButton";
-import { APP_BASE_URL } from "@/constants/config";
-import { fetchPostByID } from "@/services/data_access";
+import { fetchPostByID, fetchPostCountIdArray } from "@/services/data_access";
 import Image from "next/image";
-import Link from "next/link";
 
 async function Page({params}:{params: {id:number}}) {
     const {id} = params;
@@ -75,3 +73,28 @@ async function Page({params}:{params: {id:number}}) {
 }
 
 export default Page;
+
+
+export const dynamicParams = true // true | false,
+export const revalidate = 10
+// false | 'force-cache' | 0 | number
+
+// Implement the required generateStaticParams function
+export async function generateStaticParams() {
+    // Generate the possible values for the parameter
+    
+    const possibleValues = await fetchPostCountIdArray().then((data)=>{
+        console.log("Array of post ids: ", data);
+        return data.map((item)=>{
+            return item.id;
+        });
+    }); // Adjust based on your data
+    console.log(possibleValues);
+
+    // Generate an array of objects with the correct structure for static generation
+    const paths = (await possibleValues).map((value) => ({
+      id: value.toString(),
+    }));
+    console.log("Paths ", paths);
+    return paths;
+  }

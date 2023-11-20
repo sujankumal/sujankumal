@@ -21,7 +21,7 @@ const social: Array<SocialType> = await fetchSocial().then((data) => {
 
 const posts: Array<PostType> = await fetchPostTitle().then((data) => {
 
-    console.log(data, data[0].title);
+    console.log(data, data[0]?.title);
     return data;
 });
 

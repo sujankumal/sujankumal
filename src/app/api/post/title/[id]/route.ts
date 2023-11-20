@@ -10,20 +10,9 @@ export async function GET(request: NextRequest, {params}: {params: { id: string}
             where:{
                 id:id,
             },
-            include:{
-                categories:{
-                    select:{
-                        id:true,
-                        name:true
-                    }
-                },
-                author:{
-                    select:{
-                        id:true,
-                        name:true,
-                    }
-                },
-                content:true,
+            select:{
+                id:true,
+                title:true,
             }
         }
     ).catch((exception)=>{
@@ -33,28 +22,27 @@ export async function GET(request: NextRequest, {params}: {params: { id: string}
     return NextResponse.json(site);
 }
 
-
-
 export const dynamicParams = true // true | false,
+
 export const revalidate = 10
 // false | 'force-cache' | 0 | number
 
-// Implement the required generateStaticParams function
-export async function generateStaticParams() {
-    // Generate the possible values for the parameter
-    
+export async function generateStaticParams(){
+    console.log("Hello I am server get post ...col method generateStaticParams");
     const possibleValues = await fetchPostCountIdArray().then((data)=>{
         console.log("Array of post ids: ", data);
         return data.map((item)=>{
             return item.id;
         });
     }); // Adjust based on your data
-    console.log(possibleValues);
 
+    console.log(possibleValues);
+    
     // Generate an array of objects with the correct structure for static generation
     const paths = (await possibleValues).map((value) => ({
-      id: value.toString(),
+      params: { id: value },
     }));
-    console.log("Paths ", paths);
+    console.log("Paths for title id", paths);    
     return paths;
-  }
+}
+

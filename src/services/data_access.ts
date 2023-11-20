@@ -57,7 +57,7 @@ export async function fetchSite(): Promise<Array<SiteType>> {
 export async function fetchPostTitle():Promise<Array<PostType>>{
     return await isServerApiResponding().then((value)=>{
         if (value){
-            return fetch(API_BASE_URL+"/api/post/id/title",{
+            return fetch(API_BASE_URL+"/api/post/title",{
                 method:"GET",
                 credentials:"same-origin",
                 next:{
@@ -161,6 +161,31 @@ export async function fetchPostByID(id:number):Promise<PostType>{
     return await isServerApiResponding().then((value)=>{
         if (value){
             return fetch(API_BASE_URL+"/api/post/by-id/"+id, {
+                method:"GET",
+                credentials:"same-origin",
+                next:{
+                    revalidate: 10,
+                }
+            }).then((response)=>{
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            }).catch((error)=>{
+                console.log(error);
+                return [];
+            });
+        }else{
+            // json
+            return []
+        }
+    });
+}
+
+export async function fetchPostCountIdArray():Promise<Array<{id:number}>>{    
+    return await isServerApiResponding().then((value)=>{
+        if (value){
+            return fetch(API_BASE_URL+"/api/post/count/", {
                 method:"GET",
                 credentials:"same-origin",
                 next:{
