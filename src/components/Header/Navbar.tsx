@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Search, Menu, MenuOpen, Cottage } from "@mui/icons-material";
 import Link from "next/link";
 import Searchbar from "../Searchbar";
@@ -10,12 +10,40 @@ const menu = [
   { name: "Twitter", url: "/twitter" },
   { name: "Jokes", url: "/jokes" },
 ];
-
+let elementDistTop = 0;
+    
 const Navbar = () => {
   const [navbar, setNavbar] = useState(false);
   const [search, setSearch] = useState(false);
+
+  const [isNavFixed, setisNavFixed] = useState(false);
+  const elementRef = useRef<HTMLDivElement>(null);
+        
+  useEffect(()=>{
+    const handleScroll = () => {
+      const element = elementRef.current;
+      let scrollPosition = window.scrollY;
+      if (element){
+        if(elementDistTop == 0){
+          elementDistTop = element.offsetTop;
+        }
+        if (scrollPosition >= elementDistTop){
+          setisNavFixed(true);
+        }else{
+          setisNavFixed(false);
+        }
+      }
+    }
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    }
+  }, []);
+  let fixedNavClass = (isNavFixed)?" fixed top-0":"";
+  
   return (
-    <nav className="w-full bg-gray-800 border-t-4 border-teal-600 shadow h-full">
+    <nav className={"w-full bg-gray-800 border-t-4 border-teal-600 shadow"+fixedNavClass } ref={elementRef}>
       <div className="flex justify-between px-4 mx-auto lg:max-w-7xl md:items-center md:flex md:px-8">
         <div className="flex items-center justify-between md:block">
           <div className="avatar bg-teal-600 p-3">
