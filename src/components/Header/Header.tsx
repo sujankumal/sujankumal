@@ -31,7 +31,7 @@ const sites: Array<SiteType> = await fetchSite().then((data) => {
 
 function Header() {
 
-    return (<>
+    return (
         <header className="mb-3">
             <div className="">
                 <Image
@@ -136,8 +136,7 @@ function Header() {
             </div>
             <Navbar />
         </header>
-
-    </>);
+    );
 }
 
 export default Header;

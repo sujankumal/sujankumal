@@ -1,21 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "../../../../../../prisma/prisma";
+import prisma from "../../../../../../../prisma/prisma";
 import { fetchJokeCountIdArray } from "@/services/data_access";
 
 export async function GET(request: NextRequest, {params}: {params: { id: string}}){
-    // console.log("Hello I am server get post by-id method", typeof(params.id),params.id);
+    console.log("Hello I am server get post by-id method", typeof(params.id),params.id);
     const id = Number.parseInt(params.id);
-    const site = await prisma.post.findUnique(
+    console.log("Hello I am server get post by-id method", id);
+    
+    const joke = await prisma.post.findUnique(
         {
             where:{
                 id:id,
             },
             include:{
                 categories:{
-                    select:{
+                    include:{
                         category:{
                             select:{
-                                id: true,
+                                id:true,
                                 name:true,
                             },
                         },
@@ -31,10 +33,12 @@ export async function GET(request: NextRequest, {params}: {params: { id: string}
             }
         }
     ).catch((exception)=>{
-        // console.log("Server Error:", exception);
+        console.log("Server Error:", exception);
         return "Server Error!";
     });
-    return NextResponse.json(site);
+    console.log("Server Error:", joke);
+        
+    return NextResponse.json(joke);
 }
 
 

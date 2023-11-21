@@ -14,14 +14,6 @@ export async function GET(request: NextRequest){
                 date:true,
                 published:true,
                 categories:{
-                    where:{
-                        category:{
-                            name:{
-                                in:['about'],
-                                mode:'insensitive',
-                            },
-                        },
-                    },
                     select:{
                         category:{
                             select:{

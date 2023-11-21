@@ -208,6 +208,33 @@ export async function fetchJokes():Promise<Array<PostType>>{
     });
 }
 
+export async function fetchJokeByID(id:number):Promise<PostType>{
+    console.log("Hello JOKER");
+    return await isServerApiResponding().then((value)=>{
+        if (value){
+            return fetch(API_BASE_URL+"/api/post/joke/by-id/"+id, {
+                method:"GET",
+                credentials:"same-origin",
+                next:{
+                    revalidate: 10,
+                }
+            }).then((response)=>{
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            }).catch((error)=>{
+                // console.log(error);
+                return [];
+            });
+        }else{
+            // json
+            return []
+        }
+    });
+}
+
+
 
 export async function fetchJokeCountIdArray():Promise<Array<{id:number}>>{    
     return await isServerApiResponding().then((value)=>{
