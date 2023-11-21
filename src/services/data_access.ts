@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "@/constants/config";
+import { CatergoryType } from "@/types/category";
 import { PostType } from "@/types/post";
 import { SiteType } from "@/types/site";
 import { SocialType } from "@/types/social";
@@ -78,6 +79,33 @@ export async function fetchPostTitle():Promise<Array<PostType>>{
         }
     });
 }
+
+export async function fetchCategories():Promise<Array<CatergoryType>>{
+    return await isServerApiResponding().then((value)=>{
+        if (value){
+            return fetch(API_BASE_URL+"/api/categories",{
+                method:"GET",
+                credentials:"same-origin",
+                next:{
+                    revalidate: 10,
+                }
+            }).then((response)=>{
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            }).catch((error)=>{
+                // console.log(error);
+                return [];
+            });
+        }else{
+            // json
+            return []
+        }
+    });
+}
+
+
 export async function fetchPostHome():Promise<Array<PostType>>{
     
     return await isServerApiResponding().then((value)=>{
@@ -311,6 +339,58 @@ export async function fetchPostCountIdArray():Promise<Array<{id:number}>>{
         }
     });
 }
+
+export async function fetchCategoryCountIdArray():Promise<Array<{id:number}>>{    
+    return await isServerApiResponding().then((value)=>{
+        if (value){
+            return fetch(API_BASE_URL+"/api/categories/count/", {
+                method:"GET",
+                credentials:"same-origin",
+                next:{
+                    revalidate: 10,
+                }
+            }).then((response)=>{
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            }).catch((error)=>{
+                // console.log(error);
+                return [];
+            });
+        }else{
+            // json
+            return []
+        }
+    });
+}
+
+export async function fetchPostsByCategoryID(id:number):Promise<Array<PostType>>{
+    
+    return await isServerApiResponding().then((value)=>{
+        if (value){
+            return fetch(API_BASE_URL+"/api/post/category/"+id, {
+                method:"GET",
+                credentials:"same-origin",
+                next:{
+                    revalidate: 10,
+                }
+            }).then((response)=>{
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            }).catch((error)=>{
+                // console.log(error);
+                return [];
+            });
+        }else{
+            // json
+            return []
+        }
+    });
+}
+
 
 export async function fetchSocial():Promise<Array<SocialType>> {
     return await isServerApiResponding().then((value)=>{

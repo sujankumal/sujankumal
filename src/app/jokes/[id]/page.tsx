@@ -3,7 +3,7 @@ import DateTime from "@/components/DateTime/DateTime";
 import MarkdownComponent from "@/components/MarkdownComponent";
 import Sidebar from "@/components/Sidebar";
 import UserLinkButton from "@/components/User/UserLinkButton";
-import { fetchJokeByID, fetchJokeCountIdArray, fetchPostByID } from "@/services/data_access";
+import { fetchJokeByID, fetchJokeCountIdArray } from "@/services/data_access";
 import Image from "next/image";
 
 async function Joke({params}:{params: {id:number}}) {
