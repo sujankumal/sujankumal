@@ -1,9 +1,8 @@
 'use client'
 import {useEffect, useState} from "react";
 import { AccessTime } from "@mui/icons-material";
+import { MONTHS, WEEK_DAYS } from "@/constants/config";
 
-const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 function DigitalClock() {
     const [time, setTime] = useState<Date>();
@@ -19,8 +18,8 @@ function DigitalClock() {
 
     if (!time) return <></>
 
-    const day = days[time.getDay()];
-    const month = months[time.getMonth()];
+    const day = WEEK_DAYS[time.getDay()];
+    const month = MONTHS[time.getMonth()];
     const hours = time.getHours()
 
     // Use JSX features to concatenate strings

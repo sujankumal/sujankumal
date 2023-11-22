@@ -10,6 +10,8 @@ export interface PostType{
     main_image:string,
     main_image_credit?:string,
     date:Date,
+    year:number,
+    month:number,
     categories:Array<CategoriesOnPosts>,
     published:Boolean,
     author:UserType,
