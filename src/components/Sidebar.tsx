@@ -44,7 +44,7 @@ function Sidebar() {
                         {
                             archives.map(({year, month}, index)=>(
                             <li key={index} className="text-gray-400 border-b border-gray-300 my-1 py-1 before:content-['\1F5BF'] hover:text-teal-600">
-                                <Link href={'/archives/'+year+'/'+month} className="pl-2 text-sm text-gray-800 dark:text-inherit hover:text-inherit">{ MONTHS[month] }  { year }</Link>
+                                <Link href={'/archives/'+year+'/'+month} className="pl-2 text-sm text-gray-800 dark:text-inherit hover:text-inherit">{ MONTHS[month-1] }  { year }</Link>
                             </li>
                             ))
                         }
