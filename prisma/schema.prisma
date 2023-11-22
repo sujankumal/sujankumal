@@ -42,6 +42,8 @@ model Post {
   main_image              String
   main_image_credit       String?
   date                    DateTime
+  month                   Int?
+  year                    Int?
   categories              CategoriesOnPosts[]
   published               Boolean @default(false)
   author                  User?   @relation(fields: [authorId], references: [id])
