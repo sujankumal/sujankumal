@@ -74,7 +74,7 @@ export default async function Home() {
           }
         </div>
       </div>
-      <aside className="w-full md:col-span-1 mb-3">
+      <aside className="w-full md:col-span-1">
         <div className="h-full px-3 py-4 overflow-y-auto dark:bg-gray-800 dark:text-inherit">
           <Sidebar/>
         </div>

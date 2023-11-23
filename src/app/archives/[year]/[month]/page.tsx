@@ -10,7 +10,7 @@ import Link from "next/link";
 
 async function Archives({params}:{params: {year:number, month:number}}) {
     const {year, month} = params;
-    console.log(year,month)
+    // console.log(year,month)
     const posts = await fetchArchivesByYearAndMonth(year, month);
 
     return (  
