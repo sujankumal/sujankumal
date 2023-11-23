@@ -44,7 +44,7 @@ export async function GET(request: NextRequest, {params}: {params: { id: string}
             },
         }
     ).catch((exception)=>{
-        // console.log("Server Error:", exception);
+        console.log("Server Error:", exception);
         return "Server Error!";
     });
     return NextResponse.json(site);

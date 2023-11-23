@@ -12,6 +12,29 @@ export async function GET(request: NextRequest, {params}: {params: { year: strin
                         year:year,
                         month:month
                     }
+                },
+                select:{
+                    id: true,
+                    title: true,
+                    description:true,
+                    date:true,
+                    published:true,
+                    categories:{
+                        select:{
+                            category:{
+                                select:{
+                                    id:true,
+                                    name:true,
+                                },
+                            },
+                        }
+                    },
+                    author:{
+                        select:{
+                            id:true,
+                            name:true,
+                        }
+                    },
                 }            
             });
         return NextResponse.json(posts);

@@ -6,13 +6,11 @@ import UserLinkButton from "@/components/User/UserLinkButton";
 import { fetchPostByID, fetchPostCountIdArray } from "@/services/data_access";
 import Image from "next/image";
 
-async function Page({params}:{params: {id:number}}) {
-    const {id} = params;
-    
-    const article = await fetchPostByID(id).then((data)=>{
-        // console.log("Received data: ", data);
-        return data;
-    });
+async function Articles({params}:{params: {id:number}}) {
+    const id = params.id;
+
+    const article = await fetchPostByID(id);
+    console.log("article: ",article);
     const article_mds = article.content?.map((content, index)=>{
         // console.log(content, "cont");
         return (content.content)?<MarkdownComponent key={index} content={content.content} />:<div></div>;
@@ -42,7 +40,7 @@ async function Page({params}:{params: {id:number}}) {
                         <div className="mt-2 mb-5 pb-5 border-b border-dashed border-gray-300">
                             <header className="mt-0">
                                 <div className="my-1">
-                                    <CategoryButton categories={article.categories}/>
+                                    {article.categories?<CategoryButton categories={article.categories}/>:<></>}
                                 </div>
                                 <div className="mb-0 ml-1">
                                     <h2>{article.title}</h2>
@@ -52,7 +50,7 @@ async function Page({params}:{params: {id:number}}) {
                                         <DateTime datetime={article.date}/>
                                     </div>
                                     <div className="inline-flex">
-                                        <UserLinkButton user={article.author}/>
+                                        {article.author?<UserLinkButton user={article.author}/>:<></>}
                                     </div>
                                 </div>
                             </header>
@@ -72,7 +70,7 @@ async function Page({params}:{params: {id:number}}) {
     );
 }
 
-export default Page;
+export default Articles;
 
 
 export const dynamicParams = true // true | false,

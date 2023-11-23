@@ -40,7 +40,7 @@ const Navbar = () => {
       window.removeEventListener('scroll', handleScroll);
     }
   }, []);
-  let fixedNavClass = (isNavFixed)?" fixed top-0":"";
+  let fixedNavClass = (isNavFixed)?" fixed top-0 z-10":"";
   
   return (
     <nav className={"w-full bg-gray-800 border-t-4 border-teal-600 shadow"+fixedNavClass } ref={elementRef}>

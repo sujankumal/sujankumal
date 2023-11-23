@@ -4,7 +4,7 @@ import Link from "next/link";
 
 function CategoryButton({categories}:{categories:Array<CategoriesOnPosts>}) {
     
-    return categories.map((categoryonpost, index)=>{
+    return categories?.map((categoryonpost, index)=>{
         
       if (categoryonpost.category.name.toLowerCase() == "index"){
           return;
