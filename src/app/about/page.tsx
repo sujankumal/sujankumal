@@ -3,10 +3,7 @@ import Sidebar from "@/components/Sidebar";
 import { fetchAbout } from "@/services/data_access";
 import { PostType } from "@/types/post";
 
-const about:Array<PostType> = await fetchAbout().then((data)=>{
-    // console.log("Post ABOUT: ",data);
-    return data;
-  });    
+const about:Array<PostType> = await fetchAbout();    
 const mds = about.slice(-1)[0]?.content?.map((content, index)=>{
     // console.log(content, "cont");
     return (content.content)?<MarkdownComponent key={index} content={content.content} />:<div></div>;

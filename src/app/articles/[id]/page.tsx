@@ -10,7 +10,7 @@ async function Articles({params}:{params: {id:number}}) {
     const id = params.id;
 
     const article = await fetchPostByID(id);
-    console.log("article: ",article);
+    
     const article_mds = article.content?.map((content, index)=>{
         // console.log(content, "cont");
         return (content.content)?<MarkdownComponent key={index} content={content.content} />:<div></div>;

@@ -10,10 +10,7 @@ import Link from "next/link";
 async function Category({params}:{params: {id:number}}) {
     const {id} = params;
     
-    const posts = await fetchPostsByCategoryID(id).then((data)=>{
-        console.log("Received Category data: ", data);
-        return data;
-    });
+    const posts = await fetchPostsByCategoryID(id);
 
     return (  
         <main className="grid md:grid-cols-4 min-h-screen justify-center">
