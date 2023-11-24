@@ -2,6 +2,7 @@
 
 import CategoryButton from '@/components/Category/CategoryButton';
 import DateTime from '@/components/DateTime/DateTime';
+import PaginationPost from '@/components/Pagination/pagnate-post';
 import Sidebar from '@/components/Sidebar';
 import UserLinkButton from '@/components/User/UserLinkButton';
 import { APP_BASE_URL } from '@/constants/config';
@@ -43,6 +44,7 @@ export default async function Home() {
         </article>
         <hr className="w-full h-1 my-8 bg-gray-700 border-0 dark:bg-gray-700" />
         <div className="w-auto block">
+          <PaginationPost items={posts} pageSize={4} path={APP_BASE_URL+"articles/"}/>
           {
             posts.map((post:PostType, index:number)=>{
               
