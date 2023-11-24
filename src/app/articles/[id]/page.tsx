@@ -17,7 +17,7 @@ async function Articles({params}:{params: {id:number}}) {
     });
 
     return (  
-        <main className="grid md:grid-cols-4 min-h-screen justify-between">
+        <main className="grid md:grid-cols-4 min-h-screen justify-center">
             <div className="mb-8 px-4 md:mx-8 md:col-span-3">
                 <article>
                     <div className="mb-5 mx-5">

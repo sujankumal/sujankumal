@@ -10,7 +10,7 @@ const social_twitter = await fetchTwitter().then((data)=>{
 function Twitter() {
     
     return (
-        <main className="grid md:grid-cols-4 min-h-screen justify-between">
+        <main className="grid md:grid-cols-4 min-h-screen justify-center">
             <div className="mb-8 p-4 md:m-8 md:col-span-3 inline-flex justify-center">
                 <div className="prose prose-stone prose-sm dark:prose-invert">
                     {

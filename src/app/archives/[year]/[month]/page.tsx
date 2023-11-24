@@ -14,7 +14,7 @@ async function Archives({params}:{params: {year:number, month:number}}) {
     const posts = await fetchArchivesByYearAndMonth(year, month);
 
     return (  
-        <main className="grid md:grid-cols-4 min-h-screen justify-between">
+        <main className="grid md:grid-cols-4 min-h-screen justify-center">
             <div className="mb-8 px-4 md:mx-8 md:col-span-3">
             {
                 (posts.length !== 0)?
