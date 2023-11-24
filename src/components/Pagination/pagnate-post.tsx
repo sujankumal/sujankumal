@@ -39,7 +39,7 @@ function PaginationPost(
 
 
     return (
-        <div>
+        <div className="w-full">
             {
                 posts?.map((post, index) => {
                     return <div key={index} className="mt-2 mb-5 pb-5 border-b border-dashed border-gray-300">

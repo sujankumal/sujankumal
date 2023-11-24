@@ -9,7 +9,7 @@ const articles:Array<PostType> = await fetchArticles();
   
 function Articles() {
     return (
-        <main className="grid md:grid-cols-4 min-h-screen justify-between">
+        <main className="grid md:grid-cols-4 min-h-screen justify-center">
             <div className="mb-8 p-4 md:m-8 md:col-span-3">
                 <PaginationPost items={articles} pageSize={10} path={APP_BASE_URL+"articles/"}/>
             </div>
