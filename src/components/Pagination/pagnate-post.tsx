@@ -35,7 +35,7 @@ function PaginationPost(
 
     useEffect(() => {
         setPosts(items.slice((currentPage - 1) * pageSize, currentPage * pageSize));
-    }, [currentPage]);
+    }, [currentPage, items, pageSize]);
 
 
     return (
