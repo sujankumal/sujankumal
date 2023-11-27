@@ -69,9 +69,9 @@ export async function generateStaticParams() {
     // console.log(possibleValues);
 
     // Generate an array of objects with the correct structure for static generation
-    const paths = (await possibleValues).map((value) => ({
+    const paths = possibleValues.map((value) => ({
       id: value.toString(),
     }));
-    // console.log("Paths ", paths);
+    console.log("Paths ", paths);
     return paths;
   }

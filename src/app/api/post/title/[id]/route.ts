@@ -32,17 +32,11 @@ export async function generateStaticParams(){
     const possibleValues = await fetchPostCountIdArray().then((data)=>{
         // console.log("Array of post ids: ", data);
         return data.map((item)=>{
-            return item.id;
+            return {id: item.id.toString()};
         });
     }); // Adjust based on your data
 
     // console.log(possibleValues);
-    
-    // Generate an array of objects with the correct structure for static generation
-    const paths = (await possibleValues).map((value) => ({
-      params: { id: value },
-    }));
-    // console.log("Paths for title id", paths);    
-    return paths;
+    return possibleValues;
 }
 

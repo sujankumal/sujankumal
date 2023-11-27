@@ -325,6 +325,25 @@ export async function fetchCategoryCountIdArray(): Promise<Array<{ id: number }>
     }
 }
 
+export async function fetchPostCountYearMonthArray(): Promise<Array<{ year: number, month:number }>> {
+    try {
+        return fetch(API_BASE_URL + "/api/post/count/year-month", {
+            method: "GET",
+            credentials: "same-origin",
+            next: {
+                revalidate: 10,
+            }
+        }).then((response) => {
+            if (!response.ok) {
+                notFound();
+            }
+            return response.json();
+        });
+    } catch (error) {
+        notFound();
+    }
+}
+
 export async function fetchPostsByCategoryID(id: number): Promise<Array<PostType>> {
     try {
         return fetch(API_BASE_URL + "/api/post/category/" + id, {
