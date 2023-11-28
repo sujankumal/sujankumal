@@ -1,0 +1,88 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("POSTGRES_PRISMA_URL") // uses connection pooling
+  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+}
+
+model Site {
+  id            Int   @default(autoincrement()) @id
+  header_image  String  @default("header.jpg")
+  header_image_credit  String?
+  title         String
+  name          String
+  motto         String
+  greeting      String
+  description   String
+  detail        String
+  copyright     String
+  year          Int 
+  @@map(name: "sites")
+}
+
+model Social {
+  id            Int   @default(autoincrement()) @id
+  name          String
+  username      String
+  embed         Boolean @default(false)
+  @@map(name: "socials") 
+}
+
+model Post {
+  id                      Int     @default(autoincrement()) @id 
+  title                   String
+  description             String?
+  content                 Content[]
+  main_image              String
+  main_image_credit       String?
+  date                    DateTime
+  month                   Int?
+  year                    Int?
+  categories              CategoriesOnPosts[]
+  published               Boolean @default(false)
+  author                  User?   @relation(fields: [authorId], references: [id])
+  authorId                Int?
+  @@map(name: "posts")
+}
+
+model Content {
+  id            Int @default(autoincrement()) @id
+  type          String
+  content       String?
+  sequence      Int?
+  post          Post? @relation(fields: [postId], references: [id])
+  postId        Int? //is Foreign Key
+  @@map(name: "content")
+}
+
+model Category {
+  id            Int     @default(autoincrement()) @id
+  name          String
+  posts          CategoriesOnPosts[]
+  @@map(name: "categories")
+}
+
+model CategoriesOnPosts {
+  post          Post     @relation(fields: [postId], references: [id])
+  postId        Int
+  category      Category @relation(fields: [categoryId], references: [id])
+  categoryId    Int
+  @@id([postId, categoryId])
+  @@map(name :"categoriesonposts")
+}
+
+model User {
+  id            Int       @default(autoincrement()) @id
+  name          String?
+  email         String?   @unique
+  createdAt     DateTime  @default(now()) @map(name: "created_at")
+  updatedAt     DateTime  @updatedAt @map(name: "updated_at")
+  posts         Post[]
+  @@map(name: "users")
+}

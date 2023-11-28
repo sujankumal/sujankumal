@@ -1,0 +1,7 @@
+> **“Do your duty, but do not concern yourself with the results. We have the right to do our duty, but the results are not dependent only upon our efforts.”**
+
+*This quote encapsulates the essence of the Bhagavad Gita, a sacred text in Hinduism, where Lord Krishna imparts wisdom to Arjuna on the battlefield. The idea is to emphasize the importance of focusing on the process and commitment to one's duty rather than becoming overly fixated on the outcomes, which are often beyond our control. In practical terms, it encourages individuals to give their best effort without being unduly burdened by the uncertainties of success or failure.*
+
+*For instance, consider an entrepreneur launching a new business venture. While they can meticulously plan and execute every aspect of their strategy, external factors like market conditions, competition, and unforeseen events can influence the business's success. By embodying the principle of detached dedication to duty, the entrepreneur can channel their energy into the tasks at hand, making informed decisions and adapting to challenges without being paralyzed by fear of the unknown.*
+
+*In everyday life, this philosophy can also be applied to personal and professional goals. By concentrating on the effort put into our work, relationships, or personal development, and accepting that outcomes may vary, we cultivate resilience and a positive mindset. This mindset fosters motivation, as individuals learn to appreciate the journey and find fulfillment in the process of doing their duty, irrespective of external results.*

@@ -1,24 +1,55 @@
 "use client";
-import { useState } from "react";
-// import { AiOutlineMenu } from "react-icons/ai";
-// import { RxCross1 } from "react-icons/rx";
+import { useEffect, useRef, useState } from "react";
 import { Search, Menu, MenuOpen, Cottage } from "@mui/icons-material";
 import Link from "next/link";
 import Searchbar from "../Searchbar";
 
 const menu = [
-  { name: "About", url: "/About" },
-  { name: "Articles", url: "/Articles"},
-  { name: "Privacy Policy", url: "/Privacy-Policy" },
-  { name: "Twitter", url: "/Twitter" },
-  { name: "Jokes", url: "/Jokes" },
+  { name: "About", url: "/about" },
+  { name: "Articles", url: "/articles"},
+  { name: "Twitter", url: "/twitter" },
+  { name: "Jokes", url: "/jokes" },
 ];
-
+let elementDistanceFromTop = 0;
+    
 const Navbar = () => {
   const [navbar, setNavbar] = useState(false);
   const [search, setSearch] = useState(false);
+
+  const [isNavFixed, setisNavFixed] = useState(false);
+  const elementRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(()=>{
+    const handleScroll = () => {
+      // Calculate scrolled distance to set Navbar to fixed.
+      
+      const element = elementRef.current;
+      let scrolledDistanceY = window.scrollY;
+      if (element){
+        if(elementDistanceFromTop == 0){
+          elementDistanceFromTop = element.offsetTop;
+        }
+        if (scrolledDistanceY >= elementDistanceFromTop){
+          setisNavFixed(true);
+        }else{
+          setisNavFixed(false);
+        }
+      }
+    }
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, {
+      passive:true
+    });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    }
+  }, [elementRef]);
+  
+  let fixedNavClass = (isNavFixed)?" fixed top-0 z-10":"";
+  
   return (
-    <nav className="w-full bg-gray-800 border-t-4 border-teal-600 shadow h-full">
+    <nav className={"w-full bg-gray-800 border-t-4 border-teal-600 shadow"+fixedNavClass } ref={elementRef}>
       <div className="flex justify-between px-4 mx-auto lg:max-w-7xl md:items-center md:flex md:px-8">
         <div className="flex items-center justify-between md:block">
           <div className="avatar bg-teal-600 p-3">
@@ -47,7 +78,7 @@ const Navbar = () => {
         >
           <ul className="items-center space-y-8 pl-6 pt-6 md:flex md:pl-0 md:pt-0 md:space-x-6 md:space-y-0">
             {menu.map(({ name, url }, index) => (
-              <li key={index} className="text-white text-sm uppercase">
+              <li key={index} className="text-white text-sm uppercase hover:text-teal-600">
                 <Link href={url}>{name}</Link>
               </li>
             ))}
@@ -61,9 +92,9 @@ const Navbar = () => {
           </button>
         </div>
       </div>
-      <div className={(search)?"float-right border-t-2 border-teal-600 m-2 rounded-md":"hidden"}>
+      <div className={(search)?"border-t-2 w-max absolute right-3 border-teal-600 m-2 rounded-md":"hidden"}>
         <Searchbar onSubmit={(searchTerm:string)=>{
-          console.log("Searched For:", searchTerm); 
+          // console.log("Searched For:", searchTerm); 
         }} inputProps={{}} />
       </div>
       
