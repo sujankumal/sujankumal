@@ -35,7 +35,7 @@ export async function fetchSite(): Promise<Array<SiteType>> {
             method: "GET",
             credentials: "same-origin",
             next: {
-                revalidate: 10,
+                revalidate: 0,
             }
         }).then((response) => {
             if (!response.ok) {
@@ -54,7 +54,7 @@ export async function fetchPostTitle(): Promise<Array<PostType>> {
             method: "GET",
             credentials: "same-origin",
             next: {
-                revalidate: 10,
+                revalidate: 0,
             }
         }).then((response) => {
             if (!response.ok) {
@@ -74,7 +74,7 @@ export async function fetchArchivesDates(): Promise<Array<PostType>> {
             method: "GET",
             credentials: "same-origin",
             next: {
-                revalidate: 10,
+                revalidate: 0,
             }
         }).then((response) => {
             if (!response.ok) {
@@ -93,7 +93,7 @@ export async function fetchArchivesByYearAndMonth(year: number, month: number): 
             method: "GET",
             credentials: "same-origin",
             next: {
-                revalidate: 10,
+                revalidate: 0,
             }
         }).then((response) => {
             if (!response.ok) {
@@ -113,7 +113,7 @@ export async function fetchCategories(): Promise<Array<CatergoryType>> {
             method: "GET",
             credentials: "same-origin",
             next: {
-                revalidate: 10,
+                revalidate: 0,
             }
         }).then((response) => {
             if (!response.ok) {
@@ -134,7 +134,7 @@ export async function fetchPostHome(): Promise<Array<PostType>> {
             method: "GET",
             credentials: "same-origin",
             next: {
-                revalidate: 10,
+                revalidate: 0,
             }
         }).then((response) => {
             if (!response.ok) {
@@ -154,7 +154,7 @@ export async function fetchAbout(): Promise<Array<PostType>> {
             method: "GET",
             credentials: "same-origin",
             next: {
-                revalidate: 10,
+                revalidate: 0,
             }
         }).then((response) => {
             if (!response.ok) {
@@ -174,7 +174,7 @@ export async function fetchTwitter(): Promise<Array<SocialType>> {
             method: "GET",
             credentials: "same-origin",
             next: {
-                revalidate: 10,
+                revalidate: 0,
             }
         }).then((response) => {
             if (!response.ok) {
@@ -194,7 +194,7 @@ export async function fetchArticles(): Promise<Array<PostType>> {
             method: "GET",
             credentials: "same-origin",
             next: {
-                revalidate: 10,
+                revalidate: 0,
             }
         }).then((response) => {
             if (!response.ok) {
@@ -214,7 +214,7 @@ export async function fetchJokes(): Promise<Array<PostType>> {
             method: "GET",
             credentials: "same-origin",
             next: {
-                revalidate: 10,
+                revalidate: 0,
             }
         }).then((response) => {
             if (!response.ok) {
@@ -234,7 +234,7 @@ export async function fetchJokeByID(id: number): Promise<PostType> {
             method: "GET",
             credentials: "same-origin",
             next: {
-                revalidate: 10,
+                revalidate: 0,
             }
         }).then((response) => {
             if (!response.ok) {
@@ -255,7 +255,7 @@ export async function fetchJokeCountIdArray(): Promise<Array<{ id: number }>> {
             method: "GET",
             credentials: "same-origin",
             next: {
-                revalidate: 10,
+                revalidate: 0,
             }
         }).then((response) => {
             if (!response.ok) {
@@ -274,7 +274,7 @@ export async function fetchPostByID(id: number): Promise<PostType> {
             method: "GET",
             credentials: "same-origin",
             next: {
-                revalidate: 10,
+                revalidate: 0,
             }
         }).then((response) => {
             if (!response.ok) {
@@ -293,7 +293,7 @@ export async function fetchPostCountIdArray(): Promise<Array<{ id: number }>> {
             method: "GET",
             credentials: "same-origin",
             next: {
-                revalidate: 10,
+                revalidate: 0,
             }
         }).then((response) => {
             if (!response.ok) {
@@ -312,7 +312,7 @@ export async function fetchCategoryCountIdArray(): Promise<Array<{ id: number }>
             method: "GET",
             credentials: "same-origin",
             next: {
-                revalidate: 10,
+                revalidate: 0,
             }
         }).then((response) => {
             if (!response.ok) {
@@ -331,7 +331,7 @@ export async function fetchPostCountYearMonthArray(): Promise<Array<{ year: numb
             method: "GET",
             credentials: "same-origin",
             next: {
-                revalidate: 10,
+                revalidate: 0,
             }
         }).then((response) => {
             if (!response.ok) {
@@ -350,7 +350,7 @@ export async function fetchPostsByCategoryID(id: number): Promise<Array<PostType
             method: "GET",
             credentials: "same-origin",
             next: {
-                revalidate: 10,
+                revalidate: 0,
             }
         }).then((response) => {
             if (!response.ok) {
@@ -370,7 +370,7 @@ export async function fetchSocial(): Promise<Array<SocialType>> {
             method: "GET",
             credentials: "same-origin",
             next: {
-                revalidate: 10,
+                revalidate: 0,
             }
         }).then((response) => {
             if (!response.ok) {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "../../../../../../prisma/prisma";
 import { fetchPostCountIdArray } from "@/services/data_access";
+import { notFound } from "next/navigation";
 
 export async function GET(request: NextRequest, {params}: {params: { id: string}}){
     // console.log("Hello I am server get post by-id method", typeof(params.id),params.id);
@@ -45,7 +46,7 @@ export async function GET(request: NextRequest, {params}: {params: { id: string}
         }
     ).catch((exception)=>{
         console.log("Server Error:", exception);
-        return "Server Error!";
+        notFound();
     });
     return NextResponse.json(site);
 }
