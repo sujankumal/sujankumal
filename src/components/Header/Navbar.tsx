@@ -10,7 +10,7 @@ const menu = [
   { name: "Twitter", url: "/twitter" },
   { name: "Jokes", url: "/jokes" },
 ];
-let elementDistTop = 0;
+let elementDistanceFromTop = 0;
     
 const Navbar = () => {
   const [navbar, setNavbar] = useState(false);
@@ -18,28 +18,34 @@ const Navbar = () => {
 
   const [isNavFixed, setisNavFixed] = useState(false);
   const elementRef = useRef<HTMLDivElement>(null);
-        
+  
   useEffect(()=>{
     const handleScroll = () => {
+      // Calculate scrolled distance to set Navbar to fixed.
+      
       const element = elementRef.current;
-      let scrollPosition = window.scrollY;
+      let scrolledDistanceY = window.scrollY;
       if (element){
-        if(elementDistTop == 0){
-          elementDistTop = element.offsetTop;
+        if(elementDistanceFromTop == 0){
+          elementDistanceFromTop = element.offsetTop;
         }
-        if (scrollPosition >= elementDistTop){
+        if (scrolledDistanceY >= elementDistanceFromTop){
           setisNavFixed(true);
         }else{
           setisNavFixed(false);
         }
       }
     }
-    window.addEventListener('scroll', handleScroll);
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, {
+      passive:true
+    });
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
     }
-  }, []);
+  }, [elementRef]);
+  
   let fixedNavClass = (isNavFixed)?" fixed top-0 z-10":"";
   
   return (
