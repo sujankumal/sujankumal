@@ -26,7 +26,7 @@ async function Archives({params}:{params: {year:number, month:number}}) {
                         </div>
                         <div className="mb-2">
                         <h2>
-                            <Link href={APP_BASE_URL+"articles/"+post.id} className="text-teal-600">{post.title}</Link>
+                            <Link href={APP_BASE_URL+"/articles/"+post.id} className="text-teal-600">{post.title}</Link>
                         </h2>
                         </div>
                     </header>

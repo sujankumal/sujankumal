@@ -1,5 +1,5 @@
 {
-    "articles": [
+    "/articles": [
         {
             "id":"1",
             "title": "श्री शिव महिम्नः स्तोत्रं।",
@@ -212,7 +212,7 @@
             ],
             "main_image": "public/images/ShivaBhagwan.jpg",
             "main_image_credit":"",
-            "url": "articles/1",
+            "url": "/articles/1",
             "date": "July 17, 2023",
             "categories": [1],
             "author": "admin",
@@ -225,7 +225,7 @@
             "content": [],
             "main_image": "",
             "main_image_credit":"",
-            "url": "articles/2",
+            "url": "/articles/2",
             "date": "July 17, 2023",
             "categories": [2],
             "author": "admin",
@@ -238,7 +238,7 @@
             "content": [],
             "main_image": "",
             "main_image_credit":"",
-            "url": "articles/3",
+            "url": "/articles/3",
             "date": "July 17, 2023",
             "categories": [1],
             "author": "admin",
@@ -251,7 +251,7 @@
             "content": [],
             "main_image": "",
             "main_image_credit":"",
-            "url": "articles/4",
+            "url": "/articles/4",
             "date": "July 17, 2023",
             "categories": [3],
             "author": "admin",

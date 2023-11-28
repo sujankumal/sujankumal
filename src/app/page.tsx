@@ -42,7 +42,7 @@ export default async function Home() {
         </article>
         <hr className="w-full h-1 my-8 bg-gray-700 border-0 dark:bg-gray-700" />
         <div className="w-auto block">
-          <PaginationPost items={posts} pageSize={4} path={APP_BASE_URL+"articles/"}/>
+          <PaginationPost items={posts} pageSize={4} path={APP_BASE_URL+"/articles/"}/>
         </div>
       </div>
       <aside className="w-full md:col-span-1">
