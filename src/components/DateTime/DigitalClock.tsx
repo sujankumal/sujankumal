@@ -1,7 +1,7 @@
 'use client'
 import {useEffect, useState} from "react";
 import { AccessTime } from "@mui/icons-material";
-import { MONTHS, WEEK_DAYS } from "@/constants/config";
+import { MONTHS, WEEK_DAYS } from "@/constants/constants";
 
 
 function DigitalClock() {

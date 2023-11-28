@@ -9,9 +9,9 @@ import DigitalClock from "../DateTime/DigitalClock";
 import Navbar from "./Navbar";
 import { SiteType } from "@/types/site";
 import { fetchPostTitle, fetchSite, fetchSocial } from "@/services/data_access";
-import { PostType } from "@/types/post";
+import { PostTitleType } from "@/types/post";
 import { SocialType } from "@/types/social";
-import { APP_BASE_URL } from "@/constants/config";
+import { APP_BASE_URL } from "@/constants/constants";
 import { SvgIcon } from "@mui/material";
 
 const social: Array<SocialType> = await fetchSocial().then((data) => {
@@ -19,15 +19,13 @@ const social: Array<SocialType> = await fetchSocial().then((data) => {
     return data;
 });
 
-const posts: Array<PostType> = await fetchPostTitle().then((data) => {
+const posts: Array<PostTitleType> = await fetchPostTitle().then((data) => {
 
     // console.log(data, data[0]?.title);
     return data;
 });
 
-const sites: Array<SiteType> = await fetchSite().then((data) => {
-    return data;
-});
+const sites: SiteType = await fetchSite();
 
 function Header() {
 
@@ -125,9 +123,9 @@ function Header() {
                     <div className="text-center md:text-left">
                         <div className="mt-5">
                             <h1 className="uppercase font-bold text-2xl">
-                                <Link className="text-teal-600" href={APP_BASE_URL || '/'} rel="home">{sites.slice(-1)[0].name}</Link>
+                                <Link className="text-teal-600" href={APP_BASE_URL || '/'} rel="home">{sites.name}</Link>
                             </h1>
-                            <p className="text-light">{sites.slice(-1)[0].motto}</p>
+                            <p className="text-light">{sites.motto}</p>
                         </div>
                     </div>
                     <div className="header-ads-wrapper google-adsence">

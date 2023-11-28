@@ -16,3 +16,8 @@ export interface PostType{
     published:Boolean,
     author:UserType,
 }
+
+export interface PostTitleType{
+    id:number,
+    title:string,
+}

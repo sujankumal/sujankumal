@@ -4,17 +4,15 @@ import CategoryButton from '@/components/Category/CategoryButton';
 import DateTime from '@/components/DateTime/DateTime';
 import PaginationPost from '@/components/Pagination/pagnate-post';
 import Sidebar from '@/components/Sidebar';
-import UserLinkButton from '@/components/User/UserLinkButton';
-import { APP_BASE_URL } from '@/constants/config';
+
+import { APP_BASE_URL } from '@/constants/constants';
 import { fetchPostHome, fetchSite } from '@/services/data_access';
 import { PostType } from '@/types/post';
 import { SiteType } from '@/types/site';
 import { Metadata } from 'next';
-import Link from 'next/link';
 
-const sites:Array<SiteType> = await fetchSite().then((data)=>{
-  return data;
-});
+
+const sites:SiteType = await fetchSite();
 
 const posts:Array<PostType> = await fetchPostHome().then((data)=>{
   // console.log("Post HOme: ",data);
@@ -23,7 +21,7 @@ const posts:Array<PostType> = await fetchPostHome().then((data)=>{
 
 export async function generateMetadata():Promise<Metadata>{
   return {
-    title: sites.slice(-1)[0].title
+    title: sites.title
   }
 }
 
@@ -32,13 +30,13 @@ export default async function Home() {
     <main className="grid md:grid-cols-4 min-h-screen justify-center">
       <div className="mb-8 p-4 md:m-8 md:col-span-3">
         <article className="block text-gray-800 dark:text-inherit">
-            <h3 className="mb-4">{sites.slice(-1)[0].greeting}</h3>
+            <h3 className="mb-4">{sites.greeting}</h3>
             <div>
                 <p className='mb-4'>
-                    <i>{sites.slice(-1)[0].description}</i>
+                    <i>{sites.description}</i>
                 </p>
                 <p>
-                  {sites.slice(-1)[0].detail}
+                  {sites.detail}
                 </p>
             </div>
         </article>

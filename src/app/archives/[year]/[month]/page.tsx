@@ -3,7 +3,7 @@ import DateTime from "@/components/DateTime/DateTime";
 import NotFound from "@/components/Errors/NotFound";
 import Sidebar from "@/components/Sidebar";
 import UserLinkButton from "@/components/User/UserLinkButton";
-import { APP_BASE_URL } from "@/constants/config";
+import { APP_BASE_URL } from "@/constants/constants";
 import { fetchArchivesByYearAndMonth, fetchPostCountYearMonthArray } from "@/services/data_access";
 import { PostType } from "@/types/post";
 import Link from "next/link";

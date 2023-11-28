@@ -2,10 +2,10 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { PostType } from "@/types/post";
-import { APP_BASE_URL } from "@/constants/config";
+import { PostTitleType } from "@/types/post";
+import { APP_BASE_URL } from "@/constants/constants";
 
-function Ticker({items}:{items:Array<PostType>}) {
+function Ticker({items}:{items:Array<PostTitleType>}) {
     const [activeIndex, setActiveIndex] = useState(0);
    
     useEffect(()=>{

@@ -7,3 +7,7 @@ export async function GET(request: NextRequest){
     const site = await prisma.post.findMany();
     return NextResponse.json(site);
 }
+// 
+// export const dynamicParams = true // true | false,
+// export const revalidate = 10
+// 

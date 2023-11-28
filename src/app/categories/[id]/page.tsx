@@ -2,7 +2,7 @@ import CategoryButton from "@/components/Category/CategoryButton";
 import DateTime from "@/components/DateTime/DateTime";
 import Sidebar from "@/components/Sidebar";
 import UserLinkButton from "@/components/User/UserLinkButton";
-import { APP_BASE_URL } from "@/constants/config";
+import { APP_BASE_URL } from "@/constants/constants";
 import { fetchCategoryCountIdArray, fetchPostsByCategoryID } from "@/services/data_access";
 import { PostType } from "@/types/post";
 import Link from "next/link";

@@ -1,10 +1,10 @@
-import { MONTHS } from "@/constants/config";
+import { MONTHS } from "@/constants/constants";
 import { fetchArchivesDates, fetchCategories, fetchPostTitle } from "@/services/data_access";
 import { CatergoryType } from "@/types/category";
-import { PostType } from "@/types/post";
+import { PostTitleType } from "@/types/post";
 import Link from "next/link";
 
-const recentPost: Array<PostType> = await fetchPostTitle();
+const recentPost: Array<PostTitleType> = await fetchPostTitle();
 
 // const archives = [
 //     {name:"July 2020", url:"/archives/2020/7"},

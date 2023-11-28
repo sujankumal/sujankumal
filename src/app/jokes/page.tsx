@@ -1,6 +1,6 @@
 import PaginationPost from "@/components/Pagination/pagnate-post";
 import Sidebar from "@/components/Sidebar";
-import { APP_BASE_URL } from "@/constants/config";
+import { APP_BASE_URL } from "@/constants/constants";
 import { fetchJokes } from "@/services/data_access";
 import { PostType } from "@/types/post";
 

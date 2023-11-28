@@ -4,9 +4,9 @@ import { fetchJokeCountIdArray } from "@/services/data_access";
 import { notFound } from "next/navigation";
 
 export async function GET(request: NextRequest, {params}: {params: { id: string}}){
-    console.log("Hello I am server get post by-id method", typeof(params.id),params.id);
+    // console.log("Hello I am server get post by-id method", typeof(params.id),params.id);
     const id = Number.parseInt(params.id);
-    console.log("Hello I am server get post by-id method", id);
+    // console.log("Hello I am server get post by-id method", id);
     
     const joke = await prisma.post.findUnique(
         {

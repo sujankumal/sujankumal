@@ -1,4 +1,4 @@
-import { APP_BASE_URL } from "@/constants/config";
+import { APP_BASE_URL } from "@/constants/constants";
 import { UserType } from "@/types/user";
 import { Person } from "@mui/icons-material";
 import Link from "next/link";
