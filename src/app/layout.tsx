@@ -12,6 +12,9 @@ const noto = Noto_Sans({
 export const metadata: Metadata = {
   title: 'Er. Sujan Kumal | A Software Engineer',
   description: "Welcome to Sujan Kumal's Site. Experienced Software Engineer | Innovative Problem Solver | Passionate About Technology",
+  icons: {
+    icon: '/bird-32x32-20.gif',
+  },
 }
 
 export default function RootLayout({
