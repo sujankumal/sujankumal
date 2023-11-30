@@ -2,7 +2,7 @@ import Image from "next/image";
 import headerImage from '/public/images/header.jpg';
 import Ticker from "./Ticker";
 import { Facebook, Twitter, Instagram, GitHub, LinkedIn, Link as SocialLink } from '@mui/icons-material';
-
+import bird_100_100_20 from '/public/bird-100x100-20.gif';
 
 import Link from "next/link";
 import DigitalClock from "../DateTime/DigitalClock";
@@ -115,10 +115,13 @@ function Header() {
                 </div>
             </div>
 
-            <div className="p-5 block">
+            <div className="px-5 block">
                 <div className="w-full">
-                    <div className="text-center md:text-left">
-                        <div className="mt-5">
+                    <div className="text-center md:text-left md:flex">
+                        <div className="w-full flex justify-center md:w-fit mr-4">
+                            <Image src={bird_100_100_20} alt="Bird with rocket. Site Logo." priority={true} width={100}/>
+                        </div>
+                        <div className="md:mt-5">
                             <h1 className="uppercase font-bold text-2xl">
                                 <Link className="text-teal-600" href={APP_BASE_URL || '/'} rel="home">{sites.name}</Link>
                             </h1>
