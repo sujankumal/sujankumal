@@ -3,6 +3,8 @@ import './globals.css'
 import type { Metadata } from 'next'
 import { Noto_Sans } from 'next/font/google'
 import Header from '@/components/Header/Header'
+import Script from 'next/script'
+import { GA_TRACKING_ID } from '@/constants/constants'
 
 const noto = Noto_Sans({
   weight:['100','200','300','400','500','600','700','800'],
@@ -24,6 +26,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      {/* <!-- Google tag (gtag.js) --> */}
+      <Script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`}></Script>
+      <Script>
+        {`window.dataLayer = window.dataLayer || [];
+        function gtag(){window.dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', '${GA_TRACKING_ID}');`}
+      </Script>
       <body className={noto.className}>
         <Header/>
         {children}
