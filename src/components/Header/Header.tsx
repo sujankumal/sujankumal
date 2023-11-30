@@ -39,12 +39,9 @@ function Header() {
                 />
             </div>
             <div className="bg-gray-800 px-2">
-                <div className="md:flex text-white ">
+                <div className="md:flex text-white">
                     <div className="bg-teal-600 h-8 w-full flex flex-col justify-center  md:w-1/6 md:ml-20 float-left px-3 text-center font-semibold">Latest</div>
-                    <div className="w-full h-8 text-sm inline-block">
-                        {/* <List items={items}/> */}
-                        <Ticker items={posts} />
-                    </div>
+                    <Ticker items={posts} />
                 </div>
             </div>
             <div className="border-t-2 border-t-teal-600 bg-gray-800 px-2">
