@@ -31,6 +31,7 @@ export async function isServerApiResponding() {
 }
 
 export function isExternalFetchSet(): Boolean {
+    // Be carefull here
     return (API_FETCH_EXTERNAL !== false) ? true : false;
 }
 

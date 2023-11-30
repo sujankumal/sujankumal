@@ -7,8 +7,11 @@ import Searchbar from "../Searchbar";
 const menu = [
   { name: "About", url: "/about" },
   { name: "Articles", url: "/articles"},
-  { name: "Twitter", url: "/twitter" },
   { name: "Jokes", url: "/jokes" },
+  { name: "Twitter", url: "/twitter" },
+  { name: "Contact Us", url: "/contact"},
+  { name: "Our Team", url: "/team"},
+  { name: "Privacy Policy", url: "/privacy-policy"},
 ];
 let elementDistanceFromTop = 0;
     
@@ -48,7 +51,8 @@ const Navbar = () => {
   
   let fixedNavClass = (isNavFixed)?" fixed top-0 z-10":"";
   
-  return (
+  return (<>
+    <div className={isNavFixed?"block h-12 border-t-2":"hidden"}></div>
     <nav className={"w-full bg-gray-800 border-t-4 border-teal-600 shadow"+fixedNavClass } ref={elementRef}>
       <div className="flex justify-between px-4 mx-auto lg:max-w-7xl md:items-center md:flex md:px-8">
         <div className="flex items-center justify-between md:block">
@@ -75,6 +79,7 @@ const Navbar = () => {
         <div className={`flex-1 pb-3 mt-12 absolute left-0 overflow-y-auto max-h-screen 
                   w-screen bg-gray-800 md:relative md:block md:mx-6 md:pb-0 md:mt-0 
                   ${navbar ? "block" : "hidden"}`}
+                  onClick={() => setNavbar(!navbar)}
         >
           <ul className="items-center space-y-8 pl-6 pt-6 md:flex md:pl-0 md:pt-0 md:space-x-6 md:space-y-0">
             {menu.map(({ name, url }, index) => (
@@ -99,6 +104,7 @@ const Navbar = () => {
       </div>
       
     </nav>
+    </>
   );
 };
 export default Navbar;
