@@ -28,7 +28,7 @@ export default function RootLayout({
     <html lang="en">
       {/* <!-- Google tag (gtag.js) --> */}
       <Script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`}></Script>
-      <Script>
+      <Script id='gtag-script'>
         {`window.dataLayer = window.dataLayer || [];
         function gtag(){window.dataLayer.push(arguments);}
         gtag('js', new Date());
