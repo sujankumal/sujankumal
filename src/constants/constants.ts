@@ -1,7 +1,7 @@
 import { isNodeJs } from "@/services/check_node";
 
-export const APP_BASE_URL = isNodeJs()? process.env.VERCEL_URL: 'http://localhost:3000/';
-export const API_BASE_URL = isNodeJs()? process.env.VERCEL_URL: 'http://localhost:3000/';
+export const APP_BASE_URL = process.env.VERCEL_URL?? '';
+export const API_BASE_URL = process.env.VERCEL_URL?? '';
 
 export const GA_TRACKING_ID = process.env.GA_TRACKING_ID??"";
 
