@@ -9,12 +9,13 @@ import Image from "next/image";
 async function Joke({params}:{params: {id:number}}) {
     const {id} = params;
     
-    const joke = await fetchJokeByID(id).then((data)=>{
-        console.log("Received Joke data: ", data);
-        return data;
-    });
+    const joke = await fetchJokeByID(id);
+    // .then((data)=>{
+    //     // console.log("Received Joke data: ", data);
+    //     return data;
+    // });
     const joke_mds = joke.content?.map((content, index)=>{
-        console.log(content, "cont");
+        // console.log(content, "cont");
         return (content.content)?<MarkdownComponent key={index} content={content.content} />:<div></div>;
     });
 
