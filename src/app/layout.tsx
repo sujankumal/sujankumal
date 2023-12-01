@@ -15,7 +15,7 @@ const noto = Noto_Sans({
 export const metadata: Metadata = {
   title: 'Er. Sujan Kumal | A Software Engineer',
   description: "Welcome to Sujan Kumal's Site. Experienced Software Engineer | Innovative Problem Solver | Passionate About Technology",
-  metadataBase: new URL(APP_BASE_URL),
+  metadataBase: new URL('/', APP_BASE_URL),
   openGraph:{
     images:['/bird-800x800-20.gif'],
     type:'website',
