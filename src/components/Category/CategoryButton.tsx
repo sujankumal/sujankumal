@@ -1,4 +1,3 @@
-import { APP_BASE_URL } from "@/constants/constants";
 import { CategoriesOnPosts } from "@/types/category-post";
 import Link from "next/link";
 

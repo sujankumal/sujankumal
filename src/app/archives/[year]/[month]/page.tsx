@@ -3,9 +3,11 @@ import DateTime from "@/components/DateTime/DateTime";
 import NotFound from "@/components/Errors/NotFound";
 import Sidebar from "@/components/Sidebar";
 import UserLinkButton from "@/components/User/UserLinkButton";
-import { APP_BASE_URL } from "@/constants/constants";
+import { MONTHS } from "@/constants/constants";
+
 import { fetchArchivesByYearAndMonth, fetchPostCountYearMonthArray } from "@/services/data_access";
 import { PostType } from "@/types/post";
+import { Metadata, ResolvingMetadata } from "next";
 import Link from "next/link";
 
 async function Archives({params}:{params: {year:number, month:number}}) {
@@ -75,3 +77,29 @@ export async function generateStaticParams() {
     // console.log("Paths ", paths);
     return paths;
   }
+
+  export async function generateMetadata({params}:{params: {year:number, month:number}}, parent: ResolvingMetadata): Promise<Metadata>{
+    const {year, month} = params;
+
+    return  {
+        title: `Archives | ${MONTHS[month-1]} ${year}` ,
+        description: `This page provides concise summaries of key topics and links to related archives of ${MONTHS[month-1]} ${year} for further exploration.`,
+        openGraph:{
+          images:['/bird-1024x576-20.gif'],
+          type:'website',
+          url:'https://vercel.sujankumal.com.np/',
+          siteName:'Er. Sujan Kumal | A Software Engineer',
+          title: `Archives | ${MONTHS[month-1]} ${year}` ,
+          description: `This page provides concise summaries of key topics and links to related archives of ${MONTHS[month-1]} ${year} for further exploration.`,
+        },
+        twitter:{
+          card:'summary_large_image',
+          creator:'@sujan_03_',
+          site:'@sujan_03_',
+          images:['/bird-1024x576-20.gif'],
+          title: `Archives | ${MONTHS[month-1]} ${year}` ,
+          description: `This page provides concise summaries of key topics and links to related archives of ${MONTHS[month-1]} ${year} for further exploration.`,
+        },
+        
+      }
+}

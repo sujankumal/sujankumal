@@ -4,6 +4,7 @@ import MarkdownComponent from "@/components/MarkdownComponent";
 import Sidebar from "@/components/Sidebar";
 import UserLinkButton from "@/components/User/UserLinkButton";
 import { fetchPostByID, fetchPostCountIdArray } from "@/services/data_access";
+import { Metadata, ResolvingMetadata } from "next";
 import Image from "next/image";
 
 async function Articles({params}:{params: {id:number}}) {
@@ -96,3 +97,30 @@ export async function generateStaticParams() {
     // console.log("Paths ", paths);
     return paths;
   }
+
+export async function generateMetadata({params}:{params: {id:number}}, parent: ResolvingMetadata): Promise<Metadata>{
+    const id = params.id;
+    const article = await fetchPostByID(id);
+
+    return  {
+        title: `Articles | ${article.title}`,
+        description: article.description,
+        openGraph:{
+          images:[`/images/${article.main_image}`],
+          type:'website',
+          url:'https://vercel.sujankumal.com.np/',
+          siteName:'Er. Sujan Kumal | A Software Engineer',
+          title: `Articles | ${article.title}`,
+          description: article.description,
+        },
+        twitter:{
+          card:'summary_large_image',
+          creator:'@sujan_03_',
+          site:'@sujan_03_',
+          images:[`/images/${article.main_image}`],
+          title: `Articles | ${article.title}`,
+          description: article.description,
+        },
+        
+      }
+}

@@ -2,9 +2,11 @@ import CategoryButton from "@/components/Category/CategoryButton";
 import DateTime from "@/components/DateTime/DateTime";
 import Sidebar from "@/components/Sidebar";
 import UserLinkButton from "@/components/User/UserLinkButton";
-import { APP_BASE_URL } from "@/constants/constants";
-import { fetchCategoryCountIdArray, fetchPostsByCategoryID } from "@/services/data_access";
+
+import { fetchCategoryById, fetchCategoryCountIdArray, fetchPostsByCategoryID } from "@/services/data_access";
+import { CatergoryType } from "@/types/category";
 import { PostType } from "@/types/post";
+import { Metadata, ResolvingMetadata } from "next";
 import Link from "next/link";
 
 async function Category({params}:{params: {id:number}}) {
@@ -78,3 +80,30 @@ export async function generateStaticParams() {
     // console.log("Paths ", paths);
     return paths;
   }
+
+  export async function generateMetadata({params}:{params: {id:number}}, parent: ResolvingMetadata): Promise<Metadata>{
+    const {id} = params;
+    
+    const category: CatergoryType = await fetchCategoryById(id);
+
+    return  {
+        title: `Category | ${category.name}` ,
+        description: `This page provides concise summaries of key topics and links to related category of ${category.name} for further exploration.`,
+        openGraph:{
+          images:['/bird-1024x576-20.gif'],
+          type:'website',
+          url:'https://vercel.sujankumal.com.np/',
+          siteName:'Er. Sujan Kumal | A Software Engineer',
+          title: `Category | ${category.name}` ,
+          description: `This page provides concise summaries of key topics and links to related category of ${category.name} for further exploration.`,
+        },
+        twitter:{
+          card:'summary_large_image',
+          creator:'@sujan_03_',
+          site:'@sujan_03_',
+          images:['/bird-1024x576-20.gif'],
+          title: `Category | ${category.name}` ,
+          description: `This page provides concise summaries of key topics and links to related category of ${category.name} for further exploration.`,
+        },
+      }
+}

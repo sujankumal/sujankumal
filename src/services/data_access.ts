@@ -309,6 +309,8 @@ export async function fetchAbout(): Promise<Array<PostType>> {
                     take:1,
                     select:{
                         content:true,
+                        main_image:true,
+                        main_image_credit:true,
                     }
                 }
             );
@@ -669,6 +671,35 @@ export async function fetchCategoryCountIdArray(): Promise<Array<{ id: number }>
             return posts;
         }
         return fetch(API_BASE_URL + "/api/categories/count/", {
+            method: "GET",
+            credentials: "same-origin",
+            next: {
+                revalidate: 10,
+            }
+        }).then((response) => {
+            if (!response.ok) {
+                notFound();
+            }
+            return response.json();
+        });
+    } catch (error) {
+        notFound();
+    }
+}
+
+export async function fetchCategoryById(id: number): Promise<CatergoryType> {
+    try {
+        if (!isExternalFetchSet()) {
+            const category = prisma.category.findUnique(
+                {
+                    where: {
+                        id: Number(id)
+                    }
+                }
+            );
+            return category.then();
+        }
+        return fetch(API_BASE_URL + "/api/category/"+id, {
             method: "GET",
             credentials: "same-origin",
             next: {

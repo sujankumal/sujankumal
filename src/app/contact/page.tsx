@@ -1,4 +1,26 @@
 import Sidebar from "@/components/Sidebar";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: 'Contact Us | Er. Sujan Kumal | A Software Engineer',
+    description: "This page provides details on how to connect with us through various channels, including social media, email, and phone.",
+    openGraph:{
+        images:['/bird-1024x576-20.gif'],
+        type:'website',
+        url:'https://vercel.sujankumal.com.np/',
+        siteName:'Er. Sujan Kumal | A Software Engineer',
+        title: 'Contact Us | Er. Sujan Kumal | A Software Engineer',
+        description: "This page provides details on how to connect with us through various channels, including social media, email, and phone.",
+    },
+    twitter:{
+        card:'summary_large_image',
+        creator:'@sujan_03_',
+        site:'@sujan_03_',
+        images:['/bird-1024x576-20.gif'],
+        title: 'Contact Us | Er. Sujan Kumal | A Software Engineer',
+        description: "This page provides details on how to connect with us through various channels, including social media, email, and phone.",
+    },
+}
 
 function Contact() {
     

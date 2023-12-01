@@ -1,7 +1,9 @@
 import MarkdownComponent from "@/components/MarkdownComponent";
 import Sidebar from "@/components/Sidebar";
+import { METADATA_BASE_URL } from "@/constants/constants";
 import { fetchAbout } from "@/services/data_access";
 import { PostType } from "@/types/post";
+import { Metadata } from "next";
 
 const about:Array<PostType> = await fetchAbout();    
 const mds = about.slice(-1)[0]?.content?.map((content, index)=>{
@@ -9,6 +11,29 @@ const mds = about.slice(-1)[0]?.content?.map((content, index)=>{
     return (content.content)?<MarkdownComponent key={index} content={content.content} />:<div></div>;
 });
 
+const main_image:string = about.slice(-1)[0].main_image;
+
+export const metadata: Metadata = {
+    title: 'About | Er. Sujan Kumal | A Software Engineer',
+    description: "I'm Sujan Kumal, a software engineer with a strong passion for creating innovative solutions and exploring the world of technology. Here's a little bit about me:",
+    openGraph:{
+      images:[`/images/${main_image}`],
+      type:'website',
+      url:'https://vercel.sujankumal.com.np/',
+      siteName:'Er. Sujan Kumal | A Software Engineer',
+      title:'About | Er. Sujan Kumal | A Software Engineer',
+      description:"I'm Sujan Kumal, a software engineer with a strong passion for creating innovative solutions and exploring the world of technology. Here's a little bit about me:",
+    },
+    twitter:{
+      card:'summary_large_image',
+      creator:'@sujan_03_',
+      site:'@sujan_03_',
+      images:[`/images/${main_image}`],
+      title:'About | Er. Sujan Kumal | A Software Engineer',
+      description:"I'm Sujan Kumal, a software engineer with a strong passion for creating innovative solutions and exploring the world of technology. Here's a little bit about me:",
+    },
+  }
+  
 function About() {
     
     return (
