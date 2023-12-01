@@ -2,6 +2,7 @@
 
 export const APP_BASE_URL = process.env.VERCEL_URL?? '';
 export const API_BASE_URL = process.env.VERCEL_URL?? '';
+export const METADATA_BASE_URL = process.env.METADATA_BASE_URL??'';
 
 export const GA_TRACKING_ID = process.env.GA_TRACKING_ID??"";
 
