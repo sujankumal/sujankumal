@@ -1,4 +1,4 @@
-import { API_BASE_URL, API_FETCH_EXTERNAL } from "@/constants/constants";
+import { API_BASE_URL } from "@/constants/constants";
 import { CatergoryType } from "@/types/category";
 import { PostTitleType, PostType } from "@/types/post";
 import { SiteType } from "@/types/site";
@@ -32,7 +32,7 @@ export async function isServerApiResponding() {
 
 export function isExternalFetchSet(): Boolean {
     // Be carefull here
-    return (API_FETCH_EXTERNAL !== false) ? true : false;
+    return (API_BASE_URL === '') ? false : true;
 }
 
 export async function fetchSite():Promise<SiteType> {
@@ -63,7 +63,36 @@ export async function fetchSite():Promise<SiteType> {
         notFound();
     }
 }
-
+export async function fetchSitePrivacyPolicy():Promise<{privacy_policy:string}>{
+    try {
+        if (!isExternalFetchSet()) {
+            // data
+            const site = prisma.site.findFirst({
+                orderBy:{
+                    id:'desc'
+                },
+                select:{
+                    privacy_policy:true
+                }
+            });
+            return site.then();
+        }
+        return fetch(API_BASE_URL + "/api/site/privacy-policy", {
+            method: "GET",
+            credentials: "same-origin",
+            next: {
+                revalidate: 10,
+            }
+        }).then((response) => {
+            if (!response.ok) {
+                notFound();
+            }
+            return response.json();
+        });
+    }catch(error){
+        notFound();
+    }
+}
 export async function fetchPostTitle(): Promise<Array<PostTitleType>> {
     try {
         if (!isExternalFetchSet()) {
@@ -486,7 +515,7 @@ export async function fetchJokes(): Promise<Array<PostType>> {
 }
 
 export async function fetchJokeByID(id: number): Promise<PostType> {
-    console.log("Hello JOKER");
+    // console.log("Hello JOKER");
     try {
         if (!isExternalFetchSet()) {
             // data 

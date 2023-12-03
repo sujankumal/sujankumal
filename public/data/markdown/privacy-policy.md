@@ -34,4 +34,4 @@ We may update this privacy policy occasionally to reflect operational, legal, or
 
 ## Contact Us
 
-For more information about our privacy practices or if you have any questions, please contact us by email at [setobhagera@gmail.com].
+For more information about our privacy practices or if you have any questions, please contact us by email at [setobhagera@gmail.com](mailto:setobhagera@gmail.com).

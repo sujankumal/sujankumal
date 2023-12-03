@@ -7,11 +7,8 @@ import Searchbar from "../Searchbar";
 const menu = [
   { name: "About", url: "/about" },
   { name: "Articles", url: "/articles"},
-  { name: "Jokes", url: "/jokes" },
-  { name: "Twitter", url: "/twitter" },
-  { name: "Contact Us", url: "/contact"},
-  { name: "Our Team", url: "/team"},
-  { name: "Privacy Policy", url: "/privacy-policy"},
+  { name: "Technologies", url: "/technologies"},
+  { name: "Updates", url: "/updates"},
 ];
 let elementDistanceFromTop = 0;
     

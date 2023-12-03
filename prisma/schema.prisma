@@ -23,7 +23,18 @@ model Site {
   detail        String
   copyright     String
   year          Int 
+  privacy_policy       String?
+  contact_email        String?
+  contact_phone        String?
   @@map(name: "sites")
+}
+
+model Updates {
+  id            Int   @default(autoincrement()) @id
+  title         String
+  update        String
+  date          DateTime?
+  @@map(name:"updates")
 }
 
 model Social {
@@ -84,5 +95,18 @@ model User {
   createdAt     DateTime  @default(now()) @map(name: "created_at")
   updatedAt     DateTime  @updatedAt @map(name: "updated_at")
   posts         Post[]
+  profile       Profile?
   @@map(name: "users")
+}
+
+model Profile {
+  id           Int        @default(autoincrement()) @id
+  author       User?      @relation(fields: [authorId], references: [id])
+  authorId     Int?       @unique
+  status       String?
+  image        String?
+  about        String?
+  phone        String?
+  email        String?
+  @@map(name:"profile")
 }
