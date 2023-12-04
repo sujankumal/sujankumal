@@ -862,3 +862,162 @@ export async function fetchSocial(): Promise<Array<SocialType>> {
         notFound();
     }
 }
+
+
+export async function fetchTechPosts(): Promise<Array<PostType>> {
+
+    try {
+        if (!isExternalFetchSet()) {
+            // data 
+            const posts = prisma.post.findMany(
+                {
+                    where:{
+                        categories:{
+                            some:{
+                                category:{
+                                    name:{
+                                        equals:'tech',
+                                        mode:'insensitive',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    select:{
+                        id: true,
+                        title: true,
+                        description:true,
+                        date:true,
+                        published:true,
+                        categories:{
+                            select:{
+                                category:{
+                                    select:{
+                                        id:true,
+                                        name:true
+                                    },  
+                                },
+                            },
+                        },
+                        author:{
+                            select:{
+                                id:true,
+                                name:true,
+                            }
+                        },
+                    }
+                }
+            );
+            return posts.then();
+        }    
+        return fetch(API_BASE_URL + "/api/post/tech", {
+            method: "GET",
+            credentials: "same-origin",
+            next: {
+                revalidate: 10,
+            }
+        }).then((response) => {
+            if (!response.ok) {
+                notFound();
+            }
+            return response.json();
+        });
+    } catch (error) {
+        notFound();
+    }
+}
+
+export async function fetchTechPostByID(id: number): Promise<PostType> {
+    
+    try {
+        if (!isExternalFetchSet()) {
+            // data 
+
+            const joke = prisma.post.findUnique(
+                {
+                    where:{
+                        id: Number(id),
+                    },
+                    include:{
+                        categories:{
+                            include:{
+                                category:{
+                                    select:{
+                                        id:true,
+                                        name:true,
+                                    },
+                                },
+                            },
+                        },
+                        author:{
+                            select:{
+                                id:true,
+                                name:true,
+                            }
+                        },
+                        content:true,
+                    }
+                }
+            );
+            return joke.then();
+        }    
+        return fetch(API_BASE_URL + "/api/post/tech/by-id/" + id, {
+            method: "GET",
+            credentials: "same-origin",
+            next: {
+                revalidate: 10,
+            }
+        }).then((response) => {
+            if (!response.ok) {
+                notFound();
+            }
+            return response.json();
+        });
+    } catch (error) {
+        notFound();
+    }
+}
+
+
+
+export async function fetchTechPostCountIdArray(): Promise<Array<{ id: number }>> {
+    try {
+        if (!isExternalFetchSet()) {
+
+            const posts = await prisma.post.findMany(
+                {
+                    select: {
+                        id: true
+                    },
+                    where: {
+                        categories: {
+                            some: {
+                                category: {
+                                    name: {
+                                        equals: 'tech',
+                                        mode: 'insensitive',
+                                    },
+                                },
+                            },
+                        },
+                    }
+                }
+            );
+            return posts;
+        }
+        return fetch(API_BASE_URL + "/api/post/tech/count/", {
+            method: "GET",
+            credentials: "same-origin",
+            next: {
+                revalidate: 10,
+            }
+        }).then((response) => {
+            if (!response.ok) {
+                notFound();
+            }
+            return response.json();
+        });
+    } catch (error) {
+        notFound();
+    }
+}

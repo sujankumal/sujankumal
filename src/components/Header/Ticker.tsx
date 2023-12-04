@@ -45,7 +45,7 @@ function Ticker({items}:{items:Array<PostTitleType>}) {
                                 }
                             }}
                             >
-                            <Link href={"/post/"+item.id}>{item.title}</Link> 
+                            <Link href={"/articles/"+item.id}>{item.title}</Link> 
                         </motion.div>
                 })}
             </div>

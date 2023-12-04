@@ -1,5 +1,10 @@
+import PaginationPost from "@/components/Pagination/pagnate-post";
 import Sidebar from "@/components/Sidebar";
+import { fetchTechPosts } from "@/services/data_access";
+import { PostType } from "@/types/post";
 import { Metadata } from "next";
+
+const technologies:Array<PostType> = await fetchTechPosts();    
 
 export const metadata: Metadata = {
     title: 'Technologies | Er. Sujan Kumal | A Software Engineer',
@@ -23,14 +28,11 @@ export const metadata: Metadata = {
 }
 
 function Technologies() {
-    
+
     return (
         <main className="grid md:grid-cols-4 min-h-screen justify-center">
-            <div className="mb-8 p-4 md:m-8 md:col-span-3 inline-flex justify-center">
-                <div className="text-lg">Technologies</div>
-                <div className="prose prose-stone prose-sm dark:prose-invert">
-                   
-                </div>
+            <div className="mb-8 p-4 md:m-8 md:col-span-3">
+                <PaginationPost items={technologies} pageSize={10} path={"/technologies/"}/>
             </div>
             <aside className="w-full md:col-span-1">
                 <div className="h-full px-3 py-4 overflow-y-auto dark:bg-gray-800">
