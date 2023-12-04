@@ -55,7 +55,7 @@ async function Articles({params}:{params: {id:number}}) {
                                     </div>
                                 </div>
                             </header>
-                            <section className="prose max-w-none prose-blockquote:border-l-teal-600 hover:prose-a:text-teal-600 dark:prose-a:text-inherit">
+                            <section className="prose max-w-none prose-blockquote:border-l-teal-600 hover:prose-a:text-teal-600 dark:prose-a:text-inherit prose-headings:text-inherit prose-strong:text-inherit dark:prose-strong:text-inherit dark:prose-headings:text-inherit">
                                 { article_mds }
                             </section>
                         </div>

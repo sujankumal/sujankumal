@@ -24,10 +24,10 @@ function Sidebar() {
                     <div className="bg-teal-600 text-white px-4 py-1 text-lg inline-block">Recent Posts</div>
                 </div>
                 <div className="max-h-80 overflow-auto scrollbar">
-                    <ul className="list-outside pl-5">
+                    <ul className="pl-2">
                         {
                             recentPost.map(({id, title}, index)=>(
-                            <li key={index} className="text-gray-400 border-b border-gray-300 my-1 py-1 before:content-['\00BB'] hover:text-teal-600">
+                            <li key={index} className="w-full inline-flex text-gray-400 border-b border-gray-300 my-1 py-1 before:content-['\00BB'] hover:text-teal-600">
                                 <Link href={'/articles/'+id} className="pl-2 text-sm text-gray-800 dark:text-inherit hover:text-inherit">{title}</Link>
                             </li>
                             ))
@@ -40,10 +40,10 @@ function Sidebar() {
                     <div className="bg-teal-600 text-white px-4 py-1 text-lg inline-block">Archives</div>
                 </div>
                 <div className="max-h-80 overflow-auto scrollbar">
-                    <ul className="list-outside pl-5">
+                    <ul className="pl-2">
                         {
                             archives.map(({year, month}, index)=>(
-                            <li key={index} className="text-gray-400 border-b border-gray-300 my-1 py-1 before:content-['\1F5BF'] hover:text-teal-600">
+                            <li key={index} className="w-full inline-flex text-gray-400 border-b border-gray-300 my-1 py-1 before:content-['\1F5BF'] hover:text-teal-600">
                                 <Link href={'/archives/'+year+'/'+month} className="pl-2 text-sm text-gray-800 dark:text-inherit hover:text-inherit">{ MONTHS[month-1] }  { year }</Link>
                             </li>
                             ))
@@ -56,10 +56,10 @@ function Sidebar() {
                     <div className="bg-teal-600 text-white px-4 py-1 text-lg inline-block">Categories</div>
                 </div>
                 <div className="max-h-80 overflow-auto scrollbar">
-                    <ul className="list-outside pl-5">
+                    <ul className="pl-2">
                         {
                             catogries.map(({id, name}, index)=>(
-                            <li key={index} className="text-gray-400 border-b border-gray-300 my-1 py-1 before:content-['\2756'] hover:text-teal-600">
+                            <li key={index} className="w-full inline-flex text-gray-400 border-b border-gray-300 my-1 py-1 before:content-['\2756'] hover:text-teal-600">
                                 <Link href={'/categories/'+id} className="pl-2 text-sm text-gray-800 dark:text-inherit hover:text-inherit">{name}</Link>
                             </li>
                             ))

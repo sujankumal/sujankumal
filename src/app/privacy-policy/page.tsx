@@ -31,7 +31,7 @@ function PrivacyPolicy() {
     return (
         <main className="grid md:grid-cols-4 min-h-screen justify-center">
             <div className="mb-8 p-4 md:m-8 md:col-span-3 inline-flex justify-center">
-                <div className="prose max-w-none prose-blockquote:border-l-teal-600 hover:prose-a:text-teal-600 dark:prose-a:text-inherit">
+                <div className="prose max-w-none prose-blockquote:border-l-teal-600 hover:prose-a:text-teal-600 dark:prose-a:text-inherit prose-headings:text-inherit prose-strong:text-inherit dark:prose-strong:text-inherit dark:prose-headings:text-inherit">
                     {privacyPolicy.privacy_policy?<MarkdownComponent content={privacyPolicy.privacy_policy} />:<div></div>}
                 </div>
             </div>

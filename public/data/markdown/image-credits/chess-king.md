@@ -1,0 +1,1 @@
+Photo by [Ishika Vasnani](https://unsplash.com/@ishika_vasnani?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash) on [Unsplash](https://unsplash.com/photos/a-silver-and-gold-chess-set-on-a-black-background-jPhcQNEYLns?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash)
