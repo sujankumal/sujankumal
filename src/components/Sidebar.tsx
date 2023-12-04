@@ -28,7 +28,7 @@ function Sidebar() {
                         {
                             recentPost.map(({id, title}, index)=>(
                             <li key={index} className="w-full inline-flex text-gray-400 border-b border-gray-300 my-1 py-1 before:content-['\00BB'] hover:text-teal-600">
-                                <Link href={'/articles/'+id} className="pl-2 text-sm text-gray-800 dark:text-inherit hover:text-inherit">{title}</Link>
+                                <Link href={'/articles/'+id} className="pl-2 inline-flex flex-col justify-center text-sm text-gray-800 dark:text-inherit hover:text-inherit">{title}</Link>
                             </li>
                             ))
                         }
@@ -44,7 +44,7 @@ function Sidebar() {
                         {
                             archives.map(({year, month}, index)=>(
                             <li key={index} className="w-full inline-flex text-gray-400 border-b border-gray-300 my-1 py-1 before:content-['\1F5BF'] hover:text-teal-600">
-                                <Link href={'/archives/'+year+'/'+month} className="pl-2 text-sm text-gray-800 dark:text-inherit hover:text-inherit">{ MONTHS[month-1] }  { year }</Link>
+                                <Link href={'/archives/'+year+'/'+month} className="pl-2 inline-flex flex-col justify-center text-sm text-gray-800 dark:text-inherit hover:text-inherit">{ MONTHS[month-1] }  { year }</Link>
                             </li>
                             ))
                         }
@@ -60,7 +60,7 @@ function Sidebar() {
                         {
                             catogries.map(({id, name}, index)=>(
                             <li key={index} className="w-full inline-flex text-gray-400 border-b border-gray-300 my-1 py-1 before:content-['\2756'] hover:text-teal-600">
-                                <Link href={'/categories/'+id} className="pl-2 text-sm text-gray-800 dark:text-inherit hover:text-inherit">{name}</Link>
+                                <Link href={'/categories/'+id} className="pl-2 inline-flex flex-col justify-center text-sm text-gray-800 dark:text-inherit hover:text-inherit">{name}</Link>
                             </li>
                             ))
                         }
