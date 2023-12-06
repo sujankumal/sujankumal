@@ -9,27 +9,6 @@ import prisma from "../../prisma/prisma";
 
 const dataDirectory = path.join(process.cwd(), 'data'); // Path to your JSON data files
 
-export async function readJsonFile(url: URL): Promise<Array<PostType>> {
-    try {
-        const response = await fetch(url)
-            .then((response) => {
-                if (!response.ok) {
-                    notFound();
-                }
-                return response.json();
-            });
-        return response;
-    } catch (error) {
-        notFound();
-    }
-}
-
-export async function isServerApiResponding() {
-    return await fetch(API_BASE_URL + "/api/check").then(() => {
-        return true;
-    });
-}
-
 export function isExternalFetchSet(): Boolean {
     // Be carefull here
     return (API_BASE_URL === '') ? false : true;

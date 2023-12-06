@@ -5,9 +5,6 @@ import { fetchArticles } from "@/services/data_access";
 import { PostType } from "@/types/post";
 import { Metadata } from "next";
 
-const articles:Array<PostType> = await fetchArticles();    
-  
-
 export const metadata: Metadata = {
     title: 'Articles | Er. Sujan Kumal | A Software Engineer',
     description: "This page provides concise summaries of key topics and links to related articles for further exploration.",
@@ -29,8 +26,11 @@ export const metadata: Metadata = {
     },
   }
 
-function Articles() {
-    return (
+async function Articles() {
+
+  const articles:Array<PostType> = await fetchArticles();
+  
+  return (
         <main className="grid md:grid-cols-4 min-h-screen justify-center">
             <div className="mb-8 p-4 md:m-8 md:col-span-3">
                 <PaginationPost items={articles} pageSize={10} path={"/articles/"}/>
@@ -45,3 +45,5 @@ function Articles() {
 }
 
 export default Articles;
+
+export const revalidate = 10;
