@@ -107,6 +107,40 @@ export async function fetchPostTitle(): Promise<Array<PostTitleType>> {
 }
 
 
+export async function fetchPostTitleTicker(): Promise<Array<PostTitleType>> {
+    try {
+        if (!isExternalFetchSet()) {
+            // data
+            const posts = await prisma.post.findMany(
+                {
+                    select:{
+                        id: true,
+                        title: true,
+                    },
+                    orderBy:{
+                        date:'desc',
+                    },
+                    take:5,
+                }
+            );
+            return posts;
+        }
+        return fetch(API_BASE_URL + "/api/post/title-ticker", {
+            method: "GET",
+            credentials: "same-origin",
+            next: {
+                revalidate: 10,
+            }
+        }).then((response) => {
+            if (!response.ok) {
+                notFound();
+            }
+            return response.json();
+        });
+    } catch (error) {
+        notFound();
+    }
+}
 export async function fetchArchivesDates(): Promise<Array<PostType>> {
     try {
         if (!isExternalFetchSet()) {
@@ -247,6 +281,9 @@ export async function fetchPostHome(): Promise<Array<PostType>> {
                                     }
                                 },
                             },
+                        },
+                        orderBy:{
+                            id:'desc'
                         },
                         select:{
                             id:true,
@@ -408,7 +445,10 @@ export async function fetchArticles(): Promise<Array<PostType>> {
                                 name:true,
                             }
                         },
-                    }
+                    },
+                    orderBy:{
+                        id:'desc'
+                    },
                 }
             );
             return posts.then();
@@ -732,7 +772,10 @@ export async function fetchPostCountYearMonthArray(): Promise<Array<{ year: numb
                     select: {
                         year: true,
                         month: true,
-                    }
+                    },
+                    orderBy:{
+                        id:'desc'
+                    },
                 }
             )
             return posts.then();
@@ -861,6 +904,9 @@ export async function fetchTechPosts(): Promise<Array<PostType>> {
                                 },
                             },
                         },
+                    },
+                    orderBy:{
+                        id:'desc'
                     },
                     select:{
                         id: true,

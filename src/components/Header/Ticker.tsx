@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { PostTitleType } from "@/types/post";
-import { APP_BASE_URL } from "@/constants/constants";
 
 function Ticker({items}:{items:Array<PostTitleType>}) {
     const [activeIndex, setActiveIndex] = useState(0);
@@ -23,7 +22,7 @@ function Ticker({items}:{items:Array<PostTitleType>}) {
             { items.map((item, index): any => {
                 return  <motion.div
                             key={index}
-                            className="absolute top-0"
+                            className="absolute top-0 hover:text-teal-600"
                             initial={{
                                 opacity:0,
                                 translateY:-50,

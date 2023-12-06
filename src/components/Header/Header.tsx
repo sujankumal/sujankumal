@@ -8,27 +8,19 @@ import Link from "next/link";
 import DigitalClock from "../DateTime/DigitalClock";
 import Navbar from "./Navbar";
 import { SiteType } from "@/types/site";
-import { fetchPostTitle, fetchSite, fetchSocial } from "@/services/data_access";
+import { fetchPostTitleTicker, fetchSite, fetchSocial } from "@/services/data_access";
 import { PostTitleType } from "@/types/post";
 import { SocialType } from "@/types/social";
 import { APP_BASE_URL } from "@/constants/constants";
 import { SvgIcon } from "@mui/material";
 
-const social: Array<SocialType> = await fetchSocial().then((data) => {
-    // console.log("Social Data:", data);
-    return data;
-});
+export const revalidate = 10;
 
-const posts: Array<PostTitleType> = await fetchPostTitle().then((data) => {
-
-    // console.log(data, data[0]?.title);
-    return data;
-});
-
-const sites: SiteType = await fetchSite();
-
-function Header() {
-
+async function Header() {
+    const social: Array<SocialType> = await fetchSocial();
+    const posts: Array<PostTitleType> = await fetchPostTitleTicker();
+    const sites: SiteType = await fetchSite();
+    
     return (
         <header className="mb-3">
             <div className="">

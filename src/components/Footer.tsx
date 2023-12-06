@@ -1,3 +1,5 @@
+import { fetchSite } from "@/services/data_access";
+import { SiteType } from "@/types/site";
 import Link from "next/link";
 
 const footerMenu = [
@@ -7,11 +9,12 @@ const footerMenu = [
     { name: "Log in", url: "/users/log-in"},
 ];
 
-function Footer(props: any) {
+async function Footer() {
+    const site: SiteType = await fetchSite();
     return (<>
         <footer id="colophon" className="bg-gray-800 pb-3 text-white p-4 text-sm mt-3 md:flex">
             <div className="float-left w-full inline-flex justify-center p-2">
-                &copy; 2023 Er. Sujan Kumal | Thank you.
+                &copy; {site.year} {site.copyright} | Thank you.
             </div>
             <div className="w-full mt-12 mb-6 md:mt-0 md:mb-0 overflow-y-auto inline-flex justify-center h-auto">
                 <ul className="inline-block p-2">
