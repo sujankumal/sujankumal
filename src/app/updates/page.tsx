@@ -1,4 +1,7 @@
+import DateTime from "@/components/DateTime/DateTime";
+import MarkdownComponent from "@/components/MarkdownComponent";
 import Sidebar from "@/components/Sidebar";
+import { fetchUpdates } from "@/services/data_access";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -24,14 +27,25 @@ export const metadata: Metadata = {
 
 export const revalidate = 10;
 
-function Updates() {
-    
+async function Updates() {
+    const updates = await fetchUpdates();
     return (
         <main className="grid md:grid-cols-4 min-h-screen justify-center">
             <div className="mb-8 p-4 md:m-8 md:col-span-3 inline-flex justify-center">
-                <div className="text-lg">Updates</div>
-                <div className="prose prose-stone prose-sm dark:prose-invert">
-                   
+                <div className="grid md:grid-cols-2 gap-3">
+                {
+                    updates.map((update, index)=>{
+                        return <div key={index} className="w-full p-4 rounded-lg bg-white shadow-lg shadow-gray-500 md:col-span-1">
+                            <div className="text-center text-lg font-bold p-5 underline">{update.title}</div>
+                            <div className="prose prose-stone prose-sm dark:prose-invert">
+                                <MarkdownComponent content={update.update} />
+                            </div>
+                            <div>
+                                <DateTime datetime={update.date}/>
+                            </div>
+                        </div>
+                    })
+                }
                 </div>
             </div>
             <aside className="w-full md:col-span-1">

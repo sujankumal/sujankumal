@@ -6,6 +6,7 @@ import { SocialType } from "@/types/social";
 import { notFound } from "next/navigation";
 import path from "path";
 import prisma from "../../prisma/prisma";
+import { UpdateType } from "@/types/update";
 
 const dataDirectory = path.join(process.cwd(), 'data'); // Path to your JSON data files
 
@@ -1029,6 +1030,35 @@ export async function fetchTechPostCountIdArray(): Promise<Array<{ id: number }>
                 }
             );
             return posts;
+        }
+        return fetch(API_BASE_URL + "/api/post/tech/count/", {
+            method: "GET",
+            credentials: "same-origin",
+            next: {
+                revalidate: 10,
+            }
+        }).then((response) => {
+            if (!response.ok) {
+                notFound();
+            }
+            return response.json();
+        });
+    } catch (error) {
+        notFound();
+    }
+}
+
+export async function fetchUpdates(): Promise<Array<UpdateType>> {
+    try {
+        if (!isExternalFetchSet()) {
+            const updates = prisma.updates.findMany(
+                {
+                    orderBy:{
+                        id:'desc',
+                    }
+                }
+            );
+            return updates.then();
         }
         return fetch(API_BASE_URL + "/api/post/tech/count/", {
             method: "GET",
