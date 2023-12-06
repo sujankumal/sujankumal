@@ -22,6 +22,8 @@ export const metadata: Metadata = {
     },
 }
 
+export const revalidate = 10;
+
 function Team() {
     
     return (

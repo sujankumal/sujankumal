@@ -5,6 +5,7 @@ export const metadata: Metadata = {
     description: "Admin page.",
 }
 
+export const revalidate = 10;
 function Admin() {
     return (
         <main className="grid md:grid-cols-4 min-h-screen justify-center">

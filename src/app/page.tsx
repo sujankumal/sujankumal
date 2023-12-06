@@ -6,17 +6,20 @@ import { SiteType } from '@/types/site';
 import { Metadata } from 'next';
 
 
-const sites:SiteType = await fetchSite();
-
-const posts:Array<PostType> = await fetchPostHome();
+const site:SiteType = await fetchSite();
 
 export async function generateMetadata():Promise<Metadata>{
   return {
-    title: sites.title
+    title: site.title
   }
 }
 
+export const revalidate = 10;
+
 export default async function Home() {
+  const posts:Array<PostType> = await fetchPostHome();
+  const sites:SiteType = await fetchSite();
+
   return (
     <main className="grid md:grid-cols-4 min-h-screen justify-center">
       <div className="mb-8 p-4 md:m-8 md:col-span-3">

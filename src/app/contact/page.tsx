@@ -21,6 +21,7 @@ export const metadata: Metadata = {
         description: "This page provides details on how to connect with us through various channels, including social media, email, and phone.",
     },
 }
+export const revalidate = 10;
 
 function Contact() {
     

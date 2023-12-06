@@ -4,8 +4,6 @@ import { fetchTechPosts } from "@/services/data_access";
 import { PostType } from "@/types/post";
 import { Metadata } from "next";
 
-const technologies:Array<PostType> = await fetchTechPosts();    
-
 export const metadata: Metadata = {
     title: 'Technologies | Er. Sujan Kumal | A Software Engineer',
     description: "This page provides concise summaries of key topics and links to related articles of technologies for further exploration.",
@@ -27,7 +25,11 @@ export const metadata: Metadata = {
     },
 }
 
-function Technologies() {
+export const revalidate = 10;
+
+async function Technologies() {
+
+    const technologies:Array<PostType> = await fetchTechPosts();    
 
     return (
         <main className="grid md:grid-cols-4 min-h-screen justify-center">

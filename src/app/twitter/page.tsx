@@ -1,14 +1,15 @@
 import Sidebar from "@/components/Sidebar";
 import { fetchTwitter } from "@/services/data_access";
 
-const social_twitter = await fetchTwitter().then((data)=>{
-    return data.find((item)=>{
-        return item.embed
-    });
-  });    
+export const revalidate = 10;
 
-function Twitter() {
-    
+async function Twitter() {
+    const social_twitter = await fetchTwitter().then((data)=>{
+        return data.find((item)=>{
+            return item.embed
+        });
+      });    
+        
     return (
         <main className="grid md:grid-cols-4 min-h-screen justify-center">
             <div className="mb-8 p-4 md:m-8 md:col-span-3 inline-flex justify-center">

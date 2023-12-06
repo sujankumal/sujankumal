@@ -1,17 +1,11 @@
 import MarkdownComponent from "@/components/MarkdownComponent";
 import Sidebar from "@/components/Sidebar";
-import { METADATA_BASE_URL } from "@/constants/constants";
 import { fetchAbout } from "@/services/data_access";
 import { PostType } from "@/types/post";
 import { Metadata } from "next";
 
-const about:Array<PostType> = await fetchAbout();    
-const mds = about.slice(-1)[0]?.content?.map((content, index)=>{
-    // console.log(content, "cont");
-    return (content.content)?<MarkdownComponent key={index} content={content.content} />:<div></div>;
-});
-
-const main_image:string = about.slice(-1)[0].main_image;
+const about_:Array<PostType> = await fetchAbout();    
+const main_image:string = about_.slice(-1)[0].main_image;
 
 export const metadata: Metadata = {
     title: 'About | Er. Sujan Kumal | A Software Engineer',
@@ -34,8 +28,15 @@ export const metadata: Metadata = {
     },
   }
   
-function About() {
+export const revalidate = 10;
+
+async function About() {
     
+    const about:Array<PostType> = await fetchAbout();    
+    const mds = about.slice(-1)[0]?.content?.map((content, index)=>{
+        return (content.content)?<MarkdownComponent key={index} content={content.content} />:<div></div>;
+    });
+
     return (
         <main className="grid md:grid-cols-4 min-h-screen justify-center">
             <div className="mb-8 p-4 md:m-8 md:col-span-3 inline-flex justify-center">

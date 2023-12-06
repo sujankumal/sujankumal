@@ -23,11 +23,10 @@ export const metadata: Metadata = {
         description: "Explore our comprehensive privacy policy outlining how we collect, use, and protect your personal information.",
     },
 }
+export const revalidate = 10;
 
-const privacyPolicy:{privacy_policy:string} = await fetchSitePrivacyPolicy();
-
-function PrivacyPolicy() {
-    
+async function PrivacyPolicy() {
+    const privacyPolicy:{privacy_policy:string} = await fetchSitePrivacyPolicy();    
     return (
         <main className="grid md:grid-cols-4 min-h-screen justify-center">
             <div className="mb-8 p-4 md:m-8 md:col-span-3 inline-flex justify-center">
