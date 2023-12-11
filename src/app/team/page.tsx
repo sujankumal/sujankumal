@@ -1,5 +1,6 @@
 import Sidebar from "@/components/Sidebar";
 import { Metadata } from "next";
+import Image from "next/image";
 
 export const metadata: Metadata = {
     title: 'Our Team | Er. Sujan Kumal | A Software Engineer',
@@ -24,14 +25,28 @@ export const metadata: Metadata = {
 
 export const revalidate = 10;
 
-function Team() {
-    
+async function Team() {
+    let profile_image = "/bird-800x800-20.gif";
     return (
         <main className="grid md:grid-cols-4 min-h-screen justify-center">
-            <div className="mb-8 p-4 md:m-8 md:col-span-3 inline-flex justify-center">
-                <div className="text-lg">Our Team</div>
-                <div className="prose prose-stone prose-sm dark:prose-invert">
-                   
+            <div className="mb-8 p-4 md:m-8 md:col-span-3">
+                <div className="grid grid-cols-3 w-full gap-3 h-max">
+                   {
+                    <div className="col-span-1 p-3 bg-white rounded-lg shadow-lg">
+                        <div className="border-b border-gray-400 mb-2">
+                            <Image
+                                className="w-full rounded-lg"
+                                // fill={true}
+                                width={300}
+                                height={300}
+                                src={profile_image}
+                                alt={"Image for team member: SiteBot"}
+                                priority={true}
+                            />
+                        </div>
+                        <div>Name: Bot</div>
+                    </div>
+                   }
                 </div>
             </div>
             <aside className="w-full md:col-span-1">

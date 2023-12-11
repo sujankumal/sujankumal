@@ -1,45 +1,23 @@
+import MousePhobia from "@/components/MousePhobia";
 import Sidebar from "@/components/Sidebar";
-import { Metadata } from "next";
 
-export const metadata: Metadata = {
-    title: 'Contact Us | Er. Sujan Kumal | A Software Engineer',
-    description: "This page provides details on how to connect with us through various channels, including social media, email, and phone.",
-    openGraph:{
-        images:['/bird-1024x576-20.gif'],
-        type:'website',
-        url:'https://vercel.sujankumal.com.np/',
-        siteName:'Er. Sujan Kumal | A Software Engineer',
-        title: 'Contact Us | Er. Sujan Kumal | A Software Engineer',
-        description: "This page provides details on how to connect with us through various channels, including social media, email, and phone.",
-    },
-    twitter:{
-        card:'summary_large_image',
-        creator:'@sujan_03_',
-        site:'@sujan_03_',
-        images:['/bird-1024x576-20.gif'],
-        title: 'Contact Us | Er. Sujan Kumal | A Software Engineer',
-        description: "This page provides details on how to connect with us through various channels, including social media, email, and phone.",
-    },
-}
-export const revalidate = 10;
-
-function Contact() {
+export default async function Contact() {
     
     return (
         <main className="grid md:grid-cols-4 min-h-screen justify-center">
-            <div className="mb-8 p-4 md:m-8 md:col-span-3 inline-flex justify-center">
-                <div className="text-lg">Contact Us</div>
-                <div className="prose prose-stone prose-sm dark:prose-invert">
-                   
-                </div>
+            <div className="mb-8 p-2 md:m-8 md:col-span-3 inline-flex justify-center">
+                <MousePhobia comp={
+                        <div className="bg-gray-800 text-white h-fit p-2 rounded-lg text-sm">
+                            <span>Feel free to connect with me at </span> 
+                            <a className="hover:text-teal-600 underline text-gray-300" href="mailto:setobhagera@gmail.com">setobhagera@gmail.com</a>
+                        </div>
+                }/>
             </div>
             <aside className="w-full md:col-span-1">
                 <div className="h-full px-3 py-4 overflow-y-auto dark:bg-gray-800">
-                    <Sidebar/>
+                    <Sidebar />
                 </div>
             </aside>
         </main>
-     );
+    );
 }
-
-export default Contact;

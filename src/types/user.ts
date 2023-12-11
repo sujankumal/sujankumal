@@ -8,3 +8,13 @@ export interface UserType {
     updatedAt:Date,
     posts: PostType,
 }
+
+export interface UserProfileType {
+    id:number,
+    author:UserType,
+    status:string,
+    image:string,
+    about:string,
+    phone:string,
+    email:string,
+}
