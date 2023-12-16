@@ -37,7 +37,7 @@ async function Header() {
                 </div>
             </div>
             <div className="border-t-2 border-t-teal-600 bg-gray-800 px-2">
-                <div className="py-2 px-20 md:flex">
+                <div className="py-2 sm:px-20 md:flex">
                     <div className="text-sm text-white mb-1 w-full text-center md:max-w-max">
                         <div className="inline-flex float-none text-xs">
                             <DigitalClock />
@@ -112,7 +112,7 @@ async function Header() {
                         <div className="w-full flex justify-center md:w-fit mr-4">
                             <Image src={bird_100_100_20} alt="Bird with rocket. Site Logo." priority={true} width={100}/>
                         </div>
-                        <div className="md:mt-5">
+                        <div className="md:mt-5 mb-2 md:mb-auto">
                             <h1 className="uppercase font-bold text-2xl">
                                 <Link className="text-teal-600" href={APP_BASE_URL || '/'} rel="home">{sites.name}</Link>
                             </h1>
