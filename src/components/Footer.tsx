@@ -6,7 +6,7 @@ const footerMenu = [
     { name: "Our Team", url: "/team" },
     { name: "Contact Us", url: "/contact"},
     { name: "Privacy Policy", url: "/privacy-policy"},
-    { name: "Log in", url: "/users/log-in"},
+    { name: "Log in", url: "/log-in"},
 ];
 
 async function Footer() {
