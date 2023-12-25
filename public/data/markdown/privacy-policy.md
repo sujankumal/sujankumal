@@ -26,6 +26,10 @@ While we use third-party analytics services, we want to emphasize that these ser
 
 You can opt-out of Google Analytics by installing the Google Analytics opt-out browser add-on. More information can be found [here](https://tools.google.com/dlpage/gaoptout).
 
+### Connecting with Us? Here's What We Learn from Your Social Accounts
+
+When you sign in or connect your account using a third-party provider like Google, we receive certain information about you based on your privacy settings with that provider. This may include your email address, name, and profile picture. We use this information to create your account, authenticate you, and personalize your experience on our platform. We do not share this information with any third parties without your consent, except to comply with legal requirements or to protect our rights and those of others.
+
 ### Changes to This Privacy Policy
 
 We may update this privacy policy occasionally to reflect operational, legal, or regulatory changes. Please check this page periodically for updates.
