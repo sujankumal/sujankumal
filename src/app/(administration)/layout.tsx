@@ -1,9 +1,9 @@
 import '../globals.css'
 import { Noto_Sans } from 'next/font/google'
 import { SessionProvider } from 'next-auth/react'
-import { Session } from 'next-auth'
 import Script from 'next/script'
 import { GA_TRACKING_ID } from '@/constants/constants'
+import { auth } from '@/services/auth'
 
 const noto = Noto_Sans({
   weight: ['100', '200', '300', '400', '500', '600', '700', '800'],
@@ -11,12 +11,12 @@ const noto = Noto_Sans({
   subsets: ['latin', 'devanagari']
 })
 
-export default function AdminLayout({
-  children, session
+export default async function AdminLayout({
+  children,
 }: {
   children: React.ReactNode,
-  session: Session
 }) {
+  const session = await auth();
   console.log("Admin layout",session);
   return (
     <html lang="en">

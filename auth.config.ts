@@ -5,6 +5,7 @@ import {z} from 'zod';
 import bcrypt from 'bcrypt';
 
 import prisma from './prisma/prisma';
+import { PrismaAdapter } from "@auth/prisma-adapter";
 
 type User_type = {
   id:string,
@@ -44,7 +45,7 @@ export const authConfig = {
     pages:{
         signIn:'/log-in',
     },
-    
+
     providers:[
       CredentialProvider({
         name:"Credentials",
@@ -78,15 +79,25 @@ export const authConfig = {
       GoogleProvider({
         clientId:process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        // authorization: {
-        //     params: {
-        //       prompt: "consent",
-        //       access_type: "offline",
-        //       response_type: "code"
-        //     }
-        // }
+        authorization: {
+            params: {
+              // prompt: "consent",
+              // access_type: "offline",
+              // response_type: "code"
+              scope:"email profile",
+            }
+        },
+        profile(profile){
+          return {
+            id: profile.sub,
+            name: profile.name,
+            email: profile.email,
+            image: profile.picture,
+          }
+        }
       }),
     ],
+    adapter:PrismaAdapter(prisma),
 } satisfies NextAuthConfig;
 
 export default authConfig;

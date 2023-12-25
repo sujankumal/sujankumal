@@ -65,7 +65,7 @@ function Login() {
                                     <div className="block my-2">Don&apos;t have account?</div>
                                 </div>
                                 <div className="flex items-center justify-center">
-                                    <button onClick={() => { }} className="bg-teal-600 hover:bg-teal-800 text-white w-full py-2 px-4 rounded-3xl focus:outline-none focus:shadow-outline" type="button">
+                                    <button onClick={() => { redirect('/sign-up'); }} className="bg-teal-600 hover:bg-teal-800 text-white w-full py-2 px-4 rounded-3xl focus:outline-none focus:shadow-outline" type="button">
                                         Create account
                                     </button>
                                 </div>

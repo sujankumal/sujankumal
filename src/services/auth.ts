@@ -25,12 +25,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({token, user, account, profile, trigger, session}){
       console.log("jwt:", token, user, account, profile, trigger, session );
       if(trigger=='signIn'){
-        
+
       }
       if(user){
         token.email = user.email
       }
       return token;
+    },
+    async signIn({ account, profile }) {
+      console.log("Sign IN callback:", account, profile);
+      if (account?.provider === "google") {
+        return profile?.email_verified??false
+      }
+      return true // Do different verification for other providers that don't have `email_verified`
     },
     async authorized({ request, auth }) {
       const cookie = request.cookies.get('authjs.session-token')?.value;
