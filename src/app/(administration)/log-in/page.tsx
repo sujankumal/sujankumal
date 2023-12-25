@@ -1,7 +1,9 @@
 'use client'
 import { useEffect, useState } from "react";
-import { getCsrfToken, signOut, useSession } from "next-auth/react";
+import { getCsrfToken, signIn, signOut, useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
+import { Google } from "@mui/icons-material";
+
 
 export const revalidate = 10; 
 
@@ -60,7 +62,7 @@ function Login() {
                             </form>
                             <div className="mx-4 px-8 mb-4 pb-8">
                                 <div className="flex items-center justify-center">
-                                    <div className="block my-2">Don't have account?</div>
+                                    <div className="block my-2">Don&apos;t have account?</div>
                                 </div>
                                 <div className="flex items-center justify-center">
                                     <button onClick={() => { }} className="bg-teal-600 hover:bg-teal-800 text-white w-full py-2 px-4 rounded-3xl focus:outline-none focus:shadow-outline" type="button">
@@ -75,6 +77,16 @@ function Login() {
                         <div className="w-full flex flex-col justify-center"><div className="w-full h-[1px] bg-teal-800"></div></div>
                         <div className="w-fit m-1 text-teal-800">Or</div>
                         <div className="w-full flex flex-col justify-center"><div className="w-full h-[1px] bg-teal-800"></div></div>
+                    </div>
+                    <div className="w-full p-2">
+                        <div className="flex items-center justify-center">
+                            <button onClick={() => { signIn("google") }} className="bg-teal-600 hover:bg-teal-800 text-white w-full py-2 px-4 rounded-3xl focus:outline-none focus:shadow-outline" type="button">
+                                <span>
+                                    <Google/>
+                                    <span className="inline-flex flex-col justify-center px-2 text-sm">Login with google</span>
+                                </span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </main>

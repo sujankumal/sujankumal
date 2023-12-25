@@ -24,6 +24,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async jwt({token, user, account, profile, trigger, session}){
       console.log("jwt:", token, user, account, profile, trigger, session );
+      if(trigger=='signIn'){
+        
+      }
       if(user){
         token.email = user.email
       }
