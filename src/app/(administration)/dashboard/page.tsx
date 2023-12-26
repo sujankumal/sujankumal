@@ -6,8 +6,8 @@ import Image from "next/image";
 import bird_100_100_20 from '/public/bird-100x100-20.gif';
 
 export const metadata: Metadata = {
-    title: 'Admin | Er. Sujan Kumal | A Software Engineer',
-    description: "Admin page.",
+    title: 'Dashboard | Er. Sujan Kumal | A Software Engineer',
+    description: "Dashboard page.",
 }
 
 export const revalidate = 10;
@@ -38,14 +38,17 @@ async function Admin() {
                             <li className="inline-flex flex-col justify-center">
                                 <span className="inline-flex justify-center md:py-2 px-3 rounded md:bg-transparent text-teal-600 md:p-0 dark:text-white md:dark:text-teal-600">
                                     <p className="inline-flex flex-col justify-center mx-2">Hello, { session?.user?.name ?? "Unknown" }. </p>
-                                    <Image
-                                        className="rounded-full"
-                                        width={50}
-                                        height={50}
-                                        src={session?.user.image??''}
-                                        alt={"User Image"}
-                                        unoptimized
-                                    />
+                                    {(session?.user.image)?
+                                        <Image
+                                            className="rounded-full"
+                                            width={50}
+                                            height={50}
+                                            src={session?.user.image??''}
+                                            alt={"User Image"}
+                                            unoptimized
+                                        />
+                                    :null
+                                    }    
                                 </span>
                             </li>
                             <li className="inline-flex flex-col justify-center">

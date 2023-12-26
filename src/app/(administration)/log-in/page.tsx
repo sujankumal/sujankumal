@@ -1,29 +1,38 @@
 'use client'
 import { useEffect, useState } from "react";
-import { getCsrfToken, signIn, signOut, useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
+import { signIn, useSession } from "next-auth/react";
+import { redirect, useSearchParams } from "next/navigation";
 import { Google } from "@mui/icons-material";
-
+import { _csrfToken } from "@/services/data_access";
 
 export const revalidate = 10; 
 
 function Login() {
-    const [show_pass_error, set_show_pass_error] = useState(false);
+    const [show_credentials_error, set_show_credentials_error] = useState(false);
+    const [show_error_message, set_show_error_message] = useState('');
     const [csrfToken, setCsrfToken] = useState('');
     
     const { data: session } = useSession();
-    console.log("login:", session);
+    const searchParams = useSearchParams();
+    console.log("Query:",searchParams.get('error'));
     
     useEffect(()=>{
-        const token:Promise<string> = getCsrfToken();
+        if(searchParams.get('error')=="CredentialsSignin"){
+            set_show_credentials_error(true);
+            set_show_error_message('Please re-check Email or Password');
+        }
+    },[searchParams])
+    
+    useEffect(()=>{
+        const token:Promise<string> = _csrfToken();
         token.then((data)=>{
             setCsrfToken(data);
-        })
+        });
+        console.log("Useeffect:",csrfToken);
     },[csrfToken])
     
-    console.log("csrfToken:",csrfToken);
     if (session) {
-        return redirect('/admin');
+        return redirect('/dashboard');
     } else {
         return (
             <main className="p-2 w-full flex justify-center min-h-screen">
@@ -40,18 +49,18 @@ function Login() {
                                         <label className="block text-sm mb-2" htmlFor="email">
                                             Email
                                         </label>
-                                        <input id="input-email-login" name="email" type="email" placeholder="example@sujankumal.com.np" className="shadow border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline"/>
+                                        <input id="input-email-login" name="email" type="email" required placeholder="example@sujankumal.com.np" className={`"shadow border text-black ${show_credentials_error ? 'border-red-500' : null} rounded w-full py-2 px-3 mb-3 focus:outline-none focus:shadow-outline"`}/>
                                     </div>
                                     <div className="mb-6">
                                         <label className="block text-sm mb-2" htmlFor="password">
                                             Password
                                         </label>
-                                        <input id="input-password-login" name="password" type="password" placeholder="********" className={`"shadow border ${show_pass_error ? 'border-red-500' : null} rounded w-full py-2 px-3 mb-3 leading-tight focus:outline-none focus:shadow-outline"`}/>
-                                        {show_pass_error ? <p className="text-red-500 text-xs italic">Please choose a password.</p> : null}
-
+                                        <input id="input-password-login" name="password" type="password" required placeholder="********" className={`"shadow border text-black ${show_credentials_error ? 'border-red-500' : null} rounded w-full py-2 px-3 mb-3 leading-tight focus:outline-none focus:shadow-outline"`}/>
+                                        {show_credentials_error ? <p className="text-red-500 text-xs italic">{show_error_message}</p> : null}
                                     </div>
                                     <div className="flex items-center justify-between">
-                                        <button className="bg-teal-600 hover:bg-teal-800 text-white py-2 px-4 mr-6 rounded-3xl focus:outline-none focus:shadow-outline" type="submit">
+                                        <button type="submit"
+                                            className="bg-teal-600 hover:bg-teal-800 text-white py-2 px-4 mr-6 rounded-3xl focus:outline-none focus:shadow-outline">
                                             Sign In
                                         </button>
                                         <a className="inline-block align-baseline text-sm text-teal-600 hover:text-teal-800 ml-6" href="#">

@@ -2,14 +2,40 @@ import '../globals.css'
 import { Noto_Sans } from 'next/font/google'
 import { SessionProvider } from 'next-auth/react'
 import Script from 'next/script'
-import { GA_TRACKING_ID } from '@/constants/constants'
+import { GA_TRACKING_ID, METADATA_BASE_URL } from '@/constants/constants'
 import { auth } from '@/services/auth'
+import { Metadata } from 'next'
 
 const noto = Noto_Sans({
   weight: ['100', '200', '300', '400', '500', '600', '700', '800'],
   style: ['normal', 'italic'],
   subsets: ['latin', 'devanagari']
 })
+
+export const metadata: Metadata = {
+  title: 'Er. Sujan Kumal | A Software Engineer',
+  description: "Welcome to Sujan Kumal's Site. Experienced Software Engineer | Innovative Problem Solver | Passionate About Technology",
+  metadataBase: new URL(METADATA_BASE_URL),
+  openGraph:{
+    images:['/bird-1024x576-20.gif'],
+    type:'website',
+    url:'https://vercel.sujankumal.com.np/',
+    siteName:'Er. Sujan Kumal | A Software Engineer',
+    title:'Er. Sujan Kumal | A Software Engineer',
+    description:"Welcome to Sujan Kumal's Site. Experienced Software Engineer | Innovative Problem Solver | Passionate About Technology",
+  },
+  twitter:{
+    card:'summary_large_image',
+    creator:'@sujan_03_',
+    site:'@sujan_03_',
+    images:['/bird-1024x576-20.gif'],
+    title:'Er. Sujan Kumal | A Software Engineer',
+    description:"Welcome to Sujan Kumal's Site. Experienced Software Engineer | Innovative Problem Solver | Passionate About Technology",
+  },
+  icons: {
+    icon: '/bird-32x32-20.gif',
+  },
+}
 
 export default async function AdminLayout({
   children,

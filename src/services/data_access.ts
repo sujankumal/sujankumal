@@ -15,6 +15,23 @@ export function isExternalFetchSet(): Boolean {
     return (API_BASE_URL === '') ? false : true;
 }
 
+export async function _csrfToken():Promise<string>{
+    try {
+      return await fetch(API_BASE_URL+'/api/auth/csrf',{
+        method: "GET",
+        next: {
+            revalidate: 10,
+        }
+      }).then((res)=>{
+        return res.json()
+      }).then((data)=>{
+        return data.csrfToken??''
+      })
+    }catch(error){
+      return '';
+    }
+  } 
+  
 export async function fetchSite():Promise<SiteType> {
     try {
         if (!isExternalFetchSet()) {
@@ -29,7 +46,6 @@ export async function fetchSite():Promise<SiteType> {
         }    
         return fetch(API_BASE_URL + "/api/site", {
             method: "GET",
-            credentials: "same-origin",
             next: {
                 revalidate: 10,
             }
@@ -59,7 +75,6 @@ export async function fetchSitePrivacyPolicy():Promise<{privacy_policy:string}>{
         }
         return fetch(API_BASE_URL + "/api/site/privacy-policy", {
             method: "GET",
-            credentials: "same-origin",
             next: {
                 revalidate: 10,
             }
@@ -92,7 +107,6 @@ export async function fetchPostTitle(): Promise<Array<PostTitleType>> {
         }
         return fetch(API_BASE_URL + "/api/post/title", {
             method: "GET",
-            credentials: "same-origin",
             next: {
                 revalidate: 10,
             }
@@ -128,7 +142,6 @@ export async function fetchPostTitleTicker(): Promise<Array<PostTitleType>> {
         }
         return fetch(API_BASE_URL + "/api/post/title-ticker", {
             method: "GET",
-            credentials: "same-origin",
             next: {
                 revalidate: 10,
             }
@@ -165,7 +178,6 @@ export async function fetchArchivesDates(): Promise<Array<PostType>> {
         }    
         return fetch(API_BASE_URL + "/api/post/archives", {
             method: "GET",
-            credentials: "same-origin",
             next: {
                 revalidate: 10,
             }
@@ -219,7 +231,6 @@ export async function fetchArchivesByYearAndMonth(year: number, month: number): 
         }    
         return fetch(API_BASE_URL + "/api/post/archives/" + year + '/' + month, {
             method: "GET",
-            credentials: "same-origin",
             next: {
                 revalidate: 10,
             }
@@ -248,7 +259,6 @@ export async function fetchCategories(): Promise<Array<CatergoryType>> {
         }    
         return fetch(API_BASE_URL + "/api/categories", {
             method: "GET",
-            credentials: "same-origin",
             next: {
                 revalidate: 10,
             }
@@ -315,7 +325,6 @@ export async function fetchPostHome(): Promise<Array<PostType>> {
         }    
         return fetch(API_BASE_URL + "/api/post/home", {
             method: "GET",
-            credentials: "same-origin",
             next: {
                 revalidate: 10,
             }
@@ -364,7 +373,6 @@ export async function fetchAbout(): Promise<Array<PostType>> {
         }    
         return fetch(API_BASE_URL + "/api/post/about", {
             method: "GET",
-            credentials: "same-origin",
             next: {
                 revalidate: 10,
             }
@@ -402,7 +410,6 @@ export async function fetchTwitter(): Promise<Array<SocialType>> {
         }    
         return fetch(API_BASE_URL + "/api/social/twitter", {
             method: "GET",
-            credentials: "same-origin",
             next: {
                 revalidate: 10,
             }
@@ -456,7 +463,6 @@ export async function fetchArticles(): Promise<Array<PostType>> {
         }    
         return fetch(API_BASE_URL + "/api/post/article", {
             method: "GET",
-            credentials: "same-origin",
             next: {
                 revalidate: 10,
             }
@@ -519,7 +525,6 @@ export async function fetchJokes(): Promise<Array<PostType>> {
         }    
         return fetch(API_BASE_URL + "/api/post/joke", {
             method: "GET",
-            credentials: "same-origin",
             next: {
                 revalidate: 10,
             }
@@ -570,7 +575,6 @@ export async function fetchJokeByID(id: number): Promise<PostType> {
         }    
         return fetch(API_BASE_URL + "/api/post/joke/by-id/" + id, {
             method: "GET",
-            credentials: "same-origin",
             next: {
                 revalidate: 10,
             }
@@ -614,7 +618,6 @@ export async function fetchJokeCountIdArray(): Promise<Array<{ id: number }>> {
         }
         return fetch(API_BASE_URL + "/api/post/joke/count/", {
             method: "GET",
-            credentials: "same-origin",
             next: {
                 revalidate: 10,
             }
@@ -663,7 +666,6 @@ export async function fetchPostByID(id: number): Promise<PostType> {
         }    
         return fetch(API_BASE_URL + "/api/post/by-id/" + id, {
             method: "GET",
-            credentials: "same-origin",
             next: {
                 revalidate: 10,
             }
@@ -692,7 +694,6 @@ export async function fetchPostCountIdArray(): Promise<Array<{ id: number }>> {
         }
         return fetch(API_BASE_URL + "/api/post/count/", {
             method: "GET",
-            credentials: "same-origin",
             next: {
                 revalidate: 10,
             }
@@ -721,7 +722,6 @@ export async function fetchCategoryCountIdArray(): Promise<Array<{ id: number }>
         }
         return fetch(API_BASE_URL + "/api/categories/count/", {
             method: "GET",
-            credentials: "same-origin",
             next: {
                 revalidate: 10,
             }
@@ -750,7 +750,6 @@ export async function fetchCategoryById(id: number): Promise<CatergoryType> {
         }
         return fetch(API_BASE_URL + "/api/category/"+id, {
             method: "GET",
-            credentials: "same-origin",
             next: {
                 revalidate: 10,
             }
@@ -846,7 +845,6 @@ export async function fetchPostsByCategoryID(id: number): Promise<Array<PostType
         }    
         return fetch(API_BASE_URL + "/api/post/category/" + id, {
             method: "GET",
-            credentials: "same-origin",
             next: {
                 revalidate: 10,
             }
@@ -871,7 +869,6 @@ export async function fetchSocial(): Promise<Array<SocialType>> {
 
         return fetch(API_BASE_URL + "/api/social/", {
             method: "GET",
-            credentials: "same-origin",
             next: {
                 revalidate: 10,
             }
@@ -938,7 +935,6 @@ export async function fetchTechPosts(): Promise<Array<PostType>> {
         }    
         return fetch(API_BASE_URL + "/api/post/tech", {
             method: "GET",
-            credentials: "same-origin",
             next: {
                 revalidate: 10,
             }
@@ -989,7 +985,6 @@ export async function fetchTechPostByID(id: number): Promise<PostType> {
         }    
         return fetch(API_BASE_URL + "/api/post/tech/by-id/" + id, {
             method: "GET",
-            credentials: "same-origin",
             next: {
                 revalidate: 10,
             }
@@ -1033,7 +1028,6 @@ export async function fetchTechPostCountIdArray(): Promise<Array<{ id: number }>
         }
         return fetch(API_BASE_URL + "/api/post/tech/count/", {
             method: "GET",
-            credentials: "same-origin",
             next: {
                 revalidate: 10,
             }
@@ -1062,7 +1056,6 @@ export async function fetchUpdates(): Promise<Array<UpdateType>> {
         }
         return fetch(API_BASE_URL + "/api/post/tech/count/", {
             method: "GET",
-            credentials: "same-origin",
             next: {
                 revalidate: 10,
             }
