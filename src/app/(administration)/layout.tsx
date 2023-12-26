@@ -43,7 +43,7 @@ export default async function AdminLayout({
   children: React.ReactNode,
 }) {
   const session = await auth();
-  console.log("Admin layout",session);
+  
   return (
     <html lang="en">
       {/* <!-- Google tag (gtag.js) --> */}

@@ -19,11 +19,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   callbacks:{
     async session({ session, token, user}){
-      console.log("Session: ", session, "Token: ",token);
+      // console.log("Session: ", session, "Token: ",token);
       return session;
     },
     async jwt({token, user, account, profile, trigger, session}){
-      console.log("jwt:", token, user, account, profile, trigger, session );
+      // console.log("jwt:", token, user, account, profile, trigger, session );
       if(trigger=='signIn'){
 
       }
@@ -33,7 +33,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return token;
     },
     async signIn({ account, profile }) {
-      console.log("Sign IN callback:", account, profile);
+      // console.log("Sign IN callback:", account, profile);
       if (account?.provider === "google") {
         return profile?.email_verified??false
       }
@@ -41,7 +41,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async authorized({ request, auth }) {
       const cookie = request.cookies.get('authjs.session-token')?.value;
-      console.log("authjs file:", cookie, auth);
+      // console.log("authjs file:", cookie, auth);
       
       // return Response.redirect(new URL('/log-in', nextUrl)); // Redirect unauthenticated users to login page
       const url = request.nextUrl

@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export const revalidate = 10;
 async function Admin() {
     const session = await auth();
-    console.log("Admin page .. :", session);
+    console.log("Admin page .. session:", session);
     if (!session?.user) {
         return redirect('/log-in');
     }

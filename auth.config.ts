@@ -36,7 +36,7 @@ async function getUser(email:string):Promise<User_type|null>{
       password:user.password,
     }; 
   }catch(error){
-    console.error('Failed to fetch user:', error);
+    // console.error('Failed to fetch user:', error);
     throw new Error('Failed to fetch user.');
   }
 }
@@ -54,7 +54,7 @@ export const authConfig = {
           password:{label:"Password", type:"password"}
         },
         async authorize(credentials){
-          console.log("Credientials log authorize method: ", credentials);
+          // console.log("Credientials log authorize method: ", credentials);
           const parsedCredentials = z
               .object({ 
                   email: z.string().email(), 
@@ -72,7 +72,7 @@ export const authConfig = {
               return user;
             }
           }
-          console.log('Invalid credentials');
+          // console.log('Invalid credentials');
           return null;
         },
       }),
