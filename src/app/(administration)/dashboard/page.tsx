@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import SignOutButton from "@/components/auth/SignOut";
 import Image from "next/image";
 import bird_100_100_20 from '/public/bird-100x100-20.gif';
+import spacex_r from '/public/images/rockets/spacex--p-KCm6xB9I-unsplash.jpg';
 
 export const metadata: Metadata = {
     title: 'Dashboard | Er. Sujan Kumal | A Software Engineer',
@@ -19,7 +20,7 @@ async function Admin() {
     }
     return (
         <main className="min-h-screen justify-center">
-            <nav className="bg-white border-b-2 border-gray-200 dark:bg-gray-900">
+            <nav className=" border-b-2 border-gray-200">
                 <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-1">
                     <div className="flex justify-center w-full md:w-fit border-b-2 border-teal-600 md:border-none">
                         <a href="/" className="space-x-3 rtl:space-x-reverse md:flex">
@@ -59,6 +60,13 @@ async function Admin() {
                     </div>
                 </div>
             </nav>
+            <div className="w-full h-screen">
+                <Image
+                    src={spacex_r}
+                    alt="spacex rocker launch"
+                    className="w-full h-full relative -z-10"
+                />
+            </div>
         </main>
     );
 }
