@@ -5,6 +5,7 @@ import { Noto_Sans } from 'next/font/google'
 import Header from '@/components/Header/Header'
 import Script from 'next/script'
 import { GA_TRACKING_ID, METADATA_BASE_URL } from '@/constants/constants'
+import FAB from '@/components/FAB'
 
 const noto = Noto_Sans({
   weight:['100','200','300','400','500','600','700','800'],
@@ -57,6 +58,7 @@ export default function RootLayout({
         <Header/>
         {children}
         <Footer/>
+        <FAB/>
       </body>
     </html>
   )
