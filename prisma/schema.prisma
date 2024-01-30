@@ -45,6 +45,14 @@ model Social {
   @@map(name: "socials") 
 }
 
+model Project {
+  id            Int   @default(autoincrement()) @id
+  title         String
+  description   String?
+  link          String?
+  @@map(name: "projects")
+}
+
 model Post {
   id                      Int     @default(autoincrement()) @id 
   title                   String

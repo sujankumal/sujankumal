@@ -112,7 +112,7 @@ export async function generateMetadata({params}:{params: {id:number}}, parent: R
         openGraph:{
           images:[`/images/${article.main_image}`],
           type:'website',
-          url:'https://vercel.sujankumal.com.np/',
+          url:'https://sujankumal.com.np/',
           siteName:'Er. Sujan Kumal | A Software Engineer',
           title: `Jokes | ${article.title}`,
           description: article.description,

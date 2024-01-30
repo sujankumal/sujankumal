@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     openGraph:{
       images:['/bird-1024x576-20.gif'],
       type:'website',
-      url:'https://vercel.sujankumal.com.np/',
+      url:'https://sujankumal.com.np/',
       siteName:'Er. Sujan Kumal | A Software Engineer',
       title:'Jokes | Er. Sujan Kumal | A Software Engineer',
       description:"This page provides concise summaries of key topics and links to related Jokes for further exploration.",

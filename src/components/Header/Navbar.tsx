@@ -9,6 +9,7 @@ const menu = [
   { name: "Articles", url: "/articles"},
   { name: "Technologies", url: "/technologies"},
   { name: "Updates", url: "/updates"},
+  { name: "Projects", url: "/projects"},
 ];
 let elementDistanceFromTop = 0;
     
@@ -80,7 +81,7 @@ const Navbar = () => {
         >
           <ul className="items-center space-y-8 pl-6 pt-6 md:flex md:pl-0 md:pt-0 md:space-x-6 md:space-y-0">
             {menu.map(({ name, url }, index) => (
-              <li key={index} className="text-white text-sm uppercase hover:text-teal-600">
+              <li key={index} className="text-white text-sm uppercase hover:text-teal-600 duration-300">
                 <Link href={url}>{name}</Link>
               </li>
             ))}

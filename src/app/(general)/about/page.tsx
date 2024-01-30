@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     openGraph:{
       images:[`/images/${main_image}`],
       type:'website',
-      url:'https://vercel.sujankumal.com.np/',
+      url:'https://sujankumal.com.np/',
       siteName:'Er. Sujan Kumal | A Software Engineer',
       title:'About | Er. Sujan Kumal | A Software Engineer',
       description:"I'm Sujan Kumal, a software engineer with a strong passion for creating innovative solutions and exploring the world of technology. Here's a little bit about me:",

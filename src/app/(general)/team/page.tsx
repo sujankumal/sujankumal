@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     openGraph:{
         images:['/bird-1024x576-20.gif'],
         type:'website',
-        url:'https://vercel.sujankumal.com.np/',
+        url:'https://sujankumal.com.np/',
         siteName:'Er. Sujan Kumal | A Software Engineer',
         title: 'Our Team | Er. Sujan Kumal | A Software Engineer',
         description: "Meet our dedicated team, the driving force behind our success and innovation.",

@@ -7,6 +7,7 @@ import { notFound } from "next/navigation";
 import path from "path";
 import prisma from "../../prisma/prisma";
 import { UpdateType } from "@/types/update";
+import { ProjectType } from "@/types/project";
 
 const dataDirectory = path.join(process.cwd(), 'data'); // Path to your JSON data files
 
@@ -74,6 +75,32 @@ export async function fetchSitePrivacyPolicy():Promise<{privacy_policy:string}>{
             return site.then();
         }
         return fetch(API_BASE_URL + "/api/site/privacy-policy", {
+            method: "GET",
+            next: {
+                revalidate: 10,
+            }
+        }).then((response) => {
+            if (!response.ok) {
+                notFound();
+            }
+            return response.json();
+        });
+    }catch(error){
+        notFound();
+    }
+}
+export async function fetchProjects():Promise<ProjectType[]>{
+    try {
+        if (!isExternalFetchSet()) {
+            // data
+            const site = prisma.project.findMany({
+                orderBy:{
+                    title:'asc'
+                },
+            });
+            return site.then();
+        }
+        return fetch(API_BASE_URL + "/api/project/", {
             method: "GET",
             next: {
                 revalidate: 10,
