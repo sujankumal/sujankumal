@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Search, Menu, MenuOpen, Cottage } from "@mui/icons-material";
 import Link from "next/link";
 import Searchbar from "../Searchbar";
+import SearchDialog from "../SearchDialog";
 
 const menu = [
   { name: "About", url: "/about" },
@@ -96,9 +97,12 @@ const Navbar = () => {
         </div>
       </div>
       <div className={(search)?"border-t-2 w-max absolute right-3 border-teal-600 m-2 rounded-md":"hidden"}>
-        <Searchbar onSubmit={(searchTerm:string)=>{
+        <Searchbar 
+          // onSubmit={(searchTerm:string)=>{
           // console.log("Searched For:", searchTerm); 
-        }} inputProps={{}} />
+          // }} inputProps={{}} 
+        />
+        <SearchDialog />
       </div>
       
     </nav>
