@@ -1,19 +1,35 @@
+import { searchData } from "@/services/search";
 import { Paper } from "@mui/material";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 function SearchDialog() {
     const searchParams = useSearchParams();
     const query = searchParams.get('query');
     
+    const [posts, setPosts] = useState([]);
+    useEffect(()=>{
+        if (query){
+            const data = searchData(query);
+            data.then((d)=>{
+                setPosts(d);
+            });
+        }
+    }, [searchParams]);
     return ( 
         <Paper
          elevation={8}
          component='div'
-         className={query?"flex justify-center px-1 py-1 mt-1 border-2 border-teal-600 ":"hidden"}
+         className={query?"px-1 py-1 mt-1 border-2 border-teal-600 ":"hidden"}
         >
-            <div>
-                {query}
-            </div>
+            {
+            posts.map((item:{id:string, title:string},index)=>{
+                return <Link href={'/articles/'+ item.id} key={index} className="block hover:bg-gray-800 hover:text-white py-2 px-1 w-full text-center">
+                            {item.title}
+                        </Link>
+            })
+            }
         </Paper>
      );
 }
