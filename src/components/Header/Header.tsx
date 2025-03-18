@@ -114,7 +114,7 @@ async function Header() {
                         </div>
                         <div className="md:mt-5 mb-2 md:mb-auto">
                             <h1 className="uppercase font-bold text-2xl">
-                                <Link className="text-teal-600" href={APP_BASE_URL || '/'} rel="home">{sites.name}</Link>
+                                <Link className="text-teal-600" href="/" rel="home">{sites.name}</Link>
                             </h1>
                             <p className="text-light">{sites.motto}</p>
                         </div>
