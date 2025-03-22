@@ -3,14 +3,14 @@ import { Metadata } from "next";
 import Image from "next/image";
 
 export const metadata: Metadata = {
-    title: 'Our Team | Er. Sujan Kumal | A Software Engineer',
+    title: 'Our Team | Sujan Kumal | A Software Engineer',
     description: "Meet our dedicated team, the driving force behind our success and innovation.",
     openGraph:{
         images:['/bird-1024x576-20.gif'],
         type:'website',
         url:'https://sujankumal.com.np/',
-        siteName:'Er. Sujan Kumal | A Software Engineer',
-        title: 'Our Team | Er. Sujan Kumal | A Software Engineer',
+        siteName:'Sujan Kumal | A Software Engineer',
+        title: 'Our Team | Sujan Kumal | A Software Engineer',
         description: "Meet our dedicated team, the driving force behind our success and innovation.",
     },
     twitter:{
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
         creator:'@sujan_03_',
         site:'@sujan_03_',
         images:['/bird-1024x576-20.gif'],
-        title: 'Our Team | Er. Sujan Kumal | A Software Engineer',
+        title: 'Our Team | Sujan Kumal | A Software Engineer',
         description: "Meet our dedicated team, the driving force behind our success and innovation.",
     },
 }

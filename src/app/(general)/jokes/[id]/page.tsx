@@ -113,7 +113,7 @@ export async function generateMetadata({params}:{params: {id:number}}, parent: R
           images:[`/images/${article.main_image}`],
           type:'website',
           url:'https://sujankumal.com.np/',
-          siteName:'Er. Sujan Kumal | A Software Engineer',
+          siteName:'Sujan Kumal | A Software Engineer',
           title: `Jokes | ${article.title}`,
           description: article.description,
         },

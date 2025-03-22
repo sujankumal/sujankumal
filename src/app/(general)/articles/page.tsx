@@ -6,14 +6,14 @@ import { PostType } from "@/types/post";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: 'Articles | Er. Sujan Kumal | A Software Engineer',
+    title: 'Articles | Sujan Kumal | A Software Engineer',
     description: "This page provides concise summaries of key topics and links to related articles for further exploration.",
     openGraph:{
       images:['/bird-1024x576-20.gif'],
       type:'website',
       url:'https://sujankumal.com.np/',
-      siteName:'Er. Sujan Kumal | A Software Engineer',
-      title:'Articles | Er. Sujan Kumal | A Software Engineer',
+      siteName:'Sujan Kumal | A Software Engineer',
+      title:'Articles | Sujan Kumal | A Software Engineer',
       description:"This page provides concise summaries of key topics and links to related articles for further exploration.",
     },
     twitter:{
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
       creator:'@sujan_03_',
       site:'@sujan_03_',
       images:['/bird-1024x576-20.gif'],
-      title:'Articles | Er. Sujan Kumal | A Software Engineer',
+      title:'Articles | Sujan Kumal | A Software Engineer',
       description:"This page provides concise summaries of key topics and links to related articles for further exploration.",
     },
   }

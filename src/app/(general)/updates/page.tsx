@@ -5,14 +5,14 @@ import { fetchUpdates } from "@/services/data_access";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: 'Updates | Er. Sujan Kumal | A Software Engineer',
+    title: 'Updates | Sujan Kumal | A Software Engineer',
     description: "This page provides latest news, events, updates etc.",
     openGraph:{
         images:['/bird-1024x576-20.gif'],
         type:'website',
         url:'https://sujankumal.com.np/',
-        siteName:'Er. Sujan Kumal | A Software Engineer',
-        title: 'Updates | Er. Sujan Kumal | A Software Engineer',
+        siteName:'Sujan Kumal | A Software Engineer',
+        title: 'Updates | Sujan Kumal | A Software Engineer',
         description: "This page provides latest news, events, updates etc.",
     },
     twitter:{
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
         creator:'@sujan_03_',
         site:'@sujan_03_',
         images:['/bird-1024x576-20.gif'],
-        title: 'Updates | Er. Sujan Kumal | A Software Engineer',
+        title: 'Updates | Sujan Kumal | A Software Engineer',
         description: "This page provides latest news, events, updates etc.",
     },
 }

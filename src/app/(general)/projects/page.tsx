@@ -6,14 +6,14 @@ import { Noto_Sans_Mono } from "next/font/google";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-    title: 'Projects | Er. Sujan Kumal | A Software Engineer',
+    title: 'Projects | Sujan Kumal | A Software Engineer',
     description: "See what we've accomplished: Browse our impressive portfolio of projects.",
     openGraph:{
         images:['/bird-1024x576-20.gif'],
         type:'website',
         url:'https://sujankumal.com.np/',
-        siteName:'Er. Sujan Kumal | A Software Engineer',
-        title: 'Projects | Er. Sujan Kumal | A Software Engineer',
+        siteName:'Sujan Kumal | A Software Engineer',
+        title: 'Projects | Sujan Kumal | A Software Engineer',
         description: "See what we've accomplished: Browse our impressive portfolio of projects.",
     },
     twitter:{
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
         creator:'@sujan_03_',
         site:'@sujan_03_',
         images:['/bird-1024x576-20.gif'],
-        title: 'Projects | Er. Sujan Kumal | A Software Engineer',
+        title: 'Projects | Sujan Kumal | A Software Engineer',
         description: "See what we've accomplished: Browse our impressive portfolio of projects.",
     },
 }

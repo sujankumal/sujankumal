@@ -13,15 +13,15 @@ const noto = Noto_Sans({
 })
 
 export const metadata: Metadata = {
-  title: 'Er. Sujan Kumal | A Software Engineer',
+  title: 'Sujan Kumal | A Software Engineer',
   description: "Welcome to Sujan Kumal's Site. Experienced Software Engineer | Innovative Problem Solver | Passionate About Technology",
   metadataBase: new URL(METADATA_BASE_URL),
   openGraph:{
     images:['/bird-1024x576-20.gif'],
     type:'website',
     url:'https://sujankumal.com.np/',
-    siteName:'Er. Sujan Kumal | A Software Engineer',
-    title:'Er. Sujan Kumal | A Software Engineer',
+    siteName:'Sujan Kumal | A Software Engineer',
+    title:'Sujan Kumal | A Software Engineer',
     description:"Welcome to Sujan Kumal's Site. Experienced Software Engineer | Innovative Problem Solver | Passionate About Technology",
   },
   twitter:{
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     creator:'@sujan_03_',
     site:'@sujan_03_',
     images:['/bird-1024x576-20.gif'],
-    title:'Er. Sujan Kumal | A Software Engineer',
+    title:'Sujan Kumal | A Software Engineer',
     description:"Welcome to Sujan Kumal's Site. Experienced Software Engineer | Innovative Problem Solver | Passionate About Technology",
   },
   icons: {
@@ -54,6 +54,21 @@ export default async function AdminLayout({
         gtag('js', new Date());
 
         gtag('config', '${GA_TRACKING_ID}');`}
+      </Script>
+      {/* Add schema markup */}
+      <Script id="schema-markup" type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Person",
+          "name": "Sujan Kumal",
+          "jobTitle": "Software Engineer",
+          "url": "https://sujankumal.com.np/",
+          "sameAs": [
+            "https://twitter.com/sujan_03_",
+            "https://www.linkedin.com/in/sujankumal/"
+          ],
+          "description": "Experienced Software Engineer | Innovative Problem Solver | Passionate About Technology"
+        })}
       </Script>
       <body className={noto.className}>
         <SessionProvider session={session}>

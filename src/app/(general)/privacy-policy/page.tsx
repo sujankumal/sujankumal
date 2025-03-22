@@ -4,14 +4,14 @@ import { fetchSitePrivacyPolicy } from "@/services/data_access";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-    title: 'Privacy-Policy | Er. Sujan Kumal | A Software Engineer',
+    title: 'Privacy-Policy | Sujan Kumal | A Software Engineer',
     description: "Explore our comprehensive privacy policy outlining how we collect, use, and protect your personal information.",
     openGraph:{
         images:['/bird-1024x576-20.gif'],
         type:'website',
         url:'https://sujankumal.com.np/',
-        siteName:'Er. Sujan Kumal | A Software Engineer',
-        title: 'Privacy-Policy | Er. Sujan Kumal | A Software Engineer',
+        siteName:'Sujan Kumal | A Software Engineer',
+        title: 'Privacy-Policy | Sujan Kumal | A Software Engineer',
         description: "Explore our comprehensive privacy policy outlining how we collect, use, and protect your personal information.",
     },
     twitter:{
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
         creator:'@sujan_03_',
         site:'@sujan_03_',
         images:['/bird-1024x576-20.gif'],
-        title: 'Privacy-Policy | Er. Sujan Kumal | A Software Engineer',
+        title: 'Privacy-Policy | Sujan Kumal | A Software Engineer',
         description: "Explore our comprehensive privacy policy outlining how we collect, use, and protect your personal information.",
     },
 }

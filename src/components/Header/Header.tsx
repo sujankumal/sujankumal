@@ -1,7 +1,8 @@
 import Image from "next/image";
 import headerImage from '/public/images/header.jpg';
 import Ticker from "./Ticker";
-import { Facebook, Twitter, Instagram, GitHub, LinkedIn, Link as SocialLink } from '@mui/icons-material';
+import { Facebook, Instagram, GitHub, LinkedIn, Link as SocialLink } from '@mui/icons-material';
+import XIcon from '@mui/icons-material/X';
 import bird_100_100_20 from '/public/bird-100x100-20.gif';
 
 import Link from "next/link";
@@ -26,7 +27,7 @@ async function Header() {
             <div className="">
                 <Image
                     src={headerImage}
-                    alt="Er. Sujan Kumal"
+                    alt="Sujan Kumal"
                     priority={true}
                 />
             </div>
@@ -62,8 +63,8 @@ async function Header() {
                                         </span>
                                     case "twitter":
                                         return <span className="mx-2" key={index}>
-                                            <Link href={"https://www.twitter.com/" + soc.username} target="_blank">
-                                                <Twitter htmlColor="#1eaaff" />
+                                            <Link href={"https://www.X.com/" + soc.username} target="_blank">
+                                                <XIcon htmlColor="#1eaaff" />
                                             </Link>
                                         </span>
                                     case "threads":

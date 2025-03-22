@@ -7,7 +7,7 @@ import bird_100_100_20 from '/public/bird-100x100-20.gif';
 import spacex_r from '/public/images/rockets/spacex--p-KCm6xB9I-unsplash.jpg';
 
 export const metadata: Metadata = {
-    title: 'Dashboard | Er. Sujan Kumal | A Software Engineer',
+    title: 'Dashboard | Sujan Kumal | A Software Engineer',
     description: "Dashboard page.",
 }
 
@@ -27,11 +27,11 @@ async function Admin() {
                             <div className="w-full md:w-fit inline-flex justify-center md:block">
                                 <Image
                                     src={bird_100_100_20}
-                                    alt="Er. Sujan Kumal"
+                                    alt="Sujan Kumal"
                                     priority={true} 
                                 />
                             </div>
-                            <div className="self-center text-xl font-semibold whitespace-nowrap dark:text-white mb-2 md:m-auto">Er. Sujan Kumal</div>
+                            <div className="self-center text-xl font-semibold whitespace-nowrap dark:text-white mb-2 md:m-auto">Sujan Kumal</div>
                         </a>
                     </div>
                     <div className="w-full md:w-auto">

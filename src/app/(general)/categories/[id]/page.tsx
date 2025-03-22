@@ -93,7 +93,7 @@ export async function generateStaticParams() {
           images:['/bird-1024x576-20.gif'],
           type:'website',
           url:'https://sujankumal.com.np/',
-          siteName:'Er. Sujan Kumal | A Software Engineer',
+          siteName:'Sujan Kumal | A Software Engineer',
           title: `Category | ${category.name}` ,
           description: `This page provides concise summaries of key topics and links to related category of ${category.name} for further exploration.`,
         },
