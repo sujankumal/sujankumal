@@ -17,6 +17,10 @@ export const metadata: Metadata = {
   title: 'Sujan Kumal | A Software Engineer',
   description: "Welcome to Sujan Kumal's Site. Experienced Software Engineer | Innovative Problem Solver | Passionate About Technology",
   metadataBase: new URL(METADATA_BASE_URL),
+  robots: {
+    index: true,
+    follow: true,
+  },
   openGraph:{
     images:['/bird-1024x576-20.gif'],
     type:'website',
