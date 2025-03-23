@@ -5,13 +5,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: 'https://sujankumal.com.np',
       lastModified: new Date(),
-      changeFrequency: 'yearly',
+      changeFrequency: 'daily',
       priority: 1,
     },
     {
       url: 'https://sujankumal.com.np/about',
       lastModified: new Date(),
-      changeFrequency: 'monthly',
+      changeFrequency: 'daily',
       priority: 0.8,
     },
   ]
