@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next'
- 
+
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
@@ -13,6 +13,210 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.8,
+    },
+    {
+      url: 'https://sujankumal.com.np/archives/2023/1',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.5,
+    },
+    {
+      url: 'https://sujankumal.com.np/articles',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.7,
+    },
+    {
+      url: 'https://sujankumal.com.np/categories/4',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.6,
+    },
+    {
+      url: 'https://sujankumal.com.np/contact',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.8,
+    },
+    {
+      url: 'https://sujankumal.com.np/articles/6',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.7,
+    },
+    {
+      url: 'https://sujankumal.com.np/projects',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.7,
+    },
+    {
+      url: 'https://sujankumal.com.np/articles/7',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.7,
+    },
+    {
+      url: 'https://sujankumal.com.np/archives/2024/4',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.5,
+    },
+    {
+      url: 'https://sujankumal.com.np/categories/7',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.6,
+    },
+    {
+      url: 'https://sujankumal.com.np/archives/2023/10',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.5,
+    },
+    {
+      url: 'https://sujankumal.com.np/archives/2022/11',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.5,
+    },
+    {
+      url: 'https://sujankumal.com.np/profile/2',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.6,
+    },
+    {
+      url: 'https://sujankumal.com.np/archives/2024/2',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.5,
+    },
+    {
+      url: 'https://sujankumal.com.np/archives/2023/11',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.5,
+    },
+    {
+      url: 'https://sujankumal.com.np/articles/8',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.7,
+    },
+    {
+      url: 'https://sujankumal.com.np/team',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.6,
+    },
+    {
+      url: 'https://sujankumal.com.np/archives/2023/7',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.5,
+    },
+    {
+      url: 'https://sujankumal.com.np/categories/8',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.6,
+    },
+    {
+      url: 'https://sujankumal.com.np/updates',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.7,
+    },
+    {
+      url: 'https://sujankumal.com.np/articles/5',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.7,
+    },
+    {
+      url: 'https://sujankumal.com.np/articles/4',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.7,
+    },
+    {
+      url: 'https://sujankumal.com.np/technologies',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.7,
+    },
+    {
+      url: 'https://sujankumal.com.np/privacy-policy',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.6,
+    },
+    {
+      url: 'https://sujankumal.com.np/categories/3',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.6,
+    },
+    {
+      url: 'https://sujankumal.com.np/categories/1',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.6,
+    },
+    {
+      url: 'https://sujankumal.com.np/articles/1',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.7,
+    },
+    {
+      url: 'https://sujankumal.com.np/categories/5',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.6,
+    },
+    {
+      url: 'https://sujankumal.com.np/categories/6',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.6,
+    },
+    {
+      url: 'https://sujankumal.com.np/archives/2023/12',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.5,
+    },
+    {
+      url: 'https://sujankumal.com.np/articles/2',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.7,
+    },
+    {
+      url: 'https://sujankumal.com.np/articles/3',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.7,
+    },
+    {
+      url: 'https://sujankumal.com.np/categories/2',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.6,
+    },
+    {
+      url: 'https://sujankumal.com.np/log-in',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.8,
+    },
+    {
+      url: 'https://sujankumal.com.np/categories/9',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.6,
     },
   ]
 }
