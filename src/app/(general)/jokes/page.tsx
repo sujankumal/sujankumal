@@ -23,6 +23,10 @@ export const metadata: Metadata = {
       title:'Jokes | Sujan Kumal | A Software Engineer',
       description:"This page provides concise summaries of key topics and links to related Jokes for further exploration.",
     },
+    robots: {
+      index: true,
+      follow: true,
+    },
   }
 
 export const revalidate = 10;

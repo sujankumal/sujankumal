@@ -22,6 +22,10 @@ export const metadata: Metadata = {
         title: 'Privacy-Policy | Sujan Kumal | A Software Engineer',
         description: "Explore our comprehensive privacy policy outlining how we collect, use, and protect your personal information.",
     },
+    robots: {
+      index: true,
+      follow: true,
+    },
 }
 export const revalidate = 10;
 

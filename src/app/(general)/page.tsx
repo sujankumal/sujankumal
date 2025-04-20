@@ -10,7 +10,11 @@ const site:SiteType = await fetchSite();
 
 export async function generateMetadata():Promise<Metadata>{
   return {
-    title: site.title
+    title: site.title,
+    robots: {
+      index: true,
+      follow: true,
+    },
   }
 }
 

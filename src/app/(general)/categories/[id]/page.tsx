@@ -105,5 +105,9 @@ export async function generateStaticParams() {
           title: `Category | ${category.name}` ,
           description: `This page provides concise summaries of key topics and links to related category of ${category.name} for further exploration.`,
         },
+        robots: {
+            index: true,
+            follow: true,
+        },
       }
 }

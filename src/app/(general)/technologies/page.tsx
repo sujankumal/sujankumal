@@ -23,6 +23,10 @@ export const metadata: Metadata = {
         title: 'Technologies | Sujan Kumal | A Software Engineer',
         description: "This page provides concise summaries of key topics and links to related articles of technologies for further exploration.",
     },
+    robots: {
+      index: true,
+      follow: true,
+    },
 }
 
 export const revalidate = 10;

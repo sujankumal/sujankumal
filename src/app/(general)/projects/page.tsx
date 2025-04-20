@@ -24,6 +24,10 @@ export const metadata: Metadata = {
         title: 'Projects | Sujan Kumal | A Software Engineer',
         description: "See what we've accomplished: Browse our impressive portfolio of projects.",
     },
+    robots: {
+      index: true,
+      follow: true,
+    },
 }
 export const revalidate = 10;
 

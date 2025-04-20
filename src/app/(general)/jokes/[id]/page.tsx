@@ -125,6 +125,10 @@ export async function generateMetadata({params}:{params: {id:number}}, parent: R
           title: `Jokes | ${article.title}`,
           description: article.description,
         },
+        robots: {
+            index: true,
+            follow: true,
+        },
         
       }
 }

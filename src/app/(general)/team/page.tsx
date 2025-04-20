@@ -21,6 +21,10 @@ export const metadata: Metadata = {
         title: 'Our Team | Sujan Kumal | A Software Engineer',
         description: "Meet our dedicated team, the driving force behind our success and innovation.",
     },
+    robots: {
+      index: true,
+      follow: true,
+    },
 }
 
 export const revalidate = 10;

@@ -24,6 +24,10 @@ export const metadata: Metadata = {
       title:'Articles | Sujan Kumal | A Software Engineer',
       description:"This page provides concise summaries of key topics and links to related articles for further exploration.",
     },
+    robots: {
+      index: true,
+      follow: true,
+    },
   }
 
 async function Articles() {

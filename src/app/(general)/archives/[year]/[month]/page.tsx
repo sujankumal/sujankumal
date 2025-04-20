@@ -100,6 +100,9 @@ export async function generateStaticParams() {
           title: `Archives | ${MONTHS[month-1]} ${year}` ,
           description: `This page provides concise summaries of key topics and links to related archives of ${MONTHS[month-1]} ${year} for further exploration.`,
         },
-        
+        robots: {
+            index: true,
+            follow: true,
+        },
       }
 }

@@ -23,6 +23,10 @@ export const metadata: Metadata = {
         title: 'Updates | Sujan Kumal | A Software Engineer',
         description: "This page provides latest news, events, updates etc.",
     },
+    robots: {
+      index: true,
+      follow: true,
+    },
 }
 
 export const revalidate = 10;

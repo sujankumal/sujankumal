@@ -26,6 +26,10 @@ export const metadata: Metadata = {
       title:'About | Sujan Kumal | A Software Engineer',
       description:"I'm Sujan Kumal, a software engineer with a strong passion for creating innovative solutions and exploring the world of technology. Here's a little bit about me:",
     },
+    robots: {
+        index: true,
+        follow: true,
+    },
   }
   
 export const revalidate = 10;
