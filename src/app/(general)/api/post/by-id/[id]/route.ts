@@ -3,8 +3,8 @@ import prisma from "../../../../../../../prisma/prisma";
 import { fetchPostCountIdArray } from "@/services/data_access";
 import { notFound } from "next/navigation";
 
-export async function GET(request: NextRequest, {params}: {params: { id: string}}){
-    const id = Number.parseInt(params.id);
+export async function GET(request: NextRequest, context: {params: Promise<{ id: string}>}){
+    const id = Number.parseInt((await context.params).id);
     try {
         const site = await prisma.post.findUnique(
             {

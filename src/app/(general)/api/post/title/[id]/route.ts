@@ -3,9 +3,9 @@ import prisma from "../../../../../../../prisma/prisma";
 import { fetchPostCountIdArray } from "@/services/data_access";
 import { notFound } from "next/navigation";
 
-export async function GET(request: NextRequest, {params}: {params: { id: string}}){
+export async function GET(request: NextRequest, context: {params: Promise<{ id: string}>}){
     // console.log("Hello I am server get post by-id method", typeof(params.id),params.id);
-    const id = Number.parseInt(params.id);
+    const id = Number.parseInt((await context.params).id);
     const site = await prisma.post.findUnique(
         {
             where:{

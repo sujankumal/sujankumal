@@ -10,8 +10,8 @@ import { PostType } from "@/types/post";
 import { Metadata, ResolvingMetadata } from "next";
 import Link from "next/link";
 
-async function Archives({params}:{params: {year:number, month:number}}) {
-    const {year, month} = params;
+async function Archives({params}:{params: Promise<{year:number, month:number}>}) {
+    const {year, month} = await params;
     // console.log(year,month)
     const posts = await fetchArchivesByYearAndMonth(year, month);
 
@@ -78,8 +78,8 @@ export async function generateStaticParams() {
     return paths;
   }
 
-  export async function generateMetadata({params}:{params: {year:number, month:number}}, parent: ResolvingMetadata): Promise<Metadata>{
-    const {year, month} = params;
+  export async function generateMetadata({params}:{params: Promise<{year:number, month:number}>}, parent: ResolvingMetadata): Promise<Metadata>{
+    const {year, month} = await params;
 
     return  {
         title: `Archives | ${MONTHS[month-1]} ${year}` ,

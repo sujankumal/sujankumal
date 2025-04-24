@@ -3,8 +3,8 @@ import prisma from "../../../../../../prisma/prisma";
 import { fetchCategoryCountIdArray } from "@/services/data_access";
 import { notFound } from "next/navigation";
 
-export async function GET(request: NextRequest, {params}: {params: { id: string}}){
-    
+export async function GET(request: NextRequest, context: {params: Promise<{ id: string}>}){
+    const params = await context.params;
     const id = Number.parseInt(params.id);
     try {
         const site = await prisma.category.findUnique(

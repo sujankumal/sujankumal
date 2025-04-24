@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "../../../../../../prisma/prisma";
 import { notFound } from "next/navigation";
 
-export async function GET(request: NextRequest, {params}: {params: { query: string}}){
+export async function GET(request: NextRequest, context: {params: Promise<{ query: string}>}){
     
     try {
         const searched_data = await prisma.post.findMany(
@@ -15,18 +15,18 @@ export async function GET(request: NextRequest, {params}: {params: { query: stri
                     OR:[
                         {
                             title:{
-                                search:params.query,
+                                search:(await context.params).query,
                             },},
                         {
                             description:{
-                                search:params.query,
+                                search:(await context.params).query,
                             },
                         },
                         {
                             content:{
                                 some:{
                                     content:{
-                                        search:params.query,
+                                        search:(await context.params).query,
                                     }
                                 },
                             },

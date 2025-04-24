@@ -7,8 +7,8 @@ import { fetchTechPostByID, fetchTechPostCountIdArray } from "@/services/data_ac
 import { Metadata, ResolvingMetadata } from "next";
 import Image from "next/image";
 
-async function Tech({params}:{params: {id:number}}) {
-    const {id} = params;
+async function Tech({params}:{params: Promise<{id:number}>}) {
+    const {id} = await params;
     const tech = await fetchTechPostByID(id);
     
     const tech_mds = tech.content?.map((content, index)=>{
@@ -93,8 +93,8 @@ export async function generateStaticParams() {
   }
 
 
-export async function generateMetadata({params}:{params: {id:number}}, parent: ResolvingMetadata): Promise<Metadata>{
-    const id = params.id;
+export async function generateMetadata({params}:{params: Promise<{id:number}>}, parent: ResolvingMetadata): Promise<Metadata>{
+    const id = (await params).id;
     const article = await fetchTechPostByID(id);
 
     return  {

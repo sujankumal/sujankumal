@@ -7,8 +7,8 @@ import { fetchJokeByID, fetchJokeCountIdArray } from "@/services/data_access";
 import { Metadata, ResolvingMetadata } from "next";
 import Image from "next/image";
 
-async function Joke({params}:{params: {id:number}}) {
-    const {id} = params;
+async function Joke({params}:{params: Promise<{id:number}>}) {
+    const {id} = await params;
     
     const joke = await fetchJokeByID(id);
     // .then((data)=>{
@@ -102,8 +102,8 @@ export async function generateStaticParams() {
   }
 
 
-export async function generateMetadata({params}:{params: {id:number}}, parent: ResolvingMetadata): Promise<Metadata>{
-    const id = params.id;
+export async function generateMetadata({params}:{params: Promise<{id:number}>}, parent: ResolvingMetadata): Promise<Metadata>{
+    const id = (await params).id;
     const article = await fetchJokeByID(id);
 
     return  {

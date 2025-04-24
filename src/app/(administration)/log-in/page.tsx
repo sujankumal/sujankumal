@@ -1,12 +1,10 @@
 'use client'
-import { useEffect, useState } from "react";
+import { useEffect, useState , Suspense} from "react";
 import { signIn, useSession } from "next-auth/react";
 import { redirect, useSearchParams } from "next/navigation";
 import { Google } from "@mui/icons-material";
 import { _csrfToken } from "@/services/data_access";
 import Link from "next/link";
-
-export const revalidate = 10; 
 
 function Login() {
     const [show_credentials_error, set_show_credentials_error] = useState(false);
@@ -30,7 +28,7 @@ function Login() {
             setCsrfToken(data);
         });
         // console.log("Useeffect:",csrfToken);
-    },[csrfToken])
+    },[])
     
     if (session) {
         return redirect('/dashboard');
@@ -50,14 +48,14 @@ function Login() {
                                         <label className="block text-sm mb-2" htmlFor="email">
                                             Email
                                         </label>
-                                        <input id="input-email-login" name="email" type="email" required placeholder="example@sujankumal.com.np" className={`"shadow border text-black ${show_credentials_error ? 'border-red-500' : null} rounded w-full py-2 px-3 mb-3 focus:outline-none focus:shadow-outline"`}/>
+                                        <input id="input-email-login" name="email" type="email" required placeholder="example@sujankumal.com.np" className={`"shadow border text-black ${show_credentials_error ? 'border-red-500' : ""} rounded w-full py-2 px-3 mb-3 focus:outline-none focus:shadow-outline"`}/>
                                     </div>
                                     <div className="mb-6">
                                         <label className="block text-sm mb-2" htmlFor="password">
                                             Password
                                         </label>
-                                        <input id="input-password-login" name="password" type="password" required placeholder="********" className={`"shadow border text-black ${show_credentials_error ? 'border-red-500' : null} rounded w-full py-2 px-3 mb-3 leading-tight focus:outline-none focus:shadow-outline"`}/>
-                                        {show_credentials_error ? <p className="text-red-500 text-xs italic">{show_error_message}</p> : null}
+                                        <input id="input-password-login" name="password" type="password" required placeholder="********" className={`"shadow border text-black ${show_credentials_error ? 'border-red-500' : ""} rounded w-full py-2 px-3 mb-3 leading-tight focus:outline-none focus:shadow-outline"`}/>
+                                        {show_credentials_error && <p className="text-red-500 text-xs italic">{show_error_message}</p>}
                                     </div>
                                     <div className="flex items-center justify-between">
                                         <button type="submit"
@@ -104,4 +102,11 @@ function Login() {
     }
 }
 
-export default Login;
+// export default Login;
+export default function LoginPage() {
+    return (
+      <Suspense fallback={<div>Loading login page...</div>}>
+        <Login />
+      </Suspense>
+    );
+  }

@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "../../../../../../../../prisma/prisma";
 import { fetchPostCountYearMonthArray } from "@/services/data_access";
 
-export async function GET(request: NextRequest, {params}: {params: { year: string, month:string}}){    
+export async function GET(request: NextRequest, context: {params: Promise<{ year: string, month:string}>}){    
     // console.log("Hello I am server get post for archives method");
-    const year = Number.parseInt(params.year);
-    const month = Number.parseInt(params.month);
+    const year = Number.parseInt((await context.params).year);
+    const month = Number.parseInt((await context.params).month);
     try{
         const posts = await prisma.post.findMany({
                 where:{

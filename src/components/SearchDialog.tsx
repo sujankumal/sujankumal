@@ -2,7 +2,7 @@ import { searchData } from "@/services/search";
 import { Paper } from "@mui/material";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState , Suspense} from "react";
 
 function SearchDialog() {
     const searchParams = useSearchParams();
@@ -16,8 +16,9 @@ function SearchDialog() {
                 setPosts(d);
             });
         }
-    }, [searchParams]);
+    }, [searchParams, query]);
     return ( 
+        <Suspense fallback={<div>Loading...</div>}>
         <Paper
          elevation={8}
          component='div'
@@ -31,6 +32,7 @@ function SearchDialog() {
             })
             }
         </Paper>
+        </Suspense>
      );
 }
 

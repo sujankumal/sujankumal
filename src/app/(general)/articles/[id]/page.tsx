@@ -7,8 +7,8 @@ import { fetchPostByID, fetchPostCountIdArray } from "@/services/data_access";
 import { Metadata, ResolvingMetadata } from "next";
 import Image from "next/image";
 
-async function Articles({params}:{params: {id:number}}) {
-    const id = params.id;
+async function Articles({params}:{params: Promise<{id:number}>}) {
+    const id = (await params).id;
 
     const article = await fetchPostByID(id);
     
@@ -98,8 +98,8 @@ export async function generateStaticParams() {
     return paths;
   }
 
-export async function generateMetadata({params}:{params: {id:number}}, parent: ResolvingMetadata): Promise<Metadata>{
-    const id = params.id;
+export async function generateMetadata({params}:{params: Promise<{id:number}>}, parent: ResolvingMetadata): Promise<Metadata>{
+    const id = (await params).id;
     const article = await fetchPostByID(id);
 
     return  {

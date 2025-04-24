@@ -8,13 +8,15 @@ import { CatergoryType } from "@/types/category";
 import { PostType } from "@/types/post";
 import { Metadata, ResolvingMetadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 
-async function Category({params}:{params: {id:number}}) {
-    const {id} = params;
+async function Category({params}:{params: Promise<{id:number}>}) {
+    const {id} = await params;
     
     const posts = await fetchPostsByCategoryID(id);
 
-    return (  
+    return (
+      <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>  
         <main className="grid md:grid-cols-4 min-h-screen justify-center">
             <div className="mb-8 px-4 md:mx-8 md:col-span-3">
             {
@@ -51,6 +53,7 @@ async function Category({params}:{params: {id:number}}) {
                 </div>
             </aside>
         </main>
+      </Suspense>
     );
 }
 
@@ -81,8 +84,8 @@ export async function generateStaticParams() {
     return paths;
   }
 
-  export async function generateMetadata({params}:{params: {id:number}}, parent: ResolvingMetadata): Promise<Metadata>{
-    const {id} = params;
+  export async function generateMetadata({params}:{params: Promise<{id:number}>}, parent: ResolvingMetadata): Promise<Metadata>{
+    const {id} = await params;
     
     const category: CatergoryType = await fetchCategoryById(id);
 

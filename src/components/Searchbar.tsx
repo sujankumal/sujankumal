@@ -8,7 +8,7 @@ import {
   Paper,
 } from "@mui/material";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
 type Props = {
@@ -24,18 +24,33 @@ const Searchbar = (props: Props) => {
   const pathname = usePathname();
   const { replace } = useRouter();
   
-  
-  useEffect(useDebouncedCallback(()=>{
+  // Define debounced callback outside useEffect
+  const debouncedSearch = useDebouncedCallback((term: string) => {
     const params = new URLSearchParams(searchParams);
-    if (searchTerm){
-      params.set('query', searchTerm);
-    }else{
-      params.delete('query');
+    if (term) {
+      params.set("query", term);
+    } else {
+      params.delete("query");
     }
     replace(`${pathname}?${params.toString()}`);
-  }, 400),[searchTerm]);
+  }, 400);
+    // Use inline function in useEffect
+    useEffect(() => {
+      debouncedSearch(searchTerm);
+    }, [searchTerm, debouncedSearch]);
+  
+  // useEffect(useDebouncedCallback(()=>{
+  //   const params = new URLSearchParams(searchParams);
+  //   if (searchTerm){
+  //     params.set('query', searchTerm);
+  //   }else{
+  //     params.delete('query');
+  //   }
+  //   replace(`${pathname}?${params.toString()}`);
+  // }, 400),[searchTerm]);
 
   return (
+    <Suspense fallback={<div>Loading...</div>}>
     <Paper
       component="form"
       elevation={3}
@@ -60,6 +75,7 @@ const Searchbar = (props: Props) => {
         <Search />
       </IconButton>
     </Paper>
+    </Suspense>
   );
 };
 

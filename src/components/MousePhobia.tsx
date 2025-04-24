@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 
 function MousePhobia({ comp }: { comp: React.ReactNode }) {
 
@@ -139,7 +139,9 @@ function MousePhobia({ comp }: { comp: React.ReactNode }) {
 
     const animationClass = isAnimating ? "animation-pulse" : "";
 
-    return (<div
+    return (
+    <Suspense fallback={<div className="w-full h-80 border border-dotted border-black animate-pulse"></div>}>
+        <div
         ref={parentRef}
         className={`w-full h-80 border border-dotted border-black`}
         >
@@ -156,6 +158,7 @@ function MousePhobia({ comp }: { comp: React.ReactNode }) {
              
         className={`border w-max ${animationClass}`}>{comp}</div>
     </div>
+    </Suspense>
     );
 }
 

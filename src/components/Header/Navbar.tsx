@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { Search, Menu, MenuOpen, Cottage } from "@mui/icons-material";
 import Link from "next/link";
 import Searchbar from "../Searchbar";
@@ -51,6 +51,7 @@ const Navbar = () => {
   let fixedNavClass = (isNavFixed)?" fixed top-0 z-10":"";
   
   return (<>
+  <Suspense fallback={<div className="h-12"></div>}>
     <div className={isNavFixed?"block h-12 border-t-2":"hidden"}></div>
     <nav className={"w-full bg-gray-800 border-t-4 border-teal-600 shadow"+fixedNavClass } ref={elementRef}>
       <div className="flex justify-between px-4 mx-auto lg:max-w-7xl md:items-center md:flex md:px-8">
@@ -106,6 +107,7 @@ const Navbar = () => {
       </div>
       
     </nav>
+    </Suspense>
     </>
   );
 };

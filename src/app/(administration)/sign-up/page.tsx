@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from "react";
+import { useEffect, useState ,Suspense} from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { redirect, useSearchParams } from "next/navigation";
 import { _csrfToken } from "@/services/data_access";
@@ -8,7 +8,6 @@ import Link from "next/link";
 import { Google } from "@mui/icons-material";
 import { Alert, Slide, Snackbar } from "@mui/material";
 
-export const revalidate = 10;
 function Signup() {
     const [show_alert, set_show_alert] = useState(false);
     const [show_error_message, set_show_error_message] = useState('');
@@ -31,7 +30,7 @@ function Signup() {
             setCsrfToken(data);
         });
         // console.log("Useeffect:",csrfToken);
-    },[csrfToken])
+    },[])
 
     const handle_sign_up = ()=>{
         set_show_alert(true);
@@ -116,4 +115,11 @@ function Signup() {
     }
 }
 
-export default Signup;
+// export default Signup;
+export default function SignupPage() {
+    return (
+      <Suspense fallback={<div>Loading Signup page...</div>}>
+        <Signup />
+      </Suspense>
+    );
+  }
