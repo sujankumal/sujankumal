@@ -97,7 +97,7 @@ export const authConfig = {
         }
       }),
     ],
-    adapter:PrismaAdapter(prisma),
+    adapter:PrismaAdapter(prisma as any),
 } satisfies NextAuthConfig;
 
 export default authConfig;
