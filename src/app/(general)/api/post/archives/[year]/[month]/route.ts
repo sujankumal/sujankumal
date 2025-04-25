@@ -39,7 +39,7 @@ export async function GET(request: NextRequest, context: {params: Promise<{ year
                 }            
             });
         return NextResponse.json(posts);
-    }catch(exception){
+    }catch(exception: unknown){
         return NextResponse.json([]);
     }
 }

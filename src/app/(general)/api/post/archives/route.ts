@@ -23,7 +23,7 @@ export async function GET(request: NextRequest){
             ]
         });
         return NextResponse.json(posts);
-    }catch(exception){
+    }catch(exception: unknown){
         console.log("Server Error:", exception);
         notFound();
     }

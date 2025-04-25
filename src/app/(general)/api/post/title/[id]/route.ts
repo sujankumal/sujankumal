@@ -16,7 +16,8 @@ export async function GET(request: NextRequest, context: {params: Promise<{ id: 
                 title:true,
             }
         }
-    ).catch((exception)=>{
+    ).catch((exception: 
+ unknown)=>{
         console.log("Server Error:", exception);
         notFound();
     });

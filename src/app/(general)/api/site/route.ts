@@ -10,7 +10,8 @@ export async function GET(request: NextRequest){
             id:'desc'
         },
         take:1
-    }).catch((exception)=>{
+    }).catch((exception: 
+ unknown)=>{
         console.log("Server Error:", exception);
         notFound();
     })

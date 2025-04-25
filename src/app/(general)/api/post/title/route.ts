@@ -16,7 +16,8 @@ export async function GET(request: NextRequest){
                 date:'desc',
             }
         }
-    ).catch((exception)=>{
+    ).catch((exception: 
+ unknown)=>{
         console.log("Server Error:", exception);
         notFound();
     });

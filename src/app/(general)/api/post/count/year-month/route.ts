@@ -13,7 +13,8 @@ export async function GET(request: NextRequest){
                 month:true,
             }
         }
-    ).catch((exception)=>{
+    ).catch((exception: 
+ unknown)=>{
         console.log("Server Error:", exception);
         notFound();
     });

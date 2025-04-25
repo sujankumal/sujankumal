@@ -8,7 +8,8 @@ export async function GET(request: NextRequest){
         orderBy:{
             title:'asc'
         },
-    }).catch((exception)=>{
+    }).catch((exception: 
+ unknown)=>{
         console.log("Server Error:", exception);
         notFound();
     })

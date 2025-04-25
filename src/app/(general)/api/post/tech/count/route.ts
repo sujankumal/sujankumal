@@ -24,7 +24,8 @@ export async function GET(request: NextRequest){
                 },
             }
         }
-    ).catch((exception)=>{
+    ).catch((exception: 
+ unknown)=>{
         console.log("Server Error:", exception);
         notFound();
     });
