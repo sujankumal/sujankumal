@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "tailwindcss/tailwind.css";
 
 const styles: { [key: string]: React.CSSProperties } = {
@@ -125,6 +125,8 @@ export default function Game2048() {
   const [step, setStep] = useState<number>(0);
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
   const [won, setWon] = useState<boolean>(false);
+  const [stopped, setStopped] = useState<boolean>(true); // Start with overlay
+  const gameRef = useRef<HTMLDivElement>(null);
 
   // Initialize grid client-side
   useEffect(() => {
@@ -133,7 +135,18 @@ export default function Game2048() {
     }
   }, []);
 
+  useEffect(() => {
+    const el = gameRef.current;
+    if (!el) return;
+    const prevent = (e: TouchEvent) => e.preventDefault();
+    el.addEventListener("touchmove", prevent, { passive: false });
+    return () => {
+      el.removeEventListener("touchmove", prevent);
+    };
+  }, []);
+
   const handleMove = (direction: 'up' | 'down' | 'left' | 'right') => {
+    if (stopped || won) return;
     let newGrid: Grid = grid;
     switch (direction) {
       case 'up':
@@ -230,18 +243,45 @@ export default function Game2048() {
 
   return (
     <div
-      style={{ ...styles.container, userSelect: "none" }}
+      ref={gameRef}
+      style={{ ...styles.container, userSelect: "none", position: 'relative' }}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
+      onWheel={e => e.preventDefault()}
       tabIndex={0}
       className="select-none"
     >
       <h1 className="text-teal-600 font-bold">2048 Game</h1>
-      {won && (
-        <div className="text-yellow-400 font-bold text-2xl my-4">
-          🎉 Congratulations! You reached 2048! 🎉
+      {(won || stopped) && (
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'rgba(0,0,0,0.7)',
+          color: 'gold',
+          fontWeight: 'bold',
+          fontSize: 28,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 10,
+        }}>
+          {won ? (
+            <>
+              🎉 Congratulations! You reached 2048! 🎉
+              <button onClick={() => setStopped(true)} style={{marginTop: 16, padding: '8px 16px', fontSize: 18}}>Stop Game</button>
+            </>
+          ) : (
+            <>
+              <div>Click below to start the game</div>
+              <button onClick={() => setStopped(false)} style={{marginTop: 16, padding: '8px 16px', fontSize: 18}}>Start Game</button>
+            </>
+          )}
         </div>
       )}
       <div style={styles.grid}>
@@ -252,6 +292,16 @@ export default function Game2048() {
         ))}
       </div>
       <div style={styles.history}>
+        <div>
+
+        <button
+          onClick={() => setStopped(true)}
+          style={{ zIndex: 20, padding: '4px 12px', fontSize: 16 }}
+          disabled={stopped || won}
+        >
+          Stop
+        </button>
+        </div>
         <h2>Steps: {step}</h2>
         <ul style={{ listStyle: "none", padding: 0 }}>
           {history.map((_, idx) => (

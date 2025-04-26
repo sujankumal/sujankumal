@@ -13,19 +13,19 @@ function FAB() {
             showMenu? */}
             <div className={showMenu?"block ml-1 text-teal-600 font-extrabold text-lg drop-shadow-[-2px_2px_0px_rgb(10,10,10)]":"hidden"}>
                 <div className="my-2 hover:scale-110 duration-300">
-                    <Link href="https://sujankumal.com.np/2048/" title="2048">
+                    <Link href="/2048/" title="2048">
                         <ShuffleOn className="text-orange-700" fontSize="large"/>
                         <span className="ml-4">2048</span>
                     </Link>
 			    </div>
                 <div className="my-2 hover:scale-110 duration-300">
-                    <Link href="https://sujankumal.com.np/apps/image/" title="Image">
+                    <Link href="/apps/image/" title="Image">
                         <Photo className="text-green-600" fontSize="large"/>
                         <span className="ml-4">Image</span>
                     </Link>
 			    </div>
                 <div className="my-2 hover:scale-110 duration-300">
-                    <Link href="https://sujankumal.com.np/apps/" title="Apps">
+                    <Link href="/apps/" title="Apps">
                         <ViewInAr className="text-orange-700" fontSize="large"/>
                         <span className="ml-4">Apps</span>
                     </Link>
