@@ -19,7 +19,7 @@ export const metadata: Metadata = {
       description:"I'm Sujan Kumal, a software engineer with a strong passion for creating innovative solutions and exploring the world of technology. Here's a little bit about me:",
     },
     twitter:{
-      card:'summary_large_image',
+      card:'summary',
       creator:'@sujan_03_',
       site:'@sujan_03_',
       images:[`/images/${main_image}`],

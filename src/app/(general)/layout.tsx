@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     description:"Welcome to Sujan Kumal's Site. Experienced Software Engineer | Innovative Problem Solver | Passionate About Technology",
   },
   twitter:{
-    card:'summary_large_image',
+    card:'summary',
     creator:'@sujan_03_',
     site:'@sujan_03_',
     images:['/bird-1024x576-20.gif'],

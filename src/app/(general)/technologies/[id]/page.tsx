@@ -109,7 +109,7 @@ export async function generateMetadata({params}:{params: Promise<{id:number}>}, 
           description: article.description,
         },
         twitter:{
-          card:'summary_large_image',
+          card:'summary',
           creator:'@sujan_03_',
           site:'@sujan_03_',
           images:[`/images/${article.main_image}`],

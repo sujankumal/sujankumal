@@ -16,7 +16,7 @@ export const metadata: Metadata = {
       description:"This page provides concise summaries of key topics and links to related Jokes for further exploration.",
     },
     twitter:{
-      card:'summary_large_image',
+      card:'summary',
       creator:'@sujan_03_',
       site:'@sujan_03_',
       images:['/bird-1024x576-20.gif'],

@@ -14,7 +14,7 @@ export const metadata: Metadata = {
         description: "Meet our dedicated team, the driving force behind our success and innovation.",
     },
     twitter:{
-        card:'summary_large_image',
+        card:'summary',
         creator:'@sujan_03_',
         site:'@sujan_03_',
         images:['/bird-1024x576-20.gif'],
