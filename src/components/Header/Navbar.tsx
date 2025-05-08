@@ -11,6 +11,7 @@ const menu = [
   { name: "Technologies", url: "/technologies"},
   { name: "Updates", url: "/updates"},
   { name: "Projects", url: "/projects"},
+  { name: "QR Tool", url: "/qr"},
 ];
 let elementDistanceFromTop = 0;
     
