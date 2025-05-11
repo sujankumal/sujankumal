@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     },
   }
   
-export const revalidate = 10;
+export const revalidate = 86400;
 
 async function About() {
     

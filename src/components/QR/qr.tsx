@@ -5,7 +5,7 @@ import React, { useState, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { HexColorPicker } from 'react-colorful';
 
-export const revalidate = 10;
+export const revalidate = 86400;
 
 const noto_mono = Noto_Sans_Mono({
     subsets:['latin']

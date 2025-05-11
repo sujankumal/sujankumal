@@ -18,7 +18,7 @@ export async function generateMetadata():Promise<Metadata>{
   }
 }
 
-export const revalidate = 10;
+export const revalidate = 86400;
 
 export default async function Home() {
   const posts:Array<PostType> = await fetchPostHome();

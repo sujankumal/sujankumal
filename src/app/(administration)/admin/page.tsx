@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     description: "Admin page.",
 }
 
-export const revalidate = 10;
+export const revalidate = 86400;
 async function Admin() {
     const session = await auth();
     console.log("Admin page .. session:", session);

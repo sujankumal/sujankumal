@@ -12,6 +12,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: 'https://sujankumal.com.np/about',
       lastModified: new Date(),
       changeFrequency: 'daily',
+      priority: 0.9,
+    },
+    {
+      url: 'https://sujankumal.com.np/qr',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.8,
+    },
+    {
+      url: 'https://sujankumal.com.np/2048',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
       priority: 0.8,
     },
     {

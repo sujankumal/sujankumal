@@ -15,7 +15,7 @@ import { SocialType } from "@/types/social";
 import { APP_BASE_URL } from "@/constants/constants";
 import { SvgIcon } from "@mui/material";
 
-export const revalidate = 10;
+export const revalidate = 86400;
 
 async function Header() {
     const social: Array<SocialType> = await fetchSocial();

@@ -50,4 +50,4 @@ async function Articles() {
 
 export default Articles;
 
-export const revalidate = 10;
+export const revalidate = 86400;

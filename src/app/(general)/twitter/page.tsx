@@ -1,7 +1,7 @@
 import Sidebar from "@/components/Sidebar";
 import { fetchTwitter } from "@/services/data_access";
 
-export const revalidate = 10;
+export const revalidate = 86400;
 
 async function Twitter() {
     const social_twitter = await fetchTwitter().then((data)=>{
