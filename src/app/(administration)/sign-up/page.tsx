@@ -24,13 +24,17 @@ function Signup() {
         }
     },[searchParams])
     
-    useEffect(()=>{
-        const token:Promise<string> = _csrfToken();
-        token.then((data)=>{
-            setCsrfToken(data);
-        });
-        // console.log("Useeffect:",csrfToken);
-    },[])
+    useEffect(() => {
+        let isMounted = true;
+        _csrfToken()
+            .then((data) => {
+                if (isMounted) setCsrfToken(data);
+            })
+            .catch(() => {
+                if (isMounted) set_show_error_message('Failed to load CSRF token. Please refresh.');
+            });
+        return () => { isMounted = false; };
+    }, [])
 
     const handle_sign_up = ()=>{
         set_show_alert(true);
@@ -62,19 +66,19 @@ function Signup() {
                                         <label className="block text-sm mb-2" htmlFor="name">
                                             Name
                                         </label>
-                                        <input className="shadow border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline" name="name" type="text" placeholder="Name" />
+                                        <input className="shadow border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline" name="name" type="text" placeholder="Name" autoComplete="name" required />
                                     </div>
                                     <div className="mb-4">
                                         <label className="block text-sm mb-2" htmlFor="email">
                                             Email
                                         </label>
-                                        <input className="shadow border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline" name="email" type="email" placeholder="example@sujankumal.com.np" />
+                                        <input className="shadow border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline" name="email" type="email" placeholder="example@sujankumal.com.np" autoComplete="email" required />
                                     </div>
                                     <div className="mb-6">
                                         <label className="block text-sm mb-2" htmlFor="password">
                                             Password
                                         </label>
-                                        <input className={`"shadow border rounded w-full py-2 px-3 mb-3 leading-tight focus:outline-none focus:shadow-outline"`} name="password" type="password" placeholder="********" />
+                                        <input className="shadow border rounded w-full py-2 px-3 mb-3 leading-tight focus:outline-none focus:shadow-outline" name="password" type="password" placeholder="********" autoComplete="new-password" required minLength={8} />
                                         
                                     </div>
                                     <div className="flex items-center justify-center">

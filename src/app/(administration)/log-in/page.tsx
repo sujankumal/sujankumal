@@ -22,13 +22,17 @@ function Login() {
         }
     },[searchParams])
     
-    useEffect(()=>{
-        const token:Promise<string> = _csrfToken();
-        token.then((data)=>{
-            setCsrfToken(data);
-        });
-        // console.log("Useeffect:",csrfToken);
-    },[])
+    useEffect(() => {
+        let isMounted = true;
+        _csrfToken()
+            .then((data) => {
+                if (isMounted) setCsrfToken(data);
+            })
+            .catch((error) => {
+                if (isMounted) set_show_error_message('Failed to load CSRF token. Please refresh.');
+            });
+        return () => { isMounted = false; };
+    }, [])
     
     if (session) {
         return redirect('/dashboard');
@@ -48,13 +52,13 @@ function Login() {
                                         <label className="block text-sm mb-2" htmlFor="email">
                                             Email
                                         </label>
-                                        <input id="input-email-login" name="email" type="email" required placeholder="example@sujankumal.com.np" className={`"shadow border text-black ${show_credentials_error ? 'border-red-500' : ""} rounded w-full py-2 px-3 mb-3 focus:outline-none focus:shadow-outline"`}/>
+                                        <input id="input-email-login" name="email" type="email" required placeholder="example@sujankumal.com.np" className={`shadow border text-black ${show_credentials_error ? 'border-red-500' : ""} rounded w-full py-2 px-3 mb-3 focus:outline-none focus:shadow-outline`}/>
                                     </div>
                                     <div className="mb-6">
                                         <label className="block text-sm mb-2" htmlFor="password">
                                             Password
                                         </label>
-                                        <input id="input-password-login" name="password" type="password" required placeholder="********" className={`"shadow border text-black ${show_credentials_error ? 'border-red-500' : ""} rounded w-full py-2 px-3 mb-3 leading-tight focus:outline-none focus:shadow-outline"`}/>
+                                        <input id="input-password-login" name="password" type="password" required placeholder="********" className={`shadow border text-black ${show_credentials_error ? 'border-red-500' : ""} rounded w-full py-2 px-3 mb-3 leading-tight focus:outline-none focus:shadow-outline`}/>
                                         {show_credentials_error && <p className="text-red-500 text-xs italic">{show_error_message}</p>}
                                     </div>
                                     <div className="flex items-center justify-between">
