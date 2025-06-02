@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import "tailwindcss/tailwind.css";
 
 const styles: { [key: string]: React.CSSProperties } = {
@@ -133,7 +133,7 @@ export default function Game2048() {
     if (grid.every(row => row.every(cell => cell === 0))) {
       setGrid(initializeGrid());
     }
-  }, []);
+  }, [grid]); // Add grid as dependency
 
   useEffect(() => {
     const el = gameRef.current;
@@ -143,9 +143,9 @@ export default function Game2048() {
     return () => {
       el.removeEventListener("touchmove", prevent);
     };
-  }, []);
+  }, [gameRef]); // Add gameRef as dependency
 
-  const handleMove = (direction: 'up' | 'down' | 'left' | 'right') => {
+  const handleMove = useCallback((direction: 'up' | 'down' | 'left' | 'right') => {
     if (stopped || won) return;
     let newGrid: Grid = grid;
     switch (direction) {
@@ -171,7 +171,7 @@ export default function Game2048() {
         setWon(true);
       }
     }
-  };
+  }, [stopped, won, grid, history]); // Memoize handleMove
 
   // Keyboard
   useEffect(() => {
@@ -193,7 +193,7 @@ export default function Game2048() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [grid, history]);
+  }, [handleMove]); // Use handleMove as dependency
 
   // Touch
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {

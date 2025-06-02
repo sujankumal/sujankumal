@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "../../../../../../prisma/prisma";
-import { notFound } from "next/navigation";
 
 export async function GET(request: NextRequest, context: {params: Promise<{ query: string}>}){
     
@@ -37,8 +36,7 @@ export async function GET(request: NextRequest, context: {params: Promise<{ quer
         );
         return NextResponse.json(searched_data);    
     } catch (error) {
-        console.log(error);
-        notFound();
+        throw error;
     }
 }
 

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "../../../../../../prisma/prisma";
 import { fetchCategoryCountIdArray } from "@/services/data_access";
-import { notFound } from "next/navigation";
 
 export async function GET(request: NextRequest, context: {params: Promise<{ id: string}>}){
     const params = await context.params;
@@ -16,8 +15,7 @@ export async function GET(request: NextRequest, context: {params: Promise<{ id: 
         );
         return NextResponse.json(site);    
     } catch (error) {
-        console.log(error);
-        notFound();
+        throw error;
     }
 }
 

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "../../../../../../../prisma/prisma";
 import { fetchPostCountIdArray } from "@/services/data_access";
-import { notFound } from "next/navigation";
 
 export async function GET(request: NextRequest, context: {params: Promise<{ id: string}>}){
     const id = Number.parseInt((await context.params).id);
@@ -34,8 +33,7 @@ export async function GET(request: NextRequest, context: {params: Promise<{ id: 
         );
         return NextResponse.json(site);
     } catch (error) {
-            console.log(error);
-            notFound();
+        throw error;
     }
 }
 

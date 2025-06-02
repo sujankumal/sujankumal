@@ -44,10 +44,8 @@ export async function GET(request: NextRequest){
                 },
             }
         }
-    ).catch((exception: 
- unknown)=>{
-        console.log("Server Error:", exception);
-        notFound();
+    ).catch((error: any) => {
+        throw error;
     });
     return NextResponse.json(posts);
 }
@@ -56,4 +54,4 @@ export async function GET(request: NextRequest){
 // 
 // export const dynamicParams = true // true | false,
 export const revalidate = 86400;
-// 
+//

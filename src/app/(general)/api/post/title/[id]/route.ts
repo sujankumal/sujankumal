@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "../../../../../../../prisma/prisma";
 import { fetchPostCountIdArray } from "@/services/data_access";
-import { notFound } from "next/navigation";
 
 export async function GET(request: NextRequest, context: {params: Promise<{ id: string}>}){
-    // console.log("Hello I am server get post by-id method", typeof(params.id),params.id);
     const id = Number.parseInt((await context.params).id);
     const site = await prisma.post.findUnique(
         {
@@ -16,10 +14,8 @@ export async function GET(request: NextRequest, context: {params: Promise<{ id: 
                 title:true,
             }
         }
-    ).catch((exception: 
- unknown)=>{
-        console.log("Server Error:", exception);
-        notFound();
+    ).catch((exception: unknown) => {
+        throw exception;
     });
     return NextResponse.json(site);
 }
@@ -30,15 +26,12 @@ export const revalidate = 10
 // false | 'force-cache' | 0 | number
 
 export async function generateStaticParams(){
-    // console.log("Hello I am server get post ...col method generateStaticParams");
     const possibleValues = await fetchPostCountIdArray().then((data)=>{
-        // console.log("Array of post ids: ", data);
         return data.map((item)=>{
             return {id: item.id.toString()};
         });
     }); // Adjust based on your data
 
-    // console.log(possibleValues);
     return possibleValues;
 }
 

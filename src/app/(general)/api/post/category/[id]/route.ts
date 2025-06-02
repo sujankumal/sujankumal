@@ -44,9 +44,8 @@ export async function GET(request: NextRequest, context: {params: Promise<{ id: 
                 date:'desc'
             },
         }
-    ).catch((exception: unknown)=>{
-        console.log("Server Error:", exception);
-        notFound();
+    ).catch((error: any)=>{
+        throw error;
     });
     return NextResponse.json(site);
 }

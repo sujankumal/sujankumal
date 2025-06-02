@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "../../../../../../prisma/prisma";
-import { notFound } from "next/navigation";
 
 export async function GET(request: NextRequest){
     try {
@@ -32,9 +31,8 @@ export async function GET(request: NextRequest){
             }
         );
         return NextResponse.json(posts);
-    } catch (error) {
-        console.log(error);
-        notFound();
+    } catch (error: any) {
+        throw error;
     }
 }
 
@@ -42,4 +40,4 @@ export async function GET(request: NextRequest){
 // 
 // export const dynamicParams = true // true | false,
 export const revalidate = 86400;
-// 
+//

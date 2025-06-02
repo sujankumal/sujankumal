@@ -29,8 +29,7 @@ export async function GET(request: NextRequest){
         );
         return NextResponse.json(posts);
     } catch (error) {
-        console.log(error);
-        notFound();
+        throw error;
     }
 }
 
@@ -38,4 +37,4 @@ export async function GET(request: NextRequest){
 // 
 // export const dynamicParams = true // true | false,
 export const revalidate = 86400;
-// 
+//

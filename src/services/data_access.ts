@@ -52,12 +52,12 @@ export async function fetchSite():Promise<SiteType> {
             }
         }).then((response) => {
             if (!response.ok) {
-                notFound();
+                throw new Error('Not found');
             }
             return response.json();
         });
     } catch (error) {
-        notFound();
+        throw error;
     }
 }
 export async function fetchSitePrivacyPolicy():Promise<{privacy_policy:string}>{
@@ -81,12 +81,12 @@ export async function fetchSitePrivacyPolicy():Promise<{privacy_policy:string}>{
             }
         }).then((response) => {
             if (!response.ok) {
-                notFound();
+                throw new Error('Not found');
             }
             return response.json();
         });
     }catch(error){
-        notFound();
+        throw error;
     }
 }
 export async function fetchProjects():Promise<ProjectType[]>{
@@ -107,12 +107,12 @@ export async function fetchProjects():Promise<ProjectType[]>{
             }
         }).then((response) => {
             if (!response.ok) {
-                notFound();
+                throw new Error('Not found');
             }
             return response.json();
         });
     }catch(error){
-        notFound();
+        throw error;
     }
 }
 export async function fetchPostTitle(): Promise<Array<PostTitleType>> {
@@ -139,12 +139,12 @@ export async function fetchPostTitle(): Promise<Array<PostTitleType>> {
             }
         }).then((response) => {
             if (!response.ok) {
-                notFound();
+                throw new Error('Not found');
             }
             return response.json();
         });
     } catch (error) {
-        notFound();
+        throw error;
     }
 }
 
@@ -174,12 +174,12 @@ export async function fetchPostTitleTicker(): Promise<Array<PostTitleType>> {
             }
         }).then((response) => {
             if (!response.ok) {
-                notFound();
+                throw new Error('Not found');
             }
             return response.json();
         });
     } catch (error) {
-        notFound();
+        throw error;
     }
 }
 export async function fetchArchivesDates(): Promise<Array<PostType>> {
@@ -210,12 +210,12 @@ export async function fetchArchivesDates(): Promise<Array<PostType>> {
             }
         }).then((response) => {
             if (!response.ok) {
-                notFound();
+                throw new Error('Not found');
             }
             return response.json();
         });
     } catch (error) {
-        notFound();
+        throw error;
     }
 }
 
@@ -263,12 +263,12 @@ export async function fetchArchivesByYearAndMonth(year: number, month: number): 
             }
         }).then((response) => {
             if (!response.ok) {
-                notFound();
+                throw new Error('Not found');
             }
             return response.json();
         });
     } catch (error) {
-        notFound();
+        throw error;
     }
 }
 
@@ -291,12 +291,12 @@ export async function fetchCategories(): Promise<Array<CatergoryType>> {
             }
         }).then((response) => {
             if (!response.ok) {
-                notFound();
+                throw new Error('Not found');
             }
             return response.json();
         });
     } catch (error) {
-        notFound();
+        throw error;
     }
 }
 
@@ -357,12 +357,12 @@ export async function fetchPostHome(): Promise<Array<PostType>> {
             }
         }).then((response) => {
             if (!response.ok) {
-                notFound();
+                throw new Error('Not found');
             }
             return response.json();
         });
     } catch (error) {
-        notFound();
+        throw error;
     }
 }
 
@@ -405,12 +405,12 @@ export async function fetchAbout(): Promise<Array<PostType>> {
             }
         }).then((response) => {
             if (!response.ok) {
-                notFound();
+                throw new Error('Not found');
             }
             return response.json();
         });
     } catch (error) {
-        notFound();
+        throw error;
     }
 }
 
@@ -442,12 +442,12 @@ export async function fetchTwitter(): Promise<Array<SocialType>> {
             }
         }).then((response) => {
             if (!response.ok) {
-                notFound();
+                throw new Error('Not found');
             }
             return response.json();
         });
     } catch (error) {
-        notFound();
+        throw error;
     }
 }
 
@@ -495,12 +495,12 @@ export async function fetchArticles(): Promise<Array<PostType>> {
             }
         }).then((response) => {
             if (!response.ok) {
-                notFound();
+                throw new Error('Not found');
             }
             return response.json();
         });
     } catch (error) {
-        notFound();
+        throw error;
     }
 }
 
@@ -557,12 +557,12 @@ export async function fetchJokes(): Promise<Array<PostType>> {
             }
         }).then((response) => {
             if (!response.ok) {
-                notFound();
+                throw new Error('Not found');
             }
             return response.json();
         });
     } catch (error) {
-        notFound();
+        throw error;
     }
 }
 
@@ -607,12 +607,12 @@ export async function fetchJokeByID(id: number): Promise<PostType> {
             }
         }).then((response) => {
             if (!response.ok) {
-                notFound();
+                throw new Error('Not found');
             }
             return response.json();
         });
     } catch (error) {
-        notFound();
+        throw error;
     }
 }
 
@@ -650,12 +650,12 @@ export async function fetchJokeCountIdArray(): Promise<Array<{ id: number }>> {
             }
         }).then((response) => {
             if (!response.ok) {
-                notFound();
+                throw new Error('Not found');
             }
             return response.json();
         });
     } catch (error) {
-        notFound();
+        throw error;
     }
 }
 
@@ -698,12 +698,12 @@ export async function fetchPostByID(id: number): Promise<PostType> {
             }
         }).then((response) => {
             if (!response.ok) {
-                notFound();
+                throw new Error('Not found');
             }
             return response.json();
         });
     } catch (error) {
-        notFound();
+        throw error;
     }
 }
 
@@ -726,12 +726,12 @@ export async function fetchPostCountIdArray(): Promise<Array<{ id: number }>> {
             }
         }).then((response) => {
             if (!response.ok) {
-                notFound();
+                throw new Error('Not found');
             }
             return response.json();
         });
     } catch (error) {
-        notFound();
+        throw error;
     }
 }
 
@@ -754,12 +754,12 @@ export async function fetchCategoryCountIdArray(): Promise<Array<{ id: number }>
             }
         }).then((response) => {
             if (!response.ok) {
-                notFound();
+                throw new Error('Not found');
             }
             return response.json();
         });
     } catch (error) {
-        notFound();
+        throw error;
     }
 }
 
@@ -782,12 +782,12 @@ export async function fetchCategoryById(id: number): Promise<CatergoryType> {
             }
         }).then((response) => {
             if (!response.ok) {
-                notFound();
+                throw new Error('Not found');
             }
             return response.json();
         });
     } catch (error) {
-        notFound();
+        throw error;
     }
 }
 
@@ -815,13 +815,13 @@ export async function fetchPostCountYearMonthArray(): Promise<Array<{ year: numb
                 }
             }).then((response) => {
                 if (!response.ok) {
-                    notFound();
+                    throw new Error('Not found');
                 }
                 return response.json();
             });
         }
     } catch (error) {
-        notFound();
+        throw error;
     }
 }
 
@@ -877,12 +877,12 @@ export async function fetchPostsByCategoryID(id: number): Promise<Array<PostType
             }
         }).then((response) => {
             if (!response.ok) {
-                notFound();
+                throw new Error('Not found');
             }
             return response.json();
         });
     } catch (error) {
-        notFound();
+        throw error;
     }
 }
 
@@ -901,12 +901,12 @@ export async function fetchSocial(): Promise<Array<SocialType>> {
             }
         }).then((response) => {
             if (!response.ok) {
-                notFound();
+                throw new Error('Not found');
             }
             return response.json();
         });
     } catch (error) {
-        notFound();
+        throw error;
     }
 }
 
@@ -967,12 +967,12 @@ export async function fetchTechPosts(): Promise<Array<PostType>> {
             }
         }).then((response) => {
             if (!response.ok) {
-                notFound();
+                throw new Error('Not found');
             }
             return response.json();
         });
     } catch (error) {
-        notFound();
+        throw error;
     }
 }
 
@@ -1017,12 +1017,12 @@ export async function fetchTechPostByID(id: number): Promise<PostType> {
             }
         }).then((response) => {
             if (!response.ok) {
-                notFound();
+                throw new Error('Not found');
             }
             return response.json();
         });
     } catch (error) {
-        notFound();
+        throw error;
     }
 }
 
@@ -1060,12 +1060,12 @@ export async function fetchTechPostCountIdArray(): Promise<Array<{ id: number }>
             }
         }).then((response) => {
             if (!response.ok) {
-                notFound();
+                throw new Error('Not found');
             }
             return response.json();
         });
     } catch (error) {
-        notFound();
+        throw error;
     }
 }
 
@@ -1088,11 +1088,11 @@ export async function fetchUpdates(): Promise<Array<UpdateType>> {
             }
         }).then((response) => {
             if (!response.ok) {
-                notFound();
+                throw new Error('Not found');
             }
             return response.json();
         });
     } catch (error) {
-        notFound();
+        throw error;
     }
 }
