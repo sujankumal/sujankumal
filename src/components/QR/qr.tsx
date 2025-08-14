@@ -75,9 +75,8 @@ function QR() {
   };
 
   return (
-    <main className={"grid md:grid-cols-4 min-h-screen justify-center items-center bg-gray-50 dark:bg-gray-900 p-4 " + noto_mono.className}>
-      <div className="mb-8 p-8 md:m-8 md:col-span-3 flex flex-col items-center justify-center bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
-        <div className="max-w-none w-full flex flex-col items-center">
+    <div className={"max-w-2xl mx-auto bg-white p-6 rounded shadow " + noto_mono.className}>
+       <div className="max-w-none w-full flex flex-col items-center">
           <div className="p-6 w-full flex flex-col items-center">
             <h2 className="text-2xl font-bold mb-4 text-center">QR Code Generator</h2>
             <p className="text-xs text-gray-500 mb-2 text-center">Tip: Paste or type a link (e.g., https://example.com) in the field below to generate a QR code for it.</p>
@@ -148,8 +147,7 @@ function QR() {
             </div>
           </div>
         </div>
-      </div>
-    </main>
+    </div>
   );
 }
 

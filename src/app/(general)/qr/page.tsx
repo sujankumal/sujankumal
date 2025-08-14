@@ -1,5 +1,7 @@
 import QR from "@/components/QR/qr";
 import { Metadata } from "next";
+import React, { Suspense } from 'react';
+import Sidebar from "@/components/Sidebar";
 
 export const metadata: Metadata = {
     title: 'QR | Sujan Kumal | A Software Engineer',
@@ -27,5 +29,18 @@ export const metadata: Metadata = {
 }
 
 export default function Page() {
-    return <QR />;  
+    return (
+    <main className="grid md:grid-cols-4 min-h-screen justify-center">
+      <div className="mb-8 p-2 md:m-8 md:col-span-3 inline-flex justify-center">
+        <Suspense fallback={<div>Loading tools...</div>}>
+          <QR/>
+        </Suspense>
+      </div>
+      <aside className="w-full md:col-span-1">
+          <div className="h-full px-3 py-4 overflow-y-auto dark:bg-gray-800">
+              <Sidebar />
+          </div>
+      </aside>
+    </main>
+  ); 
 }
