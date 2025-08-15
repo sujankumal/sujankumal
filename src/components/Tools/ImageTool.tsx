@@ -195,14 +195,16 @@ export default function ImageTool() {
     };
     img.onerror = () => setError('Failed to load image for compression.');
   };
-  // Passport Photo Sheet (100x150mm, 300 DPI, auto duplicate cropped image)
+  // Passport Photo Sheet (100x150mm, 300 DPI, auto duplicate processed image)
   const handlePassportSheet = () => {
-    if (!image) return;
+    // Use preview image (with all transforms) for sheet
+    const src = preview || referencePreview;
+    if (!src) return;
     const img = document.createElement('img');
-  img.src = referencePreview!;
+    img.src = src;
     img.onload = () => {
-  // Sheet: 150x100mm at 300 DPI = 1772x1181 px
-  const sheetW = 1772, sheetH = 1181;
+      // Sheet: 150x100mm at 300 DPI = 1772x1181 px
+      const sheetW = 1772, sheetH = 1181;
       const mmToPx = (mm: number) => Math.round(mm * 11.811);
       const photoW = outWidthMM ? mmToPx(outWidthMM) : 413; // default 35mm
       const photoH = outHeightMM ? mmToPx(outHeightMM) : 531; // default 45mm
@@ -236,9 +238,8 @@ export default function ImageTool() {
           let x = xPad + c * best.w;
           let y = yPad + r * best.h;
           ctx.save();
-          ctx.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)`;
+          // No need to apply transforms again, preview already has them
           if (best.rotated) {
-            // Rotate 90deg around center of photo
             ctx.translate(x + best.w / 2, y + best.h / 2);
             ctx.rotate(Math.PI / 2);
             ctx.drawImage(img, 0, 0, img.width, img.height, -best.h / 2, -best.w / 2, best.h, best.w);
@@ -320,7 +321,7 @@ export default function ImageTool() {
 
   return (
     <div className="max-w-2xl mx-auto bg-white p-6 rounded shadow">
-      <h2 className="text-2xl font-bold mb-6 text-center">Image Compression & Tools</h2>
+      <h2 className="text-2xl font-bold mb-6 text-center">Image Compression and Tools</h2>
       <input type="file" accept="image/*" onChange={handleImageChange} className="mb-4" />
       {(preview || rawPreview) && (
         <div className="mb-4 flex flex-col md:flex-row items-center gap-4">
@@ -439,21 +440,23 @@ export default function ImageTool() {
       </div>
       {showCropModal && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white rounded shadow-lg p-6 relative w-[400px]">
+          <div className="bg-white rounded shadow-lg p-2 relative w-[400px]">
             <h3 className="font-semibold mb-2">Crop Image</h3>
-            <div className="flex gap-2 mb-2">
-              <label className="text-xs">Aspect Ratio:</label>
+            <div className="flex gap-2 mb-2 text-xs">
+              <label className="my-auto">Aspect Ratio:</label>
               <input
                 type="number"
                 min={0.1}
                 step={0.01}
                 value={aspectRatio}
                 onChange={e => setAspectRatio(Number(e.target.value) || 1)}
-                className="border rounded px-2 py-1 w-20"
+                className="border rounded px-1 w-20"
               />
-              <button className={`px-2 py-1 rounded border ${aspectRatio === 1 ? 'bg-teal-600 text-white' : 'bg-gray-100'}`} onClick={() => setAspectRatio(1)}>1:1</button>
-              <button className={`px-2 py-1 rounded border ${aspectRatio === 4/3 ? 'bg-teal-600 text-white' : 'bg-gray-100'}`} onClick={() => setAspectRatio(4/3)}>4:3</button>
-              <button className={`px-2 py-1 rounded border ${aspectRatio === 16/9 ? 'bg-teal-600 text-white' : 'bg-gray-100'}`} onClick={() => setAspectRatio(16/9)}>16:9</button>
+              <button className={`px-1 py-1 rounded border ${aspectRatio === 1 ? 'bg-teal-600 text-white' : 'bg-gray-100'}`} onClick={() => setAspectRatio(1)}>1:1</button>
+              <button className={`px-1 py-1 rounded border ${aspectRatio === 4/3 ? 'bg-teal-600 text-white' : 'bg-gray-100'}`} onClick={() => setAspectRatio(4/3)}>4:3</button>
+              <button className={`px-1 py-1 rounded border ${aspectRatio === 3/4 ? 'bg-teal-600 text-white' : 'bg-gray-100'}`} onClick={() => setAspectRatio(3/4)}>3:4</button>
+              <button className={`px-1 py-1 rounded border ${aspectRatio === 16/9 ? 'bg-teal-600 text-white' : 'bg-gray-100'}`} onClick={() => setAspectRatio(16/9)}>16:9</button>
+              <button className={`px-1 py-1 rounded border ${aspectRatio === 9/16 ? 'bg-teal-600 text-white' : 'bg-gray-100'}`} onClick={() => setAspectRatio(9/16)}>9:16</button>
             </div>
             {/* Crop size controls removed as requested */}
             <div className="relative w-full h-64 bg-gray-100 mb-4">
