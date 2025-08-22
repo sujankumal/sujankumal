@@ -4,8 +4,9 @@ import MarkdownComponent from "@/components/MarkdownComponent";
 import Sidebar from "@/components/Sidebar";
 import UserLinkButton from "@/components/User/UserLinkButton";
 import { fetchPostByID, fetchPostCountIdArray } from "@/services/data_access";
-import { Metadata, ResolvingMetadata } from "next";
+import { Metadata } from "next";
 import Image from "next/image";
+import { ArticleJsonLd, BreadcrumbJsonLd } from "../../../../components/seo/JsonLd";
 
 async function Articles({params}:{params: Promise<{id:number}>}) {
     const id = (await params).id;
@@ -17,8 +18,33 @@ async function Articles({params}:{params: Promise<{id:number}>}) {
         return (content.content)?<MarkdownComponent key={index} content={content.content} />:<div></div>;
     });
 
-    return (  
+    return (
         <main className="grid md:grid-cols-4 min-h-screen justify-center">
+            {/* Structured Data */}
+            <ArticleJsonLd
+                headline={article.title}
+                description={article.description}
+                author={{
+                    name: String(article.author?.name || "Sujan Kumal"),
+                    url: "https://sujankumal.com.np"
+                }}
+                datePublished={article.date.toISOString()}
+                dateModified={article.date.toISOString()}
+                url={`https://sujankumal.com.np/articles/${article.id}`}
+                image={article.main_image ? [`https://sujankumal.com.np/images/${article.main_image}`] : undefined}
+                publisher={{
+                    name: "Sujan Kumal",
+                    url: "https://sujankumal.com.np"
+                }}
+            />
+            <BreadcrumbJsonLd
+                items={[
+                    { name: "Home", url: "https://sujankumal.com.np" },
+                    { name: "Articles", url: "https://sujankumal.com.np/articles" },
+                    { name: article.title, url: `https://sujankumal.com.np/articles/${article.id}` }
+                ]}
+            />
+
             <div className="mb-8 px-4 md:mx-8 md:col-span-3">
                 <article>
                     <div className="mb-5 mx-5">
@@ -98,7 +124,7 @@ export async function generateStaticParams() {
     return paths;
   }
 
-export async function generateMetadata({params}:{params: Promise<{id:number}>}, parent: ResolvingMetadata): Promise<Metadata>{
+export async function generateMetadata({params}:{params: Promise<{id:number}>}): Promise<Metadata>{
     const id = (await params).id;
     const article = await fetchPostByID(id);
 
@@ -109,7 +135,7 @@ export async function generateMetadata({params}:{params: Promise<{id:number}>}, 
           images:[`/images/${article.main_image}`],
           type:'website',
           url:'https://sujankumal.com.np/',
-          siteName:'Sujan Kumal | A Software Engineer',
+          siteName:'Sujan Kumal | Software Engineer',
           title: `Articles | ${article.title}`,
           description: article.description,
         },

@@ -4,58 +4,241 @@ import { redirect } from "next/navigation";
 import SignOutButton from "@/components/auth/SignOut";
 import Image from "next/image";
 import bird_100_100_20 from '/public/bird-100x100-20.gif';
+import { CollapsibleSection, CollapsibleSectionGroup } from "../../../components/admin/CollapsibleSection";
+import { LazyAdminTable } from "../../../components/admin/LazyAdminTable";
 
 export const metadata: Metadata = {
-    title: 'Admin | Sujan Kumal | A Software Engineer',
+    title: 'Admin | Sujan Kumal | Software Engineer',
     description: "Admin page.",
 }
 
 export const revalidate = 86400;
 async function Admin() {
     const session = await auth();
-    console.log("Admin page .. session:", session);
     if (!session?.user) {
         return redirect('/log-in');
     }
+    if (!session.user.verified) {
+        return redirect('/not-authorized');
+    }
+
     return (
-        <main className="min-h-screen justify-center">
+        <main className="min-h-screen bg-gray-50">
+            {/* ...existing navbar code... */}
             <nav className="bg-white border-b-2 border-gray-200 dark:bg-gray-900">
                 <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-1">
-                    <div className="flex justify-center w-full md:w-fit border-b-2 border-teal-600 md:border-none">
-                        <a href="/" className="space-x-3 rtl:space-x-reverse md:flex">
-                            <div className="w-full md:w-fit inline-flex justify-center md:block">
-                                <Image
-                                    src={bird_100_100_20}
-                                    alt="Sujan Kumal"
-                                    priority={true} 
-                                />
-                            </div>
-                            <div className="self-center text-xl font-semibold whitespace-nowrap dark:text-white mb-2 md:m-auto">Sujan Kumal</div>
-                        </a>
-                    </div>
-                    <div className="w-full md:w-auto">
-                        <ul className="font-medium flex flex-col p-1 md:p-0 mt-1 rounded-lg md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0">
-                            <li className="inline-flex flex-col justify-center">
-                                <span className="inline-flex justify-center md:py-2 px-3 rounded md:bg-transparent text-teal-600 md:p-0 dark:text-white md:dark:text-teal-600">
-                                    <p className="inline-flex flex-col justify-center mx-2">Hello, { session?.user?.name ?? "Unknown" }. </p>
-                                    <Image
-                                        className="rounded-full"
-                                        width={50}
-                                        height={50}
-                                        src={session?.user.image??''}
-                                        alt={"User Image"}
-                                        unoptimized
-                                    />
-                                </span>
-                            </li>
-                            <li className="inline-flex flex-col justify-center">
-                                <span className="inline-flex justify-center md:py-2 px-2 text-teal-600 rounded hover:bg-teal-600 md:hover:shadow-sm md:hover:text-teal-900 md:border-0 md:p-0 dark:text-white md:dark:hover:text-teal-600 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"><SignOutButton /></span>
-                            </li>
-                            
-                        </ul>
-                    </div>
+                    {/* ...existing navbar content... */}
                 </div>
             </nav>
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="mb-8">
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Database Management</h1>
+                    <p className="text-gray-600">Manage your application data with full CRUD operations. Click on any section to expand and load the data.</p>
+                </div>
+
+                {/* Content Management */}
+                <CollapsibleSectionGroup
+                    title="📝 Content Management"
+                    description="Manage posts, categories, and content blocks"
+                    defaultExpanded={true}
+                >
+                    <CollapsibleSection
+                        title="Posts"
+                        entity="post"
+                        defaultExpanded={false}
+                    >
+                        <LazyAdminTable
+                            title="Posts"
+                            entity="post"
+                            fields={["id","title","description","main_image","date","published","author"]}
+                            markdownFields={["description"]}
+                            imageFields={["main_image"]}
+                            searchableFields={["title","description"]}
+                            isCRUD={true}
+                        />
+                    </CollapsibleSection>
+
+                    <CollapsibleSection
+                        title="Categories"
+                        entity="category"
+                    >
+                        <LazyAdminTable
+                            title="Categories"
+                            entity="category"
+                            fields={["id","name"]}
+                            searchableFields={["name"]}
+                            isCRUD={true}
+                        />
+                    </CollapsibleSection>
+
+                    <CollapsibleSection
+                        title="Content Blocks"
+                        entity="content"
+                    >
+                        <LazyAdminTable
+                            title="Content"
+                            entity="content"
+                            fields={["id","type","content","sequence","postId","post"]}
+                            markdownFields={["content"]}
+                            searchableFields={["type","content"]}
+                            isCRUD={true}
+                        />
+                    </CollapsibleSection>
+
+                    <CollapsibleSection
+                        title="Categories On Posts"
+                        entity="categoriesOnPosts"
+                    >
+                        <LazyAdminTable
+                            title="Categories On Posts"
+                            entity="categoriesOnPosts"
+                            fields={["id","postId","categoryId","post","category"]}
+                            searchableFields={[]}
+                            isCRUD={true}
+                        />
+                    </CollapsibleSection>
+                </CollapsibleSectionGroup>
+
+                {/* User Management */}
+                <CollapsibleSectionGroup
+                    title="👥 User Management"
+                    description="Manage users, profiles, and authentication"
+                >
+                    <CollapsibleSection
+                        title="Users"
+                        entity="user"
+                    >
+                        <LazyAdminTable
+                            title="Users"
+                            entity="user"
+                            fields={["id","name","email","verified","image"]}
+                            imageFields={["image"]}
+                            searchableFields={["name","email"]}
+                            isCRUD={true}
+                        />
+                    </CollapsibleSection>
+
+                    <CollapsibleSection
+                        title="Profiles"
+                        entity="profile"
+                    >
+                        <LazyAdminTable
+                            title="Profiles"
+                            entity="profile"
+                            fields={["id","authorId","status","image","about","phone","email","author"]}
+                            markdownFields={["about"]}
+                            imageFields={["image"]}
+                            searchableFields={["email","phone"]}
+                            isCRUD={true}
+                        />
+                    </CollapsibleSection>
+                </CollapsibleSectionGroup>
+
+                {/* Site Management */}
+                <CollapsibleSectionGroup
+                    title="⚙️ Site Management"
+                    description="Manage site settings, projects, and social links"
+                >
+                    <CollapsibleSection
+                        title="Site Settings"
+                        entity="site"
+                    >
+                        <LazyAdminTable
+                            title="Site"
+                            entity="site"
+                            fields={["id","header_image","title","name","motto","greeting","description","year","contact_email"]}
+                            markdownFields={["description","detail","privacy_policy"]}
+                            imageFields={["header_image"]}
+                            searchableFields={["title","name","motto","greeting"]}
+                            isCRUD={true}
+                        />
+                    </CollapsibleSection>
+
+                    <CollapsibleSection
+                        title="Projects"
+                        entity="project"
+                    >
+                        <LazyAdminTable
+                            title="Projects"
+                            entity="project"
+                            fields={["id","title","description","link"]}
+                            markdownFields={["description"]}
+                            searchableFields={["title","description"]}
+                            isCRUD={true}
+                        />
+                    </CollapsibleSection>
+
+                    <CollapsibleSection
+                        title="Social Links"
+                        entity="social"
+                    >
+                        <LazyAdminTable
+                            title="Socials"
+                            entity="social"
+                            fields={["id","name","username","embed"]}
+                            searchableFields={["name","username"]}
+                            isCRUD={true}
+                        />
+                    </CollapsibleSection>
+
+                    <CollapsibleSection
+                        title="Updates"
+                        entity="updates"
+                    >
+                        <LazyAdminTable
+                            title="Updates"
+                            entity="updates"
+                            fields={["id","title","update","date"]}
+                            markdownFields={["update"]}
+                            searchableFields={["title","update"]}
+                            isCRUD={true}
+                        />
+                    </CollapsibleSection>
+                </CollapsibleSectionGroup>
+
+                {/* System Tables */}
+                <CollapsibleSectionGroup
+                    title="🔧 System Tables"
+                    description="Authentication and system data (read-only)"
+                >
+                    <CollapsibleSection
+                        title="Accounts"
+                        entity="account"
+                    >
+                        <LazyAdminTable
+                            title="Accounts"
+                            entity="account"
+                            fields={["id","userId","type","provider","providerAccountId"]}
+                            isCRUD={false}
+                        />
+                    </CollapsibleSection>
+
+                    <CollapsibleSection
+                        title="Sessions"
+                        entity="session"
+                    >
+                        <LazyAdminTable
+                            title="Sessions"
+                            entity="session"
+                            fields={["id","sessionToken","userId","expires"]}
+                            isCRUD={false}
+                        />
+                    </CollapsibleSection>
+
+                    <CollapsibleSection
+                        title="Verification Tokens"
+                        entity="verificationToken"
+                    >
+                        <LazyAdminTable
+                            title="Verification Tokens"
+                            entity="verificationToken"
+                            fields={["identifier","token","expires"]}
+                            isCRUD={false}
+                        />
+                    </CollapsibleSection>
+                </CollapsibleSectionGroup>
+            </div>
         </main>
     );
 }

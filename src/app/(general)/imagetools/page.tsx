@@ -5,10 +5,10 @@ import React, { Suspense } from 'react';
 import Sidebar from "@/components/Sidebar";
 
 export const metadata: Metadata = {
-  title: 'Image Tools | Sujan Kumal | A Software Engineer',
+  title: 'Image Tools | Sujan Kumal | Software Engineer',
   description: 'Compress, crop, rotate, and edit images online with Sujan Kumal’s Image Tools.',
   openGraph: {
-    title: 'Image Tools | Sujan Kumal | A Software Engineer',
+    title: 'Image Tools | Sujan Kumal | Software Engineer',
     description: 'Compress, crop, rotate, and edit images online with Sujan Kumal’s Image Tools.',
     type: 'website',
     url: 'https://sujankumal.com.np/imagetools',
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary',
-    title: 'Image Tools | Sujan Kumal | A Software Engineer',
+    title: 'Image Tools | Sujan Kumal | Software Engineer',
     description: 'Compress, crop, rotate, and edit images online with Sujan Kumal’s Image Tools.',
     images: ['/bird-1024x576-20.gif'],
     creator: '@sujan_03_',

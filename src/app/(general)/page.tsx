@@ -4,6 +4,7 @@ import { fetchPostHome, fetchSite } from '@/services/data_access';
 import { PostType } from '@/types/post';
 import { SiteType } from '@/types/site';
 import { Metadata } from 'next';
+import { BlogJsonLd } from '../../components/seo/JsonLd';
 
 
 const site:SiteType = await fetchSite();
@@ -26,6 +27,22 @@ export default async function Home() {
 
   return (
     <main className="grid md:grid-cols-4 min-h-screen justify-center">
+      {/* Blog Structured Data */}
+      <BlogJsonLd
+        name="Sujan Kumal"
+        description={sites.description}
+        url="https://sujankumal.com.np"
+        author={{
+          name: "Sujan Kumal",
+          url: "https://sujankumal.com.np"
+        }}
+        posts={posts.slice(0, 5).map(post => ({
+          headline: post.title,
+          url: `https://sujankumal.com.np/articles/${post.id}`,
+          datePublished: post.date.toISOString()
+        }))}
+      />
+
       <div className="mb-8 p-4 md:m-8 md:col-span-3">
         <article className="block text-gray-800 dark:text-inherit">
             <h3 className="mb-4">{sites.greeting}</h3>

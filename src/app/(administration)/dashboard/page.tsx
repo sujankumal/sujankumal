@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { auth, signOut } from "../../../services/auth";
+import { auth } from "../../../services/auth";
 import { redirect } from "next/navigation";
 import SignOutButton from "@/components/auth/SignOut";
 import Image from "next/image";
@@ -7,14 +7,13 @@ import bird_100_100_20 from '/public/bird-100x100-20.gif';
 import spacex_r from '/public/images/rockets/spacex--p-KCm6xB9I-unsplash.jpg';
 
 export const metadata: Metadata = {
-    title: 'Dashboard | Sujan Kumal | A Software Engineer',
+    title: 'Dashboard | Sujan Kumal | Software Engineer',
     description: "Dashboard page.",
 }
 
 export const revalidate = 86400;
 async function Admin() {
     const session = await auth();
-    console.log("Dashboard page .. session:", session);
     if (!session?.user) {
         return redirect('/log-in');
     }
@@ -31,7 +30,7 @@ async function Admin() {
                                     priority={true} 
                                 />
                             </div>
-                            <div className="self-center text-xl font-semibold whitespace-nowrap dark:text-white mb-2 md:m-auto">Sujan Kumal</div>
+                            <div className="self-center text-xl font-semibold whitespace-nowrap dark:text-white mb-2 md:m-auto text-teal-600 md:p-0 ">Sujan Kumal</div>
                         </a>
                     </div>
                     <div className="w-full md:w-auto">
@@ -52,6 +51,12 @@ async function Admin() {
                                     }    
                                 </span>
                             </li>
+                            {(session?.user.verified)?
+                                <a href="/admin" className="space-x-3 rtl:space-x-reverse md:flex">
+                                    <li className="inline-flex flex-col justify-center md:py-2 px-3 rounded md:bg-transparent text-teal-600 md:p-0 dark:text-white md:dark:text-teal-600">Admin Page</li>
+                                </a>
+                                :null
+                            }
                             <li className="inline-flex flex-col justify-center">
                                 <span className="inline-flex justify-center md:py-2 px-2 text-teal-600 rounded hover:bg-teal-600 md:hover:shadow-sm md:hover:text-teal-900 md:border-0 md:p-0 dark:text-white md:dark:hover:text-teal-600 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"><SignOutButton /></span>
                             </li>

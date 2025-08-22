@@ -13,7 +13,7 @@ const noto = Noto_Sans({
 })
 
 export const metadata: Metadata = {
-  title: 'Sujan Kumal | A Software Engineer',
+  title: 'Sujan Kumal | Software Engineer',
   description: "Welcome to Sujan Kumal's Site. Experienced Software Engineer | Innovative Problem Solver | Passionate About Technology",
   metadataBase: new URL(METADATA_BASE_URL),
   robots: {
@@ -24,8 +24,8 @@ export const metadata: Metadata = {
     images:['/bird-1024x576-20.gif'],
     type:'website',
     url:'https://sujankumal.com.np/',
-    siteName:'Sujan Kumal | A Software Engineer',
-    title:'Sujan Kumal | A Software Engineer',
+    siteName:'Sujan Kumal | Software Engineer',
+    title:'Sujan Kumal | Software Engineer',
     description:"Welcome to Sujan Kumal's Site. Experienced Software Engineer | Innovative Problem Solver | Passionate About Technology",
   },
   twitter:{
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     creator:'@sujan_03_',
     site:'@sujan_03_',
     images:['/bird-1024x576-20.gif'],
-    title:'Sujan Kumal | A Software Engineer',
+    title:'Sujan Kumal | Software Engineer',
     description:"Welcome to Sujan Kumal's Site. Experienced Software Engineer | Innovative Problem Solver | Passionate About Technology",
   },
   icons: {

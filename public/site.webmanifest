@@ -1,0 +1,41 @@
+{
+  "name": "Sujan Kumal - Software Engineer",
+  "short_name": "Sujan Kumal",
+  "description": "Personal website and blog of Sujan Kumal - Software Developer, Writer, and Tech Enthusiast",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0d9488",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/bird-32x32-20.gif",
+      "sizes": "32x32",
+      "type": "image/gif",
+      "purpose": "any"
+    },
+    {
+      "src": "/bird-100x100-20.gif",
+      "sizes": "100x100",
+      "type": "image/gif",
+      "purpose": "any"
+    },
+    {
+      "src": "/bird-800x800-20.gif",
+      "sizes": "800x800",
+      "type": "image/gif",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/bird-1024x576-20.gif",
+      "sizes": "1024x576",
+      "type": "image/gif",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["technology", "blog", "portfolio"],
+  "lang": "en",
+  "dir": "ltr",
+  "scope": "/",
+  "id": "sujankumal-website"
+}

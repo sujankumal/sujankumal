@@ -14,42 +14,37 @@ declare module "@auth/core" {
 }
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
-  session:{
-    strategy:'jwt',
+  session: {
+    strategy: 'jwt',
   },
-  callbacks:{
-    async session({ session, token, user}){
-      // console.log("Session: ", session, "Token: ",token);
+  callbacks: {
+    async session({ session, token, user }) {
+      // Add verified to session.user from token
+      if (session.user && typeof token.verified !== "undefined") {
+        session.user.verified = !!token.verified;
+      }
       return session;
     },
-    async jwt({token, user, account, profile, trigger, session}){
-      // console.log("jwt:", token, user, account, profile, trigger, session );
-      if(trigger=='signIn'){
-
-      }
-      if(user){
-        token.email = user.email
+    async jwt({ token, user, account, profile, trigger, session }) {
+      if (user && typeof user.verified !== "undefined") {
+        token.verified = user.verified;
       }
       return token;
     },
     async signIn({ account, profile }) {
-      // console.log("Sign IN callback:", account, profile);
       if (account?.provider === "google") {
-        return profile?.email_verified??false
+        return profile?.email_verified ?? false;
       }
-      return true // Do different verification for other providers that don't have `email_verified`
+      return true;
     },
     async authorized({ request, auth }) {
       const cookie = request.cookies.get('authjs.session-token')?.value;
-      // console.log("authjs file:", cookie, auth);
-      
-      // return Response.redirect(new URL('/log-in', nextUrl)); // Redirect unauthenticated users to login page
-      const url = request.nextUrl
+      const url = request.nextUrl;
       const isLoggedIn = !!auth?.user;
       const isOnDashboard = request.nextUrl.pathname.startsWith('/admin');
       if (isOnDashboard) {
         if (isLoggedIn) return true;
-        return false; // Redirect unauthenticated users to login page
+        return false;
       } else if (isLoggedIn) {
         return Response.redirect(new URL('/admin', request.nextUrl));
       }

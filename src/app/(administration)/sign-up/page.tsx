@@ -16,7 +16,6 @@ function Signup() {
     const { data: session } = useSession();
 
     const searchParams = useSearchParams();
-    // console.log("Query:",searchParams.get('error'));
     
     useEffect(()=>{
         if(searchParams.get('error')=="CredentialsSignin"){

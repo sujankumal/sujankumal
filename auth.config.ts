@@ -8,96 +8,110 @@ import prisma from './prisma/prisma';
 import { PrismaAdapter } from "@auth/prisma-adapter";
 
 type User_type = {
-  id:string,
-  name:string|null,
-  email:string|null,
-  password:string|null,
+  id: string,
+  name: string | null,
+  email: string | null,
+  password: string | null,
+  verified: boolean,
+  image?: string | null,
 }
 
-async function getUser(email:string):Promise<User_type|null>{
-  try{
+async function getUser(email: string): Promise<User_type | null> {
+  try {
     let user = await prisma.user.findUnique({
-      where:{
-        email:email,
-      },
-      select:{
-        id:true,
-        name:true,
-        email:true,
-        password:true,
+      where: { email },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        password: true,
+        verified: true,
+        image: true,
       }
     });
     if (!user) return null;
-
+    // Debug: log user object
+    console.log('getUser result:', user);
     return {
-      id:user.id.toString(),
-      name:user.name,
-      email:user.email,
-      password:user.password,
-    }; 
-  }catch(error){
-    // console.error('Failed to fetch user:', error);
+      id: user.id.toString(),
+      name: user.name,
+      email: user.email,
+      password: user.password,
+      verified: user.verified,
+      image: user.image,
+    };
+  } catch (error) {
     throw new Error('Failed to fetch user.');
   }
 }
 
 export const authConfig = {
-    pages:{
-        signIn:'/log-in',
-    },
-
-    providers:[
-      CredentialProvider({
-        name:"Credentials",
-        credentials:{
-          email:{label:"Email", type:"email", placeholder:"example@sujankumal.com.np"},
-          password:{label:"Password", type:"password"}
-        },
-        async authorize(credentials){
-          // console.log("Credientials log authorize method: ", credentials);
-          const parsedCredentials = z
-              .object({ 
-                  email: z.string().email(), 
-                  password: z.string().min(8) 
-              })
-              .safeParse(credentials);
-
-          if (parsedCredentials.success){
-            const {email, password} = parsedCredentials.data;
-            const user = await getUser(email);
-            if (!user) return null;
-            const passwordMatch = await bcrypt.compare(password, user.password??'.');
-            // if (passwordMatch) return user;
-            if (passwordMatch){
-              return user;
-            }
-          }
-          // console.log('Invalid credentials');
-          return null;
-        },
-      }),
-      GoogleProvider({
-        clientId:process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        authorization: {
-            params: {
-              // prompt: "consent",
-              // access_type: "offline",
-              // response_type: "code"
-              scope:"email profile",
-            }
-        },
-        profile(profile){
-          return {
-            id: profile.sub,
-            name: profile.name,
-            email: profile.email,
-            image: profile.picture,
-          }
+  pages: {
+    signIn: '/log-in',
+  },
+  providers: [
+    CredentialProvider({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "email", placeholder: "example@sujankumal.com.np" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials) {
+        const parsedCredentials = z
+          .object({
+            email: z.string().email(),
+            password: z.string().min(8)
+          })
+          .safeParse(credentials);
+        if (parsedCredentials.success) {
+          const { email, password } = parsedCredentials.data;
+      const user = await getUser(email);
+      console.log('authorize user:', user);
+      if (!user) return null;
+      const passwordMatch = await bcrypt.compare(password, user.password ?? '.');
+      if (passwordMatch) {
+        return user;
+      }
         }
-      }),
-    ],
-    adapter:PrismaAdapter(prisma as any),
+        return null;
+      },
+    }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      authorization: {
+        params: {
+          scope: "email profile",
+        }
+      },
+      profile(profile) {
+        // You may want to fetch verified from DB if needed for Google users
+        return {
+          id: profile.sub,
+          name: profile.name,
+          email: profile.email,
+          image: profile.picture,
+        }
+      }
+    }),
+  ],
+  adapter: PrismaAdapter(prisma as any),
+  callbacks: {
+    async jwt({ token, user, account, profile, trigger, session }) {
+      console.log('JWT callback user:', user);
+      console.log('JWT callback token:', token);
+      if (user && typeof user.verified !== "undefined") {
+        token.verified = user.verified;
+      }
+      return token;
+    },
+    async session({ session, user }) {
+      if (session?.user && user?.verified !== undefined) {
+        session.user.verified = user.verified;
+      }
+      return session;
+    }
+  },
 } satisfies NextAuthConfig;
 
 export default authConfig;
