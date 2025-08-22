@@ -8,12 +8,12 @@ import { headers } from "next/headers";
 const entitySchemas = {
   post: z.object({
     title: z.string().min(1, "Title is required"),
-    description: z.string().optional(),
+    description: z.string().nullable().optional(),
     main_image: z.string().min(1, "Main image is required"),
-    main_image_credit: z.string().optional(),
+    main_image_credit: z.string().nullable().optional(),
     date: z.string().transform((str) => new Date(str)),
     published: z.boolean().default(false),
-    authorId: z.number().optional(),
+    authorId: z.number().nullable().optional(),
   }),
   category: z.object({
     name: z.string().min(1, "Name is required"),
@@ -22,20 +22,20 @@ const entitySchemas = {
     name: z.string().min(1, "Name is required"),
     email: z.string().email("Valid email is required"),
     verified: z.boolean().default(false),
-    image: z.string().optional(),
+    image: z.string().nullable().optional(),
   }),
   profile: z.object({
     authorId: z.number(),
-    status: z.string().optional(),
-    image: z.string().optional(),
-    about: z.string().optional(),
-    phone: z.string().optional(),
-    email: z.string().email().optional(),
+    status: z.string().nullable().optional(),
+    image: z.string().nullable().optional(),
+    about: z.string().nullable().optional(),
+    phone: z.string().nullable().optional(),
+    email: z.string().email().nullable().optional(),
   }),
   project: z.object({
     title: z.string().min(1, "Title is required"),
-    description: z.string().optional(),
-    link: z.string().optional(),
+    description: z.string().nullable().optional(),
+    link: z.string().nullable().optional(),
   }),
   social: z.object({
     name: z.string().min(1, "Name is required"),
@@ -49,7 +49,7 @@ const entitySchemas = {
   }),
   site: z.object({
     header_image: z.string().default("header.jpg"),
-    header_image_credit: z.string().optional(),
+    header_image_credit: z.string().nullable().optional(),
     title: z.string().min(1, "Title is required"),
     name: z.string().min(1, "Name is required"),
     motto: z.string().min(1, "Motto is required"),
@@ -58,9 +58,9 @@ const entitySchemas = {
     detail: z.string().min(1, "Detail is required"),
     copyright: z.string().min(1, "Copyright is required"),
     year: z.number().min(1900).max(new Date().getFullYear() + 10),
-    privacy_policy: z.string().optional(),
-    contact_email: z.string().email().optional(),
-    contact_phone: z.string().optional(),
+    privacy_policy: z.string().nullable().optional(),
+    contact_email: z.string().email().nullable().optional(),
+    contact_phone: z.string().nullable().optional(),
   }),
   content: z.object({
     type: z.string().min(1, "Type is required"),
@@ -288,7 +288,15 @@ export async function POST(
       return NextResponse.json({ error: "Invalid entity" }, { status: 400 });
     }
 
-    const validatedData = schema.parse(body);
+    // Preprocess data to handle empty strings as null for optional fields
+    const preprocessedBody = { ...body };
+    Object.keys(preprocessedBody).forEach(key => {
+      if (preprocessedBody[key] === "" || preprocessedBody[key] === null) {
+        preprocessedBody[key] = null;
+      }
+    });
+
+    const validatedData = schema.parse(preprocessedBody);
 
     // Get the appropriate Prisma model
     const model = (prisma as any)[entity];
@@ -350,7 +358,15 @@ export async function PUT(
       return NextResponse.json({ error: "Invalid entity" }, { status: 400 });
     }
 
-    const validatedData = schema.partial().parse(updateData);
+    // Preprocess data to handle empty strings as null for optional fields
+    const preprocessedData = { ...updateData };
+    Object.keys(preprocessedData).forEach(key => {
+      if (preprocessedData[key] === "" || preprocessedData[key] === null) {
+        preprocessedData[key] = null;
+      }
+    });
+
+    const validatedData = schema.partial().parse(preprocessedData);
 
     // Get the appropriate Prisma model
     const model = (prisma as any)[entity];
