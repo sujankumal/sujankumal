@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Plus, Edit, Trash2, Search, ArrowUpDown, ArrowUp, ArrowDown, ImageIcon } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import Image from "next/image";
@@ -69,10 +69,10 @@ export function AdminCRUDTable({
   const { showDeleteWarning, WarningBanners } = useWarningBanner();
 
   // Fetch data
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const params = new URLSearchParams({
         page: pagination.page.toString(),
@@ -95,12 +95,12 @@ export function AdminCRUDTable({
     } finally {
       setLoading(false);
     }
-  };
+  }, [entity, pagination.page, pagination.limit, searchTerm, sortBy, sortOrder]);
 
   // Effects
   useEffect(() => {
     fetchData();
-  }, [pagination.page, pagination.limit, searchTerm, sortBy, sortOrder, filters]);
+  }, [fetchData]);
 
   // Handlers
   const handleSort = (field: string) => {

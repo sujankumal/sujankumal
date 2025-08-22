@@ -157,7 +157,7 @@ export function ConfirmDialog({
               />
               {typedText && typedText !== typeToConfirm && (
                 <p className="mt-1 text-xs text-red-600">
-                  Text doesn't match. Please type exactly: {typeToConfirm}
+                  Text doesn&apos;t match. Please type exactly: {typeToConfirm}
                 </p>
               )}
             </div>

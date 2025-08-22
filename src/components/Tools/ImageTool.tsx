@@ -134,7 +134,7 @@ export default function ImageTool() {
       setPreview(canvas.toDataURL('image/jpeg', 0.8));
     };
     img.onerror = () => setPreview(referencePreview);
-  }, [referencePreview, outWidthMM, outHeightMM, cropOffset, rotate, mirrorH, mirrorV, brightness, contrast, saturation]);
+  }, [referencePreview, outWidthMM, outHeightMM, cropOffset, rotate, mirrorH, mirrorV, brightness, contrast, saturation, zoom]);
 
   // Cleanup preview URL when image changes or component unmounts
   useEffect(() => {
@@ -328,6 +328,7 @@ export default function ImageTool() {
           {rawPreview && (
             <div className="flex flex-col items-center">
               <span className="text-xs text-gray-500 mb-1">Reference Image</span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={rawPreview} alt="Reference" className="max-w-full max-h-64 rounded border block" />
             </div>
           )}
@@ -339,6 +340,7 @@ export default function ImageTool() {
                 style={{ position: 'relative' }}
               >
                 <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={preview}
                     alt="Preview"
@@ -365,6 +367,7 @@ export default function ImageTool() {
       {output && (
         <div className="mb-4">
           <h3 className="font-semibold">Output Image:</h3>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={output} alt="Output" className="max-w-full max-h-64 rounded border" />
           <div className="mt-2 flex items-center gap-2">
             <a href={output} download={inputFileName} className="text-teal-700 underline">Download JPG</a>
