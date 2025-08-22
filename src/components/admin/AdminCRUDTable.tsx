@@ -446,7 +446,7 @@ export function AdminCRUDTable({
             className="inline-flex items-center px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add {title.slice(0, -1)}
+            Add {title}
           </button>
         </div>
         
@@ -578,7 +578,7 @@ export function AdminCRUDTable({
       <Modal
         isOpen={showCreateModal}
         onClose={handleFormCancel}
-        title={`Create ${title.slice(0, -1)}`}
+        title={`Create ${title}`}
         size="lg"
       >
         <EntityForm
@@ -593,7 +593,7 @@ export function AdminCRUDTable({
       <Modal
         isOpen={showEditModal}
         onClose={handleFormCancel}
-        title={`Edit ${title.slice(0, -1)}`}
+        title={`Edit ${title}`}
         size="lg"
       >
         <EntityForm

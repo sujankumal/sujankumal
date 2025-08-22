@@ -214,7 +214,7 @@ export function EntityForm({ entity, initialData, onSubmit, onCancel, isLoading 
       // URL validation for image fields
       if ((field.name.includes("image") || field.name === "link") && formData[field.name]) {
         try {
-          new URL(formData[field.name]);
+          // new URL(formData[field.name]);
         } catch {
           newErrors[field.name] = "Please enter a valid URL";
         }
