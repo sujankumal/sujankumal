@@ -8,6 +8,7 @@ import { GA_TRACKING_ID } from '@/constants/constants'
 import FAB from '@/components/FAB'
 import { generateMetadata as generateSEOMetadata } from '../../lib/seo'
 import { WebSiteJsonLd, PersonJsonLd } from '../../components/seo/JsonLd'
+import PageLoader from '@/components/PageLoader'
 
 const noto = Noto_Sans({
   weight:['100','200','300','400','500','600','700','800'],
@@ -75,6 +76,7 @@ export default function RootLayout({
       />
       <body className={noto.className}>
         <Header/>
+        <PageLoader />
         {children}
         <Footer/>
         <FAB/>

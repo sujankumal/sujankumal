@@ -31,7 +31,6 @@ async function getUser(email: string): Promise<User_type | null> {
     });
     if (!user) return null;
     // Debug: log user object
-    console.log('getUser result:', user);
     return {
       id: user.id.toString(),
       name: user.name,
@@ -66,7 +65,7 @@ export const authConfig = {
         if (parsedCredentials.success) {
           const { email, password } = parsedCredentials.data;
       const user = await getUser(email);
-      console.log('authorize user:', user);
+      // console.log('authorize user:', user);
       if (!user) return null;
       const passwordMatch = await bcrypt.compare(password, user.password ?? '.');
       if (passwordMatch) {
@@ -98,8 +97,8 @@ export const authConfig = {
   adapter: PrismaAdapter(prisma as any),
   callbacks: {
     async jwt({ token, user, account, profile, trigger, session }) {
-      console.log('JWT callback user:', user);
-      console.log('JWT callback token:', token);
+      // console.log('JWT callback user:', user);
+      // console.log('JWT callback token:', token);
       if (user && typeof user.verified !== "undefined") {
         token.verified = user.verified;
       }
