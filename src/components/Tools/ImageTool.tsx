@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Cropper from 'react-easy-crop';
 import type { Area } from 'react-easy-crop';
 import exifr from 'exifr';
+import { ToastContainer, toast } from 'react-toastify';
 
 export default function ImageTool() {
   // Crop modal manual controls
@@ -107,10 +108,16 @@ export default function ImageTool() {
       cropX = Math.max(0, Math.min(cropX, img.width - cropW));
       cropY = Math.max(0, Math.min(cropY, img.height - cropH));
       const canvas = document.createElement('canvas');
-      canvas.width = zoomedW;
-      canvas.height = zoomedH;
+      // canvas.width = zoomedW;
+      // canvas.height = zoomedH;
+      const paddingPx = mmToPx(1);
+      canvas.width = zoomedW + 2 * paddingPx;
+      canvas.height = zoomedH + 2 * paddingPx;
       const ctx = canvas.getContext('2d');
       if (!ctx) return setPreview(referencePreview);
+      ctx.fillStyle = '#FFFFFF'
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
       ctx.save();
       // Mirror
       if (mirrorH) {
@@ -129,7 +136,8 @@ export default function ImageTool() {
       }
       // Filter for brightness, contrast, saturation
       ctx.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)`;
-      ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, zoomedW, zoomedH);
+      // ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, zoomedW, zoomedH);
+      ctx.drawImage(img, cropX, cropY, cropW, cropH, paddingPx, paddingPx, zoomedW, zoomedH);
       ctx.restore();
       setPreview(canvas.toDataURL('image/jpeg', 0.8));
     };
@@ -197,54 +205,106 @@ export default function ImageTool() {
   };
   // Passport Photo Sheet (100x150mm, 300 DPI, auto duplicate processed image)
   const handlePassportSheet = () => {
-    // Use preview image (with all transforms) for sheet
+    if (!preview){
+      toast.info("Please select a new image.");
+      return
+    }
+    if (!outWidthMM || !outHeightMM){
+      toast.info("Please set output size to generate the sheet.");
+      return
+    }
     const src = preview || referencePreview;
     if (!src) return;
     const img = document.createElement('img');
     img.src = src;
     img.onload = () => {
-      // Sheet: 150x100mm at 300 DPI = 1772x1181 px
-      const sheetW = 1772, sheetH = 1181;
+      // mm to px converter
       const mmToPx = (mm: number) => Math.round(mm * 11.811);
-      const photoW = outWidthMM ? mmToPx(outWidthMM) : 413; // default 35mm
-      const photoH = outHeightMM ? mmToPx(outHeightMM) : 531; // default 45mm
-      // Try both orientations
+      
+      // Photo dimensions
+      const photoW = outWidthMM ? mmToPx(outWidthMM) : 413;
+      const photoH = outHeightMM ? mmToPx(outHeightMM) : 531;
+      const paddingPx = mmToPx(1); // 1mm padding between photos
+
+      // Sheet dimensions
+      const sheetW = 1772;
+      const sheetH = 1181;
+
+      // Try all possible combinations: portrait/landscape sheet and photo rotation
       const options = [
-        {w: photoW, h: photoH},
-        {w: photoH, h: photoW}
+        { sheetW, sheetH, w: photoW, h: photoH, rotated: false },
+        { sheetW, sheetH, w: photoH, h: photoW, rotated: true },
+        { sheetW: sheetH, sheetH: sheetW, w: photoW, h: photoH, rotated: false },
+        { sheetW: sheetH, sheetH: sheetW, w: photoH, h: photoW, rotated: true }
       ];
-      let best = {count: 0, w: photoW, h: photoH, cols: 0, rows: 0, rotated: false};
+
+      let best = { count: 0, w: 0, h: 0, cols: 0, rows: 0, rotated: false, sheetW: 0, sheetH: 0 };
+      
       for (const opt of options) {
-        const cols = Math.floor(sheetW / opt.w);
-        const rows = Math.floor(sheetH / opt.h);
+        const cols = Math.floor((opt.sheetW - paddingPx) / (opt.w + paddingPx));
+        const rows = Math.floor((opt.sheetH - paddingPx) / (opt.h + paddingPx));
         const count = cols * rows;
+
         if (count > best.count) {
-          best = {count, w: opt.w, h: opt.h, cols, rows, rotated: opt.w !== photoW};
+          best = {
+            count,
+            w: opt.w,
+            h: opt.h,
+            cols,
+            rows,
+            rotated: opt.rotated,
+            sheetW: opt.sheetW,
+            sheetH: opt.sheetH
+          };
         }
       }
-      const totalW = best.cols * best.w;
-      const totalH = best.rows * best.h;
-      const xPad = Math.floor((sheetW - totalW) / 2);
-      const yPad = Math.floor((sheetH - totalH) / 2);
+      
+      const totalW = best.cols * best.w + (best.cols - 1) * paddingPx;
+      const totalH = best.rows * best.h + (best.rows - 1) * paddingPx;
+      const xPad = Math.floor((best.sheetW - totalW) / 2);
+      const yPad = Math.floor((best.sheetH - totalH) / 2);
+
       const canvas = document.createElement('canvas');
-      canvas.width = sheetW;
-      canvas.height = sheetH;
+      canvas.width = best.sheetW;
+      canvas.height = best.sheetH;
       const ctx = canvas.getContext('2d');
       if (!ctx) return setError('Canvas error.');
+
       ctx.fillStyle = '#fff';
-      ctx.fillRect(0, 0, sheetW, sheetH);
+      ctx.fillRect(0, 0, best.sheetW, best.sheetH);
+      
+      const aspectRatio = img.width / img.height;
+
       for (let r = 0; r < best.rows; r++) {
         for (let c = 0; c < best.cols; c++) {
-          let x = xPad + c * best.w;
-          let y = yPad + r * best.h;
-          ctx.save();
-          // No need to apply transforms again, preview already has them
+          let drawW, drawH;
+          let photoFrameW = best.w;
+          let photoFrameH = best.h;
+
           if (best.rotated) {
-            ctx.translate(x + best.w / 2, y + best.h / 2);
-            ctx.rotate(Math.PI / 2);
-            ctx.drawImage(img, 0, 0, img.width, img.height, -best.h / 2, -best.w / 2, best.h, best.w);
+            [photoFrameW, photoFrameH] = [photoFrameH, photoFrameW];
+          }
+
+          if (aspectRatio > photoFrameW / photoFrameH) {
+            drawW = photoFrameW;
+            drawH = photoFrameW / aspectRatio;
           } else {
-            ctx.drawImage(img, 0, 0, img.width, img.height, x, y, best.w, best.h);
+            drawH = photoFrameH;
+            drawW = photoFrameH * aspectRatio;
+          }
+
+          const x = xPad + c * (best.w + paddingPx);
+          const y = yPad + r * (best.h + paddingPx);
+          const centeredX = x + (best.w - drawW) / 2;
+          const centeredY = y + (best.h - drawH) / 2;
+
+          ctx.save();
+          if (best.rotated) {
+            ctx.translate(centeredX + drawW / 2, centeredY + drawH / 2);
+            ctx.rotate(Math.PI / 2);
+            ctx.drawImage(img, 0, 0, img.width, img.height, -drawH / 2, -drawW / 2, drawH, drawW);
+          } else {
+            ctx.drawImage(img, 0, 0, img.width, img.height, centeredX, centeredY, drawW, drawH);
           }
           ctx.restore();
         }
@@ -429,7 +489,12 @@ export default function ImageTool() {
             <button type="button" onClick={handleMirrorV} className={`px-2 py-1 rounded ${mirrorV ? 'bg-teal-600 text-white' : 'bg-gray-200'}`}>Vertical</button>
           </div>
           <label className="font-semibold">Passport Photo Sheet:</label>
-          <button type="button" onClick={handlePassportSheet} className="bg-teal-600 text-white px-4 py-2 rounded">Generate 100x150mm Sheet</button>
+          <button 
+            type="button" onClick={handlePassportSheet} 
+            className={`bg-teal-600 text-white px-4 py-2 rounded ${outWidthMM && outHeightMM ? '' :'disabled:opacity-90 disabled:bg-yellow-800'}`}
+            title={!outWidthMM || !outHeightMM ? "Please set output size to generate the sheet." : ""}
+            >Generate 100x150mm Sheet</button>
+            <ToastContainer position="bottom-right" theme="dark"/>
         </div>
       </div>
       <div className="flex flex-wrap gap-2 mb-4">
