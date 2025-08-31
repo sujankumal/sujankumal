@@ -1,4 +1,4 @@
-import { APP_BASE_URL } from "@/constants/constants";
+'use client'
 import { UserType } from "@/types/user";
 import { Person } from "@mui/icons-material";
 import Link from "next/link";
@@ -8,7 +8,7 @@ function UserLinkButton({user}: {user:UserType}) {
     return (user)?<div className="inline-flex text-gray-500 italic">
         <Person  className="flex-row self-center" fontSize="small" />
         <Link className="hover:text-teal-600 ml-1 inline-flex flex-row self-center" 
-            href={"#"}
+            href={"/#"}
             onNavigate={(e) => {
                 // Only executes during SPA navigation
                 console.log('Navigating...')
