@@ -6307,6 +6307,7 @@ export namespace Prisma {
   export type PostMinAggregateOutputType = {
     id: number | null
     title: string | null
+    url: string | null
     description: string | null
     main_image: string | null
     main_image_credit: string | null
@@ -6320,6 +6321,7 @@ export namespace Prisma {
   export type PostMaxAggregateOutputType = {
     id: number | null
     title: string | null
+    url: string | null
     description: string | null
     main_image: string | null
     main_image_credit: string | null
@@ -6333,6 +6335,7 @@ export namespace Prisma {
   export type PostCountAggregateOutputType = {
     id: number
     title: number
+    url: number
     description: number
     main_image: number
     main_image_credit: number
@@ -6362,6 +6365,7 @@ export namespace Prisma {
   export type PostMinAggregateInputType = {
     id?: true
     title?: true
+    url?: true
     description?: true
     main_image?: true
     main_image_credit?: true
@@ -6375,6 +6379,7 @@ export namespace Prisma {
   export type PostMaxAggregateInputType = {
     id?: true
     title?: true
+    url?: true
     description?: true
     main_image?: true
     main_image_credit?: true
@@ -6388,6 +6393,7 @@ export namespace Prisma {
   export type PostCountAggregateInputType = {
     id?: true
     title?: true
+    url?: true
     description?: true
     main_image?: true
     main_image_credit?: true
@@ -6488,6 +6494,7 @@ export namespace Prisma {
   export type PostGroupByOutputType = {
     id: number
     title: string
+    url: string
     description: string | null
     main_image: string
     main_image_credit: string | null
@@ -6520,6 +6527,7 @@ export namespace Prisma {
   export type PostSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     title?: boolean
+    url?: boolean
     description?: boolean
     main_image?: boolean
     main_image_credit?: boolean
@@ -6537,6 +6545,7 @@ export namespace Prisma {
   export type PostSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     title?: boolean
+    url?: boolean
     description?: boolean
     main_image?: boolean
     main_image_credit?: boolean
@@ -6551,6 +6560,7 @@ export namespace Prisma {
   export type PostSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     title?: boolean
+    url?: boolean
     description?: boolean
     main_image?: boolean
     main_image_credit?: boolean
@@ -6565,6 +6575,7 @@ export namespace Prisma {
   export type PostSelectScalar = {
     id?: boolean
     title?: boolean
+    url?: boolean
     description?: boolean
     main_image?: boolean
     main_image_credit?: boolean
@@ -6575,7 +6586,7 @@ export namespace Prisma {
     authorId?: boolean
   }
 
-  export type PostOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "main_image" | "main_image_credit" | "date" | "month" | "year" | "published" | "authorId", ExtArgs["result"]["post"]>
+  export type PostOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "url" | "description" | "main_image" | "main_image_credit" | "date" | "month" | "year" | "published" | "authorId", ExtArgs["result"]["post"]>
   export type PostInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     content?: boolean | Post$contentArgs<ExtArgs>
     categories?: boolean | Post$categoriesArgs<ExtArgs>
@@ -6599,6 +6610,7 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: number
       title: string
+      url: string
       description: string | null
       main_image: string
       main_image_credit: string | null
@@ -7035,6 +7047,7 @@ export namespace Prisma {
   interface PostFieldRefs {
     readonly id: FieldRef<"Post", 'Int'>
     readonly title: FieldRef<"Post", 'String'>
+    readonly url: FieldRef<"Post", 'String'>
     readonly description: FieldRef<"Post", 'String'>
     readonly main_image: FieldRef<"Post", 'String'>
     readonly main_image_credit: FieldRef<"Post", 'String'>
@@ -16468,6 +16481,7 @@ export namespace Prisma {
   export const PostScalarFieldEnum: {
     id: 'id',
     title: 'title',
+    url: 'url',
     description: 'description',
     main_image: 'main_image',
     main_image_credit: 'main_image_credit',
@@ -16643,6 +16657,7 @@ export namespace Prisma {
 
   export const PostOrderByRelevanceFieldEnum: {
     title: 'title',
+    url: 'url',
     description: 'description',
     main_image: 'main_image',
     main_image_credit: 'main_image_credit'
@@ -17046,6 +17061,7 @@ export namespace Prisma {
     NOT?: PostWhereInput | PostWhereInput[]
     id?: IntFilter<"Post"> | number
     title?: StringFilter<"Post"> | string
+    url?: StringFilter<"Post"> | string
     description?: StringNullableFilter<"Post"> | string | null
     main_image?: StringFilter<"Post"> | string
     main_image_credit?: StringNullableFilter<"Post"> | string | null
@@ -17062,6 +17078,7 @@ export namespace Prisma {
   export type PostOrderByWithRelationInput = {
     id?: SortOrder
     title?: SortOrder
+    url?: SortOrder
     description?: SortOrderInput | SortOrder
     main_image?: SortOrder
     main_image_credit?: SortOrderInput | SortOrder
@@ -17082,6 +17099,7 @@ export namespace Prisma {
     OR?: PostWhereInput[]
     NOT?: PostWhereInput | PostWhereInput[]
     title?: StringFilter<"Post"> | string
+    url?: StringFilter<"Post"> | string
     description?: StringNullableFilter<"Post"> | string | null
     main_image?: StringFilter<"Post"> | string
     main_image_credit?: StringNullableFilter<"Post"> | string | null
@@ -17098,6 +17116,7 @@ export namespace Prisma {
   export type PostOrderByWithAggregationInput = {
     id?: SortOrder
     title?: SortOrder
+    url?: SortOrder
     description?: SortOrderInput | SortOrder
     main_image?: SortOrder
     main_image_credit?: SortOrderInput | SortOrder
@@ -17119,6 +17138,7 @@ export namespace Prisma {
     NOT?: PostScalarWhereWithAggregatesInput | PostScalarWhereWithAggregatesInput[]
     id?: IntWithAggregatesFilter<"Post"> | number
     title?: StringWithAggregatesFilter<"Post"> | string
+    url?: StringWithAggregatesFilter<"Post"> | string
     description?: StringNullableWithAggregatesFilter<"Post"> | string | null
     main_image?: StringWithAggregatesFilter<"Post"> | string
     main_image_credit?: StringNullableWithAggregatesFilter<"Post"> | string | null
@@ -17883,6 +17903,7 @@ export namespace Prisma {
 
   export type PostCreateInput = {
     title: string
+    url?: string
     description?: string | null
     main_image: string
     main_image_credit?: string | null
@@ -17898,6 +17919,7 @@ export namespace Prisma {
   export type PostUncheckedCreateInput = {
     id?: number
     title: string
+    url?: string
     description?: string | null
     main_image: string
     main_image_credit?: string | null
@@ -17912,6 +17934,7 @@ export namespace Prisma {
 
   export type PostUpdateInput = {
     title?: StringFieldUpdateOperationsInput | string
+    url?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     main_image?: StringFieldUpdateOperationsInput | string
     main_image_credit?: NullableStringFieldUpdateOperationsInput | string | null
@@ -17927,6 +17950,7 @@ export namespace Prisma {
   export type PostUncheckedUpdateInput = {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
+    url?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     main_image?: StringFieldUpdateOperationsInput | string
     main_image_credit?: NullableStringFieldUpdateOperationsInput | string | null
@@ -17942,6 +17966,7 @@ export namespace Prisma {
   export type PostCreateManyInput = {
     id?: number
     title: string
+    url?: string
     description?: string | null
     main_image: string
     main_image_credit?: string | null
@@ -17954,6 +17979,7 @@ export namespace Prisma {
 
   export type PostUpdateManyMutationInput = {
     title?: StringFieldUpdateOperationsInput | string
+    url?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     main_image?: StringFieldUpdateOperationsInput | string
     main_image_credit?: NullableStringFieldUpdateOperationsInput | string | null
@@ -17966,6 +17992,7 @@ export namespace Prisma {
   export type PostUncheckedUpdateManyInput = {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
+    url?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     main_image?: StringFieldUpdateOperationsInput | string
     main_image_credit?: NullableStringFieldUpdateOperationsInput | string | null
@@ -18829,6 +18856,7 @@ export namespace Prisma {
   export type PostCountOrderByAggregateInput = {
     id?: SortOrder
     title?: SortOrder
+    url?: SortOrder
     description?: SortOrder
     main_image?: SortOrder
     main_image_credit?: SortOrder
@@ -18849,6 +18877,7 @@ export namespace Prisma {
   export type PostMaxOrderByAggregateInput = {
     id?: SortOrder
     title?: SortOrder
+    url?: SortOrder
     description?: SortOrder
     main_image?: SortOrder
     main_image_credit?: SortOrder
@@ -18862,6 +18891,7 @@ export namespace Prisma {
   export type PostMinOrderByAggregateInput = {
     id?: SortOrder
     title?: SortOrder
+    url?: SortOrder
     description?: SortOrder
     main_image?: SortOrder
     main_image_credit?: SortOrder
@@ -20096,6 +20126,7 @@ export namespace Prisma {
 
   export type PostCreateWithoutContentInput = {
     title: string
+    url?: string
     description?: string | null
     main_image: string
     main_image_credit?: string | null
@@ -20110,6 +20141,7 @@ export namespace Prisma {
   export type PostUncheckedCreateWithoutContentInput = {
     id?: number
     title: string
+    url?: string
     description?: string | null
     main_image: string
     main_image_credit?: string | null
@@ -20139,6 +20171,7 @@ export namespace Prisma {
 
   export type PostUpdateWithoutContentInput = {
     title?: StringFieldUpdateOperationsInput | string
+    url?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     main_image?: StringFieldUpdateOperationsInput | string
     main_image_credit?: NullableStringFieldUpdateOperationsInput | string | null
@@ -20153,6 +20186,7 @@ export namespace Prisma {
   export type PostUncheckedUpdateWithoutContentInput = {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
+    url?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     main_image?: StringFieldUpdateOperationsInput | string
     main_image_credit?: NullableStringFieldUpdateOperationsInput | string | null
@@ -20202,6 +20236,7 @@ export namespace Prisma {
 
   export type PostCreateWithoutCategoriesInput = {
     title: string
+    url?: string
     description?: string | null
     main_image: string
     main_image_credit?: string | null
@@ -20216,6 +20251,7 @@ export namespace Prisma {
   export type PostUncheckedCreateWithoutCategoriesInput = {
     id?: number
     title: string
+    url?: string
     description?: string | null
     main_image: string
     main_image_credit?: string | null
@@ -20259,6 +20295,7 @@ export namespace Prisma {
 
   export type PostUpdateWithoutCategoriesInput = {
     title?: StringFieldUpdateOperationsInput | string
+    url?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     main_image?: StringFieldUpdateOperationsInput | string
     main_image_credit?: NullableStringFieldUpdateOperationsInput | string | null
@@ -20273,6 +20310,7 @@ export namespace Prisma {
   export type PostUncheckedUpdateWithoutCategoriesInput = {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
+    url?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     main_image?: StringFieldUpdateOperationsInput | string
     main_image_credit?: NullableStringFieldUpdateOperationsInput | string | null
@@ -20306,6 +20344,7 @@ export namespace Prisma {
 
   export type PostCreateWithoutAuthorInput = {
     title: string
+    url?: string
     description?: string | null
     main_image: string
     main_image_credit?: string | null
@@ -20320,6 +20359,7 @@ export namespace Prisma {
   export type PostUncheckedCreateWithoutAuthorInput = {
     id?: number
     title: string
+    url?: string
     description?: string | null
     main_image: string
     main_image_credit?: string | null
@@ -20445,6 +20485,7 @@ export namespace Prisma {
     NOT?: PostScalarWhereInput | PostScalarWhereInput[]
     id?: IntFilter<"Post"> | number
     title?: StringFilter<"Post"> | string
+    url?: StringFilter<"Post"> | string
     description?: StringNullableFilter<"Post"> | string | null
     main_image?: StringFilter<"Post"> | string
     main_image_credit?: StringNullableFilter<"Post"> | string | null
@@ -20835,6 +20876,7 @@ export namespace Prisma {
   export type PostCreateManyAuthorInput = {
     id?: number
     title: string
+    url?: string
     description?: string | null
     main_image: string
     main_image_credit?: string | null
@@ -20866,6 +20908,7 @@ export namespace Prisma {
 
   export type PostUpdateWithoutAuthorInput = {
     title?: StringFieldUpdateOperationsInput | string
+    url?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     main_image?: StringFieldUpdateOperationsInput | string
     main_image_credit?: NullableStringFieldUpdateOperationsInput | string | null
@@ -20880,6 +20923,7 @@ export namespace Prisma {
   export type PostUncheckedUpdateWithoutAuthorInput = {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
+    url?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     main_image?: StringFieldUpdateOperationsInput | string
     main_image_credit?: NullableStringFieldUpdateOperationsInput | string | null
@@ -20894,6 +20938,7 @@ export namespace Prisma {
   export type PostUncheckedUpdateManyWithoutAuthorInput = {
     id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
+    url?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     main_image?: StringFieldUpdateOperationsInput | string
     main_image_credit?: NullableStringFieldUpdateOperationsInput | string | null

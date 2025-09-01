@@ -3,16 +3,16 @@ import DateTime from "@/components/DateTime/DateTime";
 import Sidebar from "@/components/Sidebar";
 import UserLinkButton from "@/components/User/UserLinkButton";
 
-import { fetchCategoryById, fetchCategoryCountIdArray, fetchPostsByCategoryID } from "@/services/data_access";
+import { fetchCategoryCountIdArray, fetchPostsByCategoryID, fetchCategoryByName } from "@/services/data_access";
 import { CatergoryType } from "@/types/category";
 import { PostType } from "@/types/post";
 import { Metadata, ResolvingMetadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 
-async function Category({params}:{params: Promise<{id:number}>}) {
-    const {id} = await params;
-    
+async function Category({params}:{params: Promise<{name:string}>}) {
+    const {name} = await params;
+    const id = (await fetchCategoryByName(name)).id;
     const posts = await fetchPostsByCategoryID(id);
 
     return (
@@ -28,7 +28,7 @@ async function Category({params}:{params: Promise<{id:number}>}) {
                           </div>
                           <div className="mb-2">
                             <h2>
-                              <Link href={"/articles/"+post.id} className="text-teal-600">{post.title}</Link>
+                              <Link href={"/articles"+"/"+post.url} className="text-teal-600">{post.title}</Link>
                             </h2>
                           </div>
                         </header>
@@ -84,10 +84,11 @@ export async function generateStaticParams() {
     return paths;
   }
 
-  export async function generateMetadata({params}:{params: Promise<{id:number}>}, parent: ResolvingMetadata): Promise<Metadata>{
-    const {id} = await params;
+  export async function generateMetadata({params}:{params: Promise<{name:string}>}, parent: ResolvingMetadata): Promise<Metadata>{
+    // const {id} = await params;
+    const {name} = await params;
     
-    const category: CatergoryType = await fetchCategoryById(id);
+    const category: CatergoryType = await fetchCategoryByName(name);
 
     return  {
         title: `Category | ${category.name}` ,

@@ -1,15 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "../../../../../../prisma/prisma";
-import { fetchCategoryCountIdArray } from "@/services/data_access";
+import { fetchCategoryCountIdArray, fetchCategoryNameArray } from "@/services/data_access";
 
-export async function GET(request: NextRequest, context: {params: Promise<{ id: string}>}){
+export async function GET(request: NextRequest, context: {params: Promise<{ name: string}>}){
     const params = await context.params;
-    const id = Number.parseInt(params.id);
+    const name = params.name;
     try {
-        const site = await prisma.category.findUnique(
+        const site = await prisma.category.findFirst(
             {
                 where:{
-                    id:id,
+                    name:{
+                    equals: name,
+                    mode: 'insensitive', // Ignore case sensitivity
+                    },
                 },
             }
         );
@@ -29,17 +32,17 @@ export const revalidate = 10
 export async function generateStaticParams() {
     // Generate the possible values for the parameter
     
-    const possibleValues = await fetchCategoryCountIdArray().then((data)=>{
+    const possibleValues = await fetchCategoryNameArray().then((data)=>{
         // console.log("Array of category ids: ", data);
         return data.map((item)=>{
-            return item.id;
+            return item.name;
         });
     }); // Adjust based on your data
     // console.log(possibleValues);
 
     // Generate an array of objects with the correct structure for static generation
     const paths = possibleValues.map((value) => ({
-      id: value.toString(),
+      name: value.toString(),
     }));
     // console.log("Paths ", paths);
     return paths;

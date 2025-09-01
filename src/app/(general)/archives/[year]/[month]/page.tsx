@@ -28,7 +28,7 @@ async function Archives({params}:{params: Promise<{year:number, month:number}>})
                         </div>
                         <div className="mb-2">
                         <h2>
-                            <Link href={"/articles/"+post.id} className="text-teal-600">{post.title}</Link>
+                            <Link href={"/articles"+"/"+post.url} className="text-teal-600">{post.title}</Link>
                         </h2>
                         </div>
                     </header>

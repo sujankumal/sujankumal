@@ -3,15 +3,15 @@ import DateTime from "@/components/DateTime/DateTime";
 import MarkdownComponent from "@/components/MarkdownComponent";
 import Sidebar from "@/components/Sidebar";
 import UserLinkButton from "@/components/User/UserLinkButton";
-import { fetchPostByID, fetchPostCountIdArray } from "@/services/data_access";
+import { fetchPostBySlug, fetchPostUrlArray } from "@/services/data_access";
 import { Metadata } from "next";
 import Image from "next/image";
 import { ArticleJsonLd, BreadcrumbJsonLd } from "../../../../components/seo/JsonLd";
 
-async function Articles({params}:{params: Promise<{id:number}>}) {
-    const id = (await params).id;
-
-    const article = await fetchPostByID(id);
+async function Article({params}:{params: Promise<{url:string}>}) {
+    const url = (await params).url;
+    
+    const article = await fetchPostBySlug(url);
     
     const article_mds = article.content?.map((content, index)=>{
         // console.log(content, "cont");
@@ -30,7 +30,7 @@ async function Articles({params}:{params: Promise<{id:number}>}) {
                 }}
                 datePublished={article.date.toISOString()}
                 dateModified={article.date.toISOString()}
-                url={`https://sujankumal.com.np/articles/${article.id}`}
+                url={`https://sujankumal.com.np/articles${article.url}`}
                 image={article.main_image ? [`https://sujankumal.com.np/images/${article.main_image}`] : undefined}
                 publisher={{
                     name: "Sujan Kumal",
@@ -41,7 +41,7 @@ async function Articles({params}:{params: Promise<{id:number}>}) {
                 items={[
                     { name: "Home", url: "https://sujankumal.com.np" },
                     { name: "Articles", url: "https://sujankumal.com.np/articles" },
-                    { name: article.title, url: `https://sujankumal.com.np/articles/${article.id}` }
+                    { name: article.title, url: `https://sujankumal.com.np/articles/${article.url}` }
                 ]}
             />
 
@@ -97,7 +97,7 @@ async function Articles({params}:{params: Promise<{id:number}>}) {
     );
 }
 
-export default Articles;
+export default Article;
 
 
 export const dynamicParams = true // true | false,
@@ -108,25 +108,25 @@ export const revalidate = 10
 export async function generateStaticParams() {
     // Generate the possible values for the parameter
     
-    const possibleValues = await fetchPostCountIdArray().then((data)=>{
+    const possibleValues = await fetchPostUrlArray().then((data)=>{
         // console.log("Array of post ids: ", data);
         return data.map((item)=>{
-            return item.id;
+            return item.url;
         });
     }); // Adjust based on your data
     // console.log(possibleValues);
 
     // Generate an array of objects with the correct structure for static generation
     const paths = possibleValues.map((value) => ({
-      id: value.toString(),
+      url: value.toString(),
     }));
     // console.log("Paths ", paths);
     return paths;
   }
 
-export async function generateMetadata({params}:{params: Promise<{id:number}>}): Promise<Metadata>{
-    const id = (await params).id;
-    const article = await fetchPostByID(id);
+export async function generateMetadata({params}:{params: Promise<{url:string}>}): Promise<Metadata>{
+    const string = (await params).url;
+    const article = await fetchPostBySlug(string);
 
     return  {
         title: `Articles | ${article.title}`,

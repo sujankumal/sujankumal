@@ -26,9 +26,9 @@ function Sidebar() {
                 <div className="max-h-80 overflow-auto scrollbar">
                     <ul className="pl-2">
                         {
-                            recentPost.map(({id, title}, index)=>(
+                            recentPost.map(({title, url}, index)=>(
                             <li key={index} className="w-full inline-flex text-gray-400 border-b border-gray-300 my-1 py-1 before:content-['\00BB'] hover:text-teal-600">
-                                <Link href={'/articles/'+id} className="pl-2 inline-flex flex-col justify-center text-sm text-gray-800 dark:text-inherit hover:text-inherit">{title}</Link>
+                                <Link href={'/articles/'+url} className="pl-2 inline-flex flex-col justify-center text-sm text-gray-800 dark:text-inherit hover:text-inherit">{title}</Link>
                             </li>
                             ))
                         }
@@ -60,7 +60,7 @@ function Sidebar() {
                         {
                             catogries.map(({id, name}, index)=>(
                             <li key={index} className="w-full inline-flex text-gray-400 border-b border-gray-300 my-1 py-1 before:content-['\2756'] hover:text-teal-600">
-                                <Link href={'/categories/'+id} className="pl-2 inline-flex flex-col justify-center text-sm text-gray-800 dark:text-inherit hover:text-inherit">{name}</Link>
+                                <Link href={'/categories/'+name} className="pl-2 inline-flex flex-col justify-center text-sm text-gray-800 dark:text-inherit hover:text-inherit">{name}</Link>
                             </li>
                             ))
                         }

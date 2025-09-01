@@ -158,6 +158,7 @@ exports.Prisma.ProjectScalarFieldEnum = {
 exports.Prisma.PostScalarFieldEnum = {
   id: 'id',
   title: 'title',
+  url: 'url',
   description: 'description',
   main_image: 'main_image',
   main_image_credit: 'main_image_credit',
@@ -285,6 +286,7 @@ exports.Prisma.ProjectOrderByRelevanceFieldEnum = {
 
 exports.Prisma.PostOrderByRelevanceFieldEnum = {
   title: 'title',
+  url: 'url',
   description: 'description',
   main_image: 'main_image',
   main_image_credit: 'main_image_credit'

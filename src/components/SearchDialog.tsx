@@ -25,8 +25,8 @@ function SearchDialog() {
          className={query?"px-1 py-1 mt-1 border-2 border-teal-600 ":"hidden"}
         >
             {
-            posts.map((item:{id:string, title:string},index)=>{
-                return <Link href={'/articles/'+ item.id} key={index} className="block hover:bg-gray-800 hover:text-white py-2 px-1 w-full text-center">
+            posts.map((item:{url:string, title:string},index)=>{
+                return <Link href={'/articles/'+ item.url} key={index} className="block hover:bg-gray-800 hover:text-white py-2 px-1 w-full text-center">
                             {item.title}
                         </Link>
             })

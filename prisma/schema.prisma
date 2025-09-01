@@ -58,6 +58,7 @@ model Project {
 model Post {
   id                      Int     @default(autoincrement()) @id 
   title                   String
+  url                     String  @default("/")
   description             String?
   content                 Content[]
   main_image              String

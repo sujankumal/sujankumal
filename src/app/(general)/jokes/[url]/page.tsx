@@ -3,14 +3,13 @@ import DateTime from "@/components/DateTime/DateTime";
 import MarkdownComponent from "@/components/MarkdownComponent";
 import Sidebar from "@/components/Sidebar";
 import UserLinkButton from "@/components/User/UserLinkButton";
-import { fetchJokeByID, fetchJokeCountIdArray } from "@/services/data_access";
+import { fetchPostBySlug, fetchJokePostsUrl} from "@/services/data_access";
 import { Metadata, ResolvingMetadata } from "next";
 import Image from "next/image";
 
-async function Joke({params}:{params: Promise<{id:number}>}) {
-    const {id} = await params;
-    
-    const joke = await fetchJokeByID(id);
+async function Joke({params}:{params: Promise<{url:string}>}) {
+    const {url} = await params;
+    const joke = await fetchPostBySlug(url);
     // .then((data)=>{
     //     // console.log("Received Joke data: ", data);
     //     return data;
@@ -85,26 +84,26 @@ export const revalidate = 10
 export async function generateStaticParams() {
     // Generate the possible values for the parameter
     
-    const possibleValues = await fetchJokeCountIdArray().then((data)=>{
+    const possibleValues = await fetchJokePostsUrl().then((data)=>{
         // console.log("Array of post ids: ", data);
         return data.map((item)=>{
-            return item.id;
+            return item.url;
         });
     }); // Adjust based on your data
     // console.log(possibleValues);
 
     // Generate an array of objects with the correct structure for static generation
     const paths = possibleValues.map((value) => ({
-      id: value.toString(),
+      url: value.toString(),
     }));
     // console.log("Paths ", paths);
     return paths;
   }
 
 
-export async function generateMetadata({params}:{params: Promise<{id:number}>}, parent: ResolvingMetadata): Promise<Metadata>{
-    const id = (await params).id;
-    const article = await fetchJokeByID(id);
+export async function generateMetadata({params}:{params: Promise<{url:string}>}, parent: ResolvingMetadata): Promise<Metadata>{
+    const url = (await params).url;
+    const article = await fetchPostBySlug(url);
 
     return  {
         title: `Jokes | ${article.title}`,

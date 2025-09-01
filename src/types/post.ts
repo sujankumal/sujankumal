@@ -4,6 +4,7 @@ import { ContentType } from "./content";
 
 export interface PostType{
     id:number,
+    url:string,
     title:string,
     description:string,
     content:Array<ContentType>,
@@ -20,4 +21,5 @@ export interface PostType{
 export interface PostTitleType{
     id:number,
     title:string,
+    url:string
 }

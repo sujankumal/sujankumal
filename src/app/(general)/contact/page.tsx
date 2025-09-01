@@ -9,7 +9,7 @@ export default async function Contact() {
                 <MousePhobia comp={
                         <div className="bg-gray-800 text-white h-fit p-2 rounded-lg text-sm">
                             <span>Feel free to connect with me at </span> 
-                            <a className="hover:text-teal-600 underline text-gray-300" href="mailto:setobhagera@gmail.com">setobhagera@gmail.com</a>
+                            <a className="hover:text-teal-600 underline text-gray-300" href="mailto:support@sujankumal.com.np">support@sujankumal.com.np</a>
                         </div>
                 }/>
             </div>

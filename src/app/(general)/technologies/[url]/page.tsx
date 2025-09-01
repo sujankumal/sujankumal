@@ -3,13 +3,13 @@ import DateTime from "@/components/DateTime/DateTime";
 import MarkdownComponent from "@/components/MarkdownComponent";
 import Sidebar from "@/components/Sidebar";
 import UserLinkButton from "@/components/User/UserLinkButton";
-import { fetchTechPostByID, fetchTechPostCountIdArray } from "@/services/data_access";
+import { fetchTechPostsUrl, fetchPostBySlug } from "@/services/data_access";
 import { Metadata, ResolvingMetadata } from "next";
 import Image from "next/image";
 
-async function Tech({params}:{params: Promise<{id:number}>}) {
-    const {id} = await params;
-    const tech = await fetchTechPostByID(id);
+async function Tech({params}:{params: Promise<{url:string}>}) {
+    const {url} = await params;
+    const tech = await fetchPostBySlug(url);
     
     const tech_mds = tech.content?.map((content, index)=>{
         return (content.content)?<MarkdownComponent key={index} content={content.content} />:<div></div>;
@@ -80,22 +80,22 @@ export const revalidate = 10
 export async function generateStaticParams() {
     // Generate the possible values for the parameter
     
-    const possibleValues = await fetchTechPostCountIdArray().then((data)=>{
+    const possibleValues = await fetchTechPostsUrl().then((data)=>{
         return data.map((item)=>{
-            return item.id;
+            return item.url;
         });
     });
     // Generate an array of objects with the correct structure for static generation
     const paths = possibleValues.map((value) => ({
-      id: value.toString(),
+      url: value.toString(),
     }));
     return paths;
   }
 
 
-export async function generateMetadata({params}:{params: Promise<{id:number}>}, parent: ResolvingMetadata): Promise<Metadata>{
-    const id = (await params).id;
-    const article = await fetchTechPostByID(id);
+export async function generateMetadata({params}:{params: Promise<{url:string}>}, parent: ResolvingMetadata): Promise<Metadata>{
+    const url = (await params).url;
+    const article = await fetchPostBySlug(url);
 
     return  {
         title: `Technologies | ${article.title}`,

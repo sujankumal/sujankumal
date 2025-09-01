@@ -123,6 +123,7 @@ export async function fetchPostTitle(): Promise<Array<PostTitleType>> {
                 {
                     select:{
                         id: true,
+                        url: true,
                         title: true,
                     },
                     orderBy:{
@@ -157,6 +158,7 @@ export async function fetchPostTitleTicker(): Promise<Array<PostTitleType>> {
                 {
                     select:{
                         id: true,
+                        url: true,
                         title: true,
                     },
                     orderBy:{
@@ -232,6 +234,7 @@ export async function fetchArchivesByYearAndMonth(year: number, month: number): 
                 },
                 select:{
                     id: true,
+                    url: true,
                     title: true,
                     description:true,
                     date:true,
@@ -325,6 +328,7 @@ export async function fetchPostHome(): Promise<Array<PostType>> {
                         },
                         select:{
                             id:true,
+                            url: true,
                             title: true,
                             description:true,
                             date:true,
@@ -460,6 +464,7 @@ export async function fetchArticles(): Promise<Array<PostType>> {
                 {
                     select:{
                         id: true,
+                        url: true,
                         title: true,
                         description:true,
                         date:true,
@@ -525,6 +530,7 @@ export async function fetchJokes(): Promise<Array<PostType>> {
                     },
                     select:{
                         id: true,
+                        url: true,
                         title: true,
                         description:true,
                         date:true,
@@ -735,6 +741,62 @@ export async function fetchPostCountIdArray(): Promise<Array<{ id: number }>> {
     }
 }
 
+
+export async function fetchPostUrlArray(): Promise<Array<{ url: string }>> {
+    try {
+        if (!isExternalFetchSet()) {
+            const posts = await prisma.post.findMany(
+                {
+                    select: {
+                        url: true
+                    }
+                }
+            );
+            return posts;
+        }
+        return fetch(API_BASE_URL + "/api/post/url/", {
+            method: "GET",
+            next: {
+                revalidate: 10,
+            }
+        }).then((response) => {
+            if (!response.ok) {
+                throw new Error('Not found');
+            }
+            return response.json();
+        });
+    } catch (error) {
+        throw error;
+    }
+}
+export async function fetchCategoryNameArray(): Promise<Array<{ name: string }>> {
+    try {
+        if (!isExternalFetchSet()) {
+            const categories = await prisma.category.findMany(
+                {
+                    select: {
+                        name:true
+                    }
+                }
+            );
+            return categories;
+        }
+        return fetch(API_BASE_URL + "/api/categories/name/", {
+            method: "GET",
+            next: {
+                revalidate: 10,
+            }
+        }).then((response) => {
+            if (!response.ok) {
+                throw new Error('Not found');
+            }
+            return response.json();
+        });
+    } catch (error) {
+        throw error;
+    }
+}
+
 export async function fetchCategoryCountIdArray(): Promise<Array<{ id: number }>> {
     try {
         if (!isExternalFetchSet()) {
@@ -776,6 +838,33 @@ export async function fetchCategoryById(id: number): Promise<CatergoryType> {
             return category.then();
         }
         return fetch(API_BASE_URL + "/api/category/"+id, {
+            method: "GET",
+            next: {
+                revalidate: 10,
+            }
+        }).then((response) => {
+            if (!response.ok) {
+                throw new Error('Not found');
+            }
+            return response.json();
+        });
+    } catch (error) {
+        throw error;
+    }
+}
+export async function fetchCategoryByName(name: string): Promise<CatergoryType> {
+    try {
+        if (!isExternalFetchSet()) {
+            const category = prisma.category.findFirst(
+                {
+                    where: {
+                        name: name
+                    }
+                }
+            );
+            return category.then();
+        }
+        return fetch(API_BASE_URL + "/api/categories/"+name, {
             method: "GET",
             next: {
                 revalidate: 10,
@@ -842,6 +931,7 @@ export async function fetchPostsByCategoryID(id: number): Promise<Array<PostType
                     },
                     select:{
                         id: true,
+                        url: true,
                         title: true,
                         description:true,
                         date:true,
@@ -935,6 +1025,7 @@ export async function fetchTechPosts(): Promise<Array<PostType>> {
                     },
                     select:{
                         id: true,
+                        url: true,
                         title: true,
                         description:true,
                         date:true,
@@ -961,6 +1052,51 @@ export async function fetchTechPosts(): Promise<Array<PostType>> {
             return posts.then();
         }    
         return fetch(API_BASE_URL + "/api/post/tech", {
+            method: "GET",
+            next: {
+                revalidate: 10,
+            }
+        }).then((response) => {
+            if (!response.ok) {
+                throw new Error('Not found');
+            }
+            return response.json();
+        });
+    } catch (error) {
+        throw error;
+    }
+}
+
+export async function fetchTechPostsUrl(): Promise<Array<PostType>> {
+    try {
+        if (!isExternalFetchSet()) {
+            // data 
+            const posts = prisma.post.findMany(
+                {
+                    where:{
+                        categories:{
+                            some:{
+                                category:{
+                                    name:{
+                                        equals:'tech',
+                                        mode:'insensitive',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    orderBy:{
+                        id:'desc'
+                    },
+                    select:{
+                        id: true,
+                        url: true,
+                    }
+                }
+            );
+            return posts.then();
+        }    
+        return fetch(API_BASE_URL + "/api/post/tech/url", {
             method: "GET",
             next: {
                 revalidate: 10,
@@ -1027,6 +1163,50 @@ export async function fetchTechPostByID(id: number): Promise<PostType> {
 }
 
 
+export async function fetchJokePostsUrl(): Promise<Array<PostType>> {
+    try {
+        if (!isExternalFetchSet()) {
+            // data 
+            const posts = prisma.post.findMany(
+                {
+                    where:{
+                        categories:{
+                            some:{
+                                category:{
+                                    name:{
+                                        equals:'joke',
+                                        mode:'insensitive',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    orderBy:{
+                        id:'desc'
+                    },
+                    select:{
+                        id: true,
+                        url: true,
+                    }
+                }
+            );
+            return posts.then();
+        }    
+        return fetch(API_BASE_URL + "/api/post/joke/url", {
+            method: "GET",
+            next: {
+                revalidate: 10,
+            }
+        }).then((response) => {
+            if (!response.ok) {
+                throw new Error('Not found');
+            }
+            return response.json();
+        });
+    } catch (error) {
+        throw error;
+    }
+}
 
 export async function fetchTechPostCountIdArray(): Promise<Array<{ id: number }>> {
     try {
@@ -1086,6 +1266,53 @@ export async function fetchUpdates(): Promise<Array<UpdateType>> {
             next: {
                 revalidate: 10,
             }
+        }).then((response) => {
+            if (!response.ok) {
+                throw new Error('Not found');
+            }
+            return response.json();
+        });
+    } catch (error) {
+        throw error;
+    }
+}
+
+export async function fetchPostBySlug(slug: string): Promise<PostType> {
+    // console.log('fetchPostBySlug',slug)
+    try {
+        if (!isExternalFetchSet()) {
+            const post = prisma.post.findFirst({
+                where: {
+                    url: slug, // Query by slug instead of ID
+                },
+                include: {
+                    categories: {
+                        select: {
+                            category: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                },
+                            },
+                        },
+                    },
+                    author: {
+                        select: {
+                            id: true,
+                            name: true,
+                        },
+                    },
+                    content: true,
+                },
+            });
+            return post.then();
+        }
+        // For external API, the endpoint would be '/api/post/by-url/[url]'
+        return fetch(API_BASE_URL + "/api/post/by-url/" + slug, {
+            method: "GET",
+            next: {
+                revalidate: 10,
+            },
         }).then((response) => {
             if (!response.ok) {
                 throw new Error('Not found');
