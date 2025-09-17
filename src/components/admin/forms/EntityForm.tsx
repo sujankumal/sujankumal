@@ -280,7 +280,7 @@ export function EntityForm({ entity, initialData, onSubmit, onCancel, isLoading 
       {loadingRelations && (
         <div className="text-center py-4">
           <div className="inline-flex items-center text-sm text-gray-600">
-            <div className="w-4 h-4 border-2 border-gray-300 border-t-teal-600 rounded-full animate-spin mr-2"></div>
+            <div className="w-4 h-4 border-2 border-gray-300 border-t-orange-600 rounded-full animate-spin mr-2"></div>
             Loading form options...
           </div>
         </div>
@@ -308,14 +308,14 @@ export function EntityForm({ entity, initialData, onSubmit, onCancel, isLoading 
           type="button"
           onClick={onCancel}
           disabled={isLoading}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:opacity-50"
+          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={isLoading}
-          className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-teal-600 border border-transparent rounded-md shadow-sm hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:opacity-50"
+          className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-orange-600 border border-transparent rounded-md shadow-sm hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50"
         >
           {isLoading && <LoadingSpinner size="sm" className="mr-2" />}
           {initialData ? "Update" : "Create"}

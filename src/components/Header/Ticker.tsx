@@ -22,7 +22,7 @@ function Ticker({items}:{items:Array<PostTitleType>}) {
             { items.map((item, index): any => {
                 return  <motion.div
                             key={index}
-                            className="absolute top-0 hover:text-teal-600"
+                            className="absolute top-0 hover:text-orange-600"
                             initial={{
                                 opacity:0,
                                 translateY:-50,

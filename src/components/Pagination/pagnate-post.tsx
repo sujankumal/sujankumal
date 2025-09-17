@@ -49,7 +49,7 @@ function PaginationPost(
                             </div>
                             <div className="mb-2">
                                 <h2>
-                                    <Link href={`${path}/${post.url}`} className="text-teal-600">{post.title}</Link>
+                                    <Link href={`${path}/${post.url}`} className="text-orange-600">{post.title}</Link>
                                 </h2>
                             </div>
                         </header>

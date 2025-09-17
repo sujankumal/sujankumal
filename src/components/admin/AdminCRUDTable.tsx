@@ -305,7 +305,7 @@ export function AdminCRUDTable({
       <div className="w-16 h-10 relative bg-gray-100 rounded overflow-hidden border border-gray-200">
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-4 h-4 border-2 border-gray-300 border-t-teal-600 rounded-full animate-spin"></div>
+            <div className="w-4 h-4 border-2 border-gray-300 border-t-orange-600 rounded-full animate-spin"></div>
           </div>
         )}
         <Image
@@ -331,7 +331,7 @@ export function AdminCRUDTable({
     if (markdownFields.includes(field) && value) {
       return (
         <div className="max-w-xs">
-          <ReactMarkdown className="prose prose-xs prose-teal max-w-none line-clamp-3">
+          <ReactMarkdown className="prose prose-xs prose-orange max-w-none line-clamp-3">
             {value}
           </ReactMarkdown>
         </div>
@@ -388,7 +388,7 @@ export function AdminCRUDTable({
       return (
         <div className="flex flex-wrap gap-1">
           {value.slice(0, 3).map((cat: any, idx: number) => (
-            <span key={idx} className="text-xs bg-teal-100 text-teal-800 px-2 py-1 rounded-full">
+            <span key={idx} className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">
               {cat.category?.name || cat.name}
             </span>
           ))}
@@ -429,8 +429,8 @@ export function AdminCRUDTable({
       return <ArrowUpDown className="h-4 w-4 text-gray-400" />;
     }
     return sortOrder === "asc" ? 
-      <ArrowUp className="h-4 w-4 text-teal-600" /> : 
-      <ArrowDown className="h-4 w-4 text-teal-600" />;
+      <ArrowUp className="h-4 w-4 text-orange-600" /> : 
+      <ArrowDown className="h-4 w-4 text-orange-600" />;
   };
 
   return (
@@ -443,7 +443,7 @@ export function AdminCRUDTable({
           <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
           <button
             onClick={handleCreate}
-            className="inline-flex items-center px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
+            className="inline-flex items-center px-4 py-2 bg-orange-600 text-white text-sm font-medium rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
           >
             <Plus className="h-4 w-4 mr-2" />
             Add {title}
@@ -460,7 +460,7 @@ export function AdminCRUDTable({
             placeholder={`Search ${title.toLowerCase()}...`}
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-teal-500 focus:border-teal-500"
+            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-orange-500 focus:border-orange-500"
           />
         </div>
       </div>
@@ -534,7 +534,7 @@ export function AdminCRUDTable({
                     <div className="flex items-center justify-end space-x-2">
                       <button
                         onClick={() => handleEdit(item)}
-                        className="text-teal-600 hover:text-teal-900 p-1 rounded hover:bg-teal-50"
+                        className="text-orange-600 hover:text-orange-900 p-1 rounded hover:bg-orange-50"
                         title="Edit"
                       >
                         <Edit className="h-4 w-4" />

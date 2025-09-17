@@ -22,7 +22,7 @@ function SearchDialog() {
         <Paper
          elevation={8}
          component='div'
-         className={query?"px-1 py-1 mt-1 border-2 border-teal-600 ":"hidden"}
+         className={query?"px-1 py-1 mt-1 border-2 border-orange-600 ":"hidden"}
         >
             {
             posts.map((item:{url:string, title:string},index)=>{

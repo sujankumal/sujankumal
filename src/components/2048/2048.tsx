@@ -253,7 +253,7 @@ export default function Game2048() {
       tabIndex={0}
       className="select-none"
     >
-      <h1 className="text-teal-600 font-bold">2048 Game</h1>
+      <h1 className="text-orange-600 font-bold">2048 Game</h1>
       {(won || stopped) && (
         <div style={{
           position: 'absolute',
@@ -308,7 +308,7 @@ export default function Game2048() {
             <li key={idx}>
               <button
                 onClick={() => goToHistory(idx)}
-                className="hover:text-teal-600 duration-300 !important"
+                className="hover:text-orange-600 duration-300 !important"
               >
                 Go to step {idx + 1}
               </button>

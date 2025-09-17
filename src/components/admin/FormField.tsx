@@ -33,7 +33,7 @@ export function FormField({
 }: FormFieldProps) {
   const baseInputClasses = `
     w-full rounded-md border px-3 py-2 text-sm shadow-sm transition-colors
-    focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500
+    focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500
     disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed
     ${error 
       ? "border-red-300 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500" 
@@ -86,7 +86,7 @@ export function FormField({
               checked={value || false}
               onChange={(e) => onChange(e.target.checked)}
               disabled={disabled}
-              className="h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500 disabled:cursor-not-allowed disabled:opacity-50"
+              className="h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500 disabled:cursor-not-allowed disabled:opacity-50"
             />
             <label htmlFor={name} className="ml-2 text-sm text-gray-700">
               {label}

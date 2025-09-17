@@ -42,7 +42,7 @@ function ToastComponent({ toast, onRemove }: ToastProps) {
   const styles = {
     success: "bg-green-50/95 border-green-200 text-green-900 shadow-green-100/50",
     error: "bg-red-50/95 border-red-200 text-red-900 shadow-red-100/50",
-    warning: "bg-yellow-50/95 border-yellow-200 text-yellow-900 shadow-yellow-100/50",
+    warning: "bg-yellow-50/95 border-yellow-200 text-gray-800 shadow-yellow-100/50",
     info: "bg-blue-50/95 border-blue-200 text-blue-900 shadow-blue-100/50",
   };
 

@@ -73,11 +73,11 @@ export function CollapsibleSection({
       {/* Header */}
       <button
         onClick={handleToggle}
-        className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-inset"
+        className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-inset"
       >
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-3">
-            <div className="text-teal-600">
+            <div className="text-orange-600">
               {displayIcon}
             </div>
             <div className="text-left">
@@ -89,7 +89,7 @@ export function CollapsibleSection({
         
         <div className="flex items-center space-x-2">
           {isLoading && (
-            <div className="w-4 h-4 border-2 border-gray-300 border-t-teal-600 rounded-full animate-spin"></div>
+            <div className="w-4 h-4 border-2 border-gray-300 border-t-orange-600 rounded-full animate-spin"></div>
           )}
           <div className="text-gray-400">
             {isExpanded ? (
@@ -107,7 +107,7 @@ export function CollapsibleSection({
           {isLoading ? (
             <div className="px-6 py-12 text-center">
               <div className="inline-flex items-center space-x-2 text-gray-600">
-                <div className="w-6 h-6 border-2 border-gray-300 border-t-teal-600 rounded-full animate-spin"></div>
+                <div className="w-6 h-6 border-2 border-gray-300 border-t-orange-600 rounded-full animate-spin"></div>
                 <span>Loading {title.toLowerCase()}...</span>
               </div>
             </div>
@@ -143,8 +143,8 @@ export function CollapsibleSectionGroup({
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full text-left mb-4 group focus:outline-none"
       >
-        <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-teal-50 to-blue-50 rounded-lg border border-teal-200 hover:from-teal-100 hover:to-blue-100 transition-all duration-200">
-          <div className="text-teal-600">
+        <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-orange-50 to-blue-50 rounded-lg border border-orange-200 hover:from-orange-100 hover:to-blue-100 transition-all duration-200">
+          <div className="text-orange-600">
             {isExpanded ? (
               <ChevronDown className="h-6 w-6" />
             ) : (
@@ -152,7 +152,7 @@ export function CollapsibleSectionGroup({
             )}
           </div>
           <div>
-            <h2 className="text-xl font-bold text-gray-900 group-hover:text-teal-700 transition-colors">
+            <h2 className="text-xl font-bold text-gray-900 group-hover:text-orange-700 transition-colors">
               {title}
             </h2>
             {description && (

@@ -71,7 +71,7 @@ const Searchbar = (props: Props) => {
         }}
         // {...props.inputProps}
       />
-      <IconButton type="submit" className="bg-teal-600 text-white">
+      <IconButton type="submit" className="bg-orange-600 text-white">
         <Search />
       </IconButton>
     </Paper>

@@ -7,7 +7,7 @@ import { ToastContainer, toast } from 'react-toastify';
 function UserLinkButton({user}: {user:UserType}) {
     return (user)?<div className="inline-flex text-gray-500 italic">
         <Person  className="flex-row self-center" fontSize="small" />
-        <Link className="hover:text-teal-600 ml-1 inline-flex flex-row self-center" 
+        <Link className="hover:text-orange-600 ml-1 inline-flex flex-row self-center" 
             href={"/#"}
             onNavigate={(e) => {
                 // Only executes during SPA navigation

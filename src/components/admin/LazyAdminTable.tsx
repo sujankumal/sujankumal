@@ -128,7 +128,7 @@ export function LazyAdminTable({
             </div>
             <div className="flex items-center space-x-2">
               {isCRUD && (
-                <span className="px-2 py-1 text-xs bg-teal-100 text-teal-800 rounded-full font-medium">
+                <span className="px-2 py-1 text-xs bg-orange-100 text-orange-800 rounded-full font-medium">
                   Full CRUD
                 </span>
               )}
@@ -144,7 +144,7 @@ export function LazyAdminTable({
           {isLoading && (
             <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
               <div className="text-center">
-                <div className="w-8 h-8 border-2 border-gray-300 border-t-teal-600 rounded-full animate-spin mx-auto mb-2"></div>
+                <div className="w-8 h-8 border-2 border-gray-300 border-t-orange-600 rounded-full animate-spin mx-auto mb-2"></div>
                 <p className="text-sm text-gray-600">Loading {title.toLowerCase()}...</p>
               </div>
             </div>
@@ -162,7 +162,7 @@ export function LazyAdminTable({
               <p className="text-gray-600 mb-4">Click to load {title.toLowerCase()}</p>
               <button
                 onClick={loadData}
-                className="px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition-colors"
+                className="px-4 py-2 bg-orange-600 text-white text-sm font-medium rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors"
               >
                 Load {title}
               </button>

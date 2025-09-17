@@ -58,7 +58,7 @@ async function Article({params}:{params: Promise<{url:string}>}) {
                                 alt={"Image for "+ article.title}
                                 priority={true}
                             />
-                            <figcaption className="ml-1 prose hover:prose-a:text-teal-600 text-xs dark:prose-a:text-inherit">
+                            <figcaption className="ml-1 prose hover:prose-a:text-orange-600 text-xs dark:prose-a:text-inherit">
                                 {
                                     (article.main_image_credit)?<MarkdownComponent content={article.main_image_credit} />:<div></div>
                                 }
@@ -81,7 +81,7 @@ async function Article({params}:{params: Promise<{url:string}>}) {
                                     </div>
                                 </div>
                             </header>
-                            <section className="prose max-w-none prose-blockquote:border-l-teal-600 hover:prose-a:text-teal-600 dark:prose-a:text-inherit prose-headings:text-inherit prose-strong:text-inherit dark:prose-strong:text-inherit dark:prose-headings:text-inherit">
+                            <section className="prose max-w-none prose-blockquote:border-l-orange-600 hover:prose-a:text-orange-600 dark:prose-a:text-inherit prose-headings:text-inherit prose-strong:text-inherit dark:prose-strong:text-inherit dark:prose-headings:text-inherit">
                                 { article_mds }
                             </section>
                         </div>

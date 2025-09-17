@@ -53,7 +53,7 @@ function ImageCell({ value, field }: { value: string; field: string }) {
     <div className="w-20 h-10 relative bg-gray-100 rounded overflow-hidden border border-gray-200">
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-3 h-3 border-2 border-gray-300 border-t-teal-600 rounded-full animate-spin"></div>
+          <div className="w-3 h-3 border-2 border-gray-300 border-t-orange-600 rounded-full animate-spin"></div>
         </div>
       )}
       <Image
@@ -81,7 +81,7 @@ export function TableSection({ title, items, fields, markdownFields = [], imageF
 }) {
   return (
     <section className="mb-12">
-      <h2 className="text-2xl font-bold mb-4 text-teal-700">{title}</h2>
+      <h2 className="text-2xl font-bold mb-4 text-orange-700">{title}</h2>
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white rounded shadow">
           <thead>
@@ -98,7 +98,7 @@ export function TableSection({ title, items, fields, markdownFields = [], imageF
                   <td key={field} className="px-4 py-2 text-sm">
                     {markdownFields.includes(field) && item[field] ? (
                       <div className="max-w-xs">
-                        <ReactMarkdown className="prose prose-xs prose-teal max-w-none line-clamp-3">
+                        <ReactMarkdown className="prose prose-xs prose-orange max-w-none line-clamp-3">
                           {item[field]}
                         </ReactMarkdown>
                       </div>

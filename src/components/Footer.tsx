@@ -19,7 +19,7 @@ async function Footer() {
             <div className="w-full mt-12 mb-6 md:mt-0 md:mb-0 overflow-y-auto inline-flex justify-center h-auto">
                 <ul className="inline-block p-2">
                     {footerMenu.map(({ name, url }, index) => (
-                        <li key={index} className="inline-block text-white text-sm w-fit px-2 hover:text-teal-600">
+                        <li key={index} className="inline-block text-white text-sm w-fit px-2 hover:text-orange-600">
                             <Link href={url}>{name}</Link>
                         </li>
                     ))}

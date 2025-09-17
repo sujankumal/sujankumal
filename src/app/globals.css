@@ -32,17 +32,9 @@
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
-  --primary: rgb(31 41 55 );
-  --secondary: rgb(35, 133, 125);
-  --tertiary: rgb(123, 128, 128);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+  --primary: rgb(29, 27, 24); 
+  --secondary: rgb(234, 88, 12); /* Tailwind's orange-600 */
+  --tertiary: rgb(255, 170, 75); 
 }
 
 body {

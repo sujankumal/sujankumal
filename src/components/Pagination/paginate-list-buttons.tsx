@@ -40,7 +40,7 @@ export default function pageListButtons(currentPage: number, numberOfPages: numb
                     : paginationMidVal)) >= val) ?
                 <li key={index}>
                     <button onClick={() => { (currentPage === val) ? null : setCurrentPage(val) }}
-                        className={`flex w-8 items-center justify-center px-3 h-6 leading-tight text-gray-500 bg-white border hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white ${(val == currentPage) ? "border-b-teal-600 dark:border-b-teal-600" : ""}`}>
+                        className={`flex w-8 items-center justify-center px-3 h-6 leading-tight text-gray-500 bg-white border hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white ${(val == currentPage) ? "border-b-orange-600 dark:border-b-orange-600" : ""}`}>
                         {val}
                     </button>
                 </li>

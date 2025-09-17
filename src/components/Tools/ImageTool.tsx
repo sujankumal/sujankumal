@@ -420,7 +420,7 @@ export default function ImageTool() {
       )}
       {exif && (
         <div className="mb-4 text-xs bg-gray-100 p-2 rounded">
-          <button onClick={() => setShowExif((v) => !v)} className="text-teal-700 underline mb-2">{showExif ? 'Hide' : 'Show'} EXIF Data</button>
+          <button onClick={() => setShowExif((v) => !v)} className="text-orange-700 underline mb-2">{showExif ? 'Hide' : 'Show'} EXIF Data</button>
           {showExif && <pre className="overflow-x-auto max-h-64">{JSON.stringify(exif, null, 2)}</pre>}
         </div>
       )}
@@ -430,7 +430,7 @@ export default function ImageTool() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={output} alt="Output" className="max-w-full max-h-64 rounded border" />
           <div className="mt-2 flex items-center gap-2">
-            <a href={output} download={inputFileName} className="text-teal-700 underline">Download JPG</a>
+            <a href={output} download={inputFileName} className="text-orange-700 underline">Download JPG</a>
             <span className="text-xs text-gray-600">(
               {(() => {
                 // Calculate base64 size in KB
@@ -455,12 +455,12 @@ export default function ImageTool() {
           <div className="flex gap-2 mb-2">
             <button
               type="button"
-              className={`px-2 py-1 rounded border ${outWidthMM === 25 && outHeightMM === 30 ? 'bg-teal-600 text-white' : 'bg-gray-100'}`}
+              className={`px-2 py-1 rounded border ${outWidthMM === 25 && outHeightMM === 30 ? 'bg-orange-600 text-white' : 'bg-gray-100'}`}
               onClick={() => { setOutWidthMM(25); setOutHeightMM(30); }}
             >25x30</button>
             <button
               type="button"
-              className={`px-2 py-1 rounded border ${outWidthMM === 35 && outHeightMM === 45 ? 'bg-teal-600 text-white' : 'bg-gray-100'}`}
+              className={`px-2 py-1 rounded border ${outWidthMM === 35 && outHeightMM === 45 ? 'bg-orange-600 text-white' : 'bg-gray-100'}`}
               onClick={() => { setOutWidthMM(35); setOutHeightMM(45); }}
             >35x45</button>
           </div>
@@ -478,28 +478,28 @@ export default function ImageTool() {
         <div className="flex flex-col gap-2">
           <label className="font-semibold">Rotate:</label>
           <div className="flex gap-2">
-            <button type="button" onClick={() => handleRotate(0)} className={`px-2 py-1 rounded ${rotate === 0 ? 'bg-teal-600 text-white' : 'bg-gray-200'}`}>0°</button>
-            <button type="button" onClick={() => handleRotate(90)} className={`px-2 py-1 rounded ${rotate === 90 ? 'bg-teal-600 text-white' : 'bg-gray-200'}`}>90°</button>
-            <button type="button" onClick={() => handleRotate(180)} className={`px-2 py-1 rounded ${rotate === 180 ? 'bg-teal-600 text-white' : 'bg-gray-200'}`}>180°</button>
-            <button type="button" onClick={() => handleRotate(270)} className={`px-2 py-1 rounded ${rotate === 270 ? 'bg-teal-600 text-white' : 'bg-gray-200'}`}>270°</button>
+            <button type="button" onClick={() => handleRotate(0)} className={`px-2 py-1 rounded ${rotate === 0 ? 'bg-orange-600 text-white' : 'bg-gray-200'}`}>0°</button>
+            <button type="button" onClick={() => handleRotate(90)} className={`px-2 py-1 rounded ${rotate === 90 ? 'bg-orange-600 text-white' : 'bg-gray-200'}`}>90°</button>
+            <button type="button" onClick={() => handleRotate(180)} className={`px-2 py-1 rounded ${rotate === 180 ? 'bg-orange-600 text-white' : 'bg-gray-200'}`}>180°</button>
+            <button type="button" onClick={() => handleRotate(270)} className={`px-2 py-1 rounded ${rotate === 270 ? 'bg-orange-600 text-white' : 'bg-gray-200'}`}>270°</button>
           </div>
           <label className="font-semibold">Mirror:</label>
           <div className="flex gap-2">
-            <button type="button" onClick={handleMirrorH} className={`px-2 py-1 rounded ${mirrorH ? 'bg-teal-600 text-white' : 'bg-gray-200'}`}>Horizontal</button>
-            <button type="button" onClick={handleMirrorV} className={`px-2 py-1 rounded ${mirrorV ? 'bg-teal-600 text-white' : 'bg-gray-200'}`}>Vertical</button>
+            <button type="button" onClick={handleMirrorH} className={`px-2 py-1 rounded ${mirrorH ? 'bg-orange-600 text-white' : 'bg-gray-200'}`}>Horizontal</button>
+            <button type="button" onClick={handleMirrorV} className={`px-2 py-1 rounded ${mirrorV ? 'bg-orange-600 text-white' : 'bg-gray-200'}`}>Vertical</button>
           </div>
           <label className="font-semibold">Passport Photo Sheet:</label>
           <button 
             type="button" onClick={handlePassportSheet} 
-            className={`bg-teal-600 text-white px-4 py-2 rounded ${outWidthMM && outHeightMM ? '' :'disabled:opacity-90 disabled:bg-yellow-800'}`}
+            className={`bg-orange-600 text-white px-4 py-2 rounded ${outWidthMM && outHeightMM ? '' :'disabled:opacity-90 disabled:bg-yellow-800'}`}
             title={!outWidthMM || !outHeightMM ? "Please set output size to generate the sheet." : ""}
             >Generate 100x150mm Sheet</button>
             <ToastContainer position="bottom-right" theme="dark"/>
         </div>
       </div>
       <div className="flex flex-wrap gap-2 mb-4">
-        <button onClick={handleCompress} className="bg-teal-600 text-white px-4 py-2 rounded">Refresh Output</button>
-        <button onClick={() => setShowCropModal(true)} className="bg-teal-600 text-white px-4 py-2 rounded">Crop</button>
+        <button onClick={handleCompress} className="bg-orange-600 text-white px-4 py-2 rounded">Refresh Output</button>
+        <button onClick={() => setShowCropModal(true)} className="bg-orange-600 text-white px-4 py-2 rounded">Crop</button>
         <button onClick={() => {
           setCroppedPreview(null);
           setPreview(rawPreview);
@@ -520,11 +520,11 @@ export default function ImageTool() {
                 onChange={e => setAspectRatio(Number(e.target.value) || 1)}
                 className="border rounded px-1 w-20"
               />
-              <button className={`px-1 py-1 rounded border ${aspectRatio === 1 ? 'bg-teal-600 text-white' : 'bg-gray-100'}`} onClick={() => setAspectRatio(1)}>1:1</button>
-              <button className={`px-1 py-1 rounded border ${aspectRatio === 4/3 ? 'bg-teal-600 text-white' : 'bg-gray-100'}`} onClick={() => setAspectRatio(4/3)}>4:3</button>
-              <button className={`px-1 py-1 rounded border ${aspectRatio === 3/4 ? 'bg-teal-600 text-white' : 'bg-gray-100'}`} onClick={() => setAspectRatio(3/4)}>3:4</button>
-              <button className={`px-1 py-1 rounded border ${aspectRatio === 16/9 ? 'bg-teal-600 text-white' : 'bg-gray-100'}`} onClick={() => setAspectRatio(16/9)}>16:9</button>
-              <button className={`px-1 py-1 rounded border ${aspectRatio === 9/16 ? 'bg-teal-600 text-white' : 'bg-gray-100'}`} onClick={() => setAspectRatio(9/16)}>9:16</button>
+              <button className={`px-1 py-1 rounded border ${aspectRatio === 1 ? 'bg-orange-600 text-white' : 'bg-gray-100'}`} onClick={() => setAspectRatio(1)}>1:1</button>
+              <button className={`px-1 py-1 rounded border ${aspectRatio === 4/3 ? 'bg-orange-600 text-white' : 'bg-gray-100'}`} onClick={() => setAspectRatio(4/3)}>4:3</button>
+              <button className={`px-1 py-1 rounded border ${aspectRatio === 3/4 ? 'bg-orange-600 text-white' : 'bg-gray-100'}`} onClick={() => setAspectRatio(3/4)}>3:4</button>
+              <button className={`px-1 py-1 rounded border ${aspectRatio === 16/9 ? 'bg-orange-600 text-white' : 'bg-gray-100'}`} onClick={() => setAspectRatio(16/9)}>16:9</button>
+              <button className={`px-1 py-1 rounded border ${aspectRatio === 9/16 ? 'bg-orange-600 text-white' : 'bg-gray-100'}`} onClick={() => setAspectRatio(9/16)}>9:16</button>
             </div>
             {/* Crop size controls removed as requested */}
             <div className="relative w-full h-64 bg-gray-100 mb-4">
@@ -553,7 +553,7 @@ export default function ImageTool() {
             </div>
             <div className="flex gap-2 justify-end">
               <button
-                className="bg-teal-600 text-white px-4 py-2 rounded"
+                className="bg-orange-600 text-white px-4 py-2 rounded"
                 onClick={async () => {
                   if (!referencePreview || !croppedAreaPixels) return;
                   // Crop the image using canvas

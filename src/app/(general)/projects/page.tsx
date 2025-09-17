@@ -48,7 +48,7 @@ async function Projects() {
                                     <header className="mt-2 text-center">
                                         <div className="mb-2">
                                             <h2>
-                                                <Link href={proj.link} className="text-teal-600">{proj.title}</Link>
+                                                <Link href={proj.link} className="text-orange-600">{proj.title}</Link>
                                             </h2>
                                         </div>
                                     </header>

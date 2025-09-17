@@ -85,7 +85,7 @@ function QR() {
               placeholder="Enter any link or text"
               value={input}
               onChange={e => setInput(e.target.value)}
-              className="w-full max-w-md px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 mb-4 text-gray-900 dark:text-gray-100 dark:bg-gray-700 dark:border-gray-600"
+              className="w-full max-w-md px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 mb-4 text-gray-900 dark:text-gray-100 dark:bg-gray-700 dark:border-gray-600"
             />
             <div className="flex flex-col sm:flex-row gap-4 mb-4 justify-center items-center">
               <button onClick={() => setShowFgPicker(v => !v)} className="flex items-center gap-2 px-3 py-1 bg-gray-200 rounded">
@@ -107,21 +107,21 @@ function QR() {
                 <button
                   onClick={() => downloadQR(256, true)}
                   disabled={!input}
-                  className="px-2 py-1 text-xs bg-teal-600 text-white rounded shadow hover:bg-teal-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  className="px-2 py-1 text-xs bg-orange-600 text-white rounded shadow hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                   PNG 256x256
                 </button>
                 <button
                   onClick={() => downloadQR(512, true)}
                   disabled={!input}
-                  className="px-2 py-1 text-xs bg-teal-600 text-white rounded shadow hover:bg-teal-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  className="px-2 py-1 text-xs bg-orange-600 text-white rounded shadow hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                   PNG 512x512
                 </button>
                 <button
                   onClick={() => downloadQR(800, true)}
                   disabled={!input}
-                  className="px-2 py-1 text-xs bg-teal-600 text-white rounded shadow hover:bg-teal-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  className="px-2 py-1 text-xs bg-orange-600 text-white rounded shadow hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                   PNG 800x800
                 </button>
@@ -134,7 +134,7 @@ function QR() {
                 </button>
               </div>
             </div>
-            <div ref={qrRef} className="mt-6 flex justify-center items-center p-4 border border-dashed border-teal-400 rounded-lg bg-gray-100 dark:bg-gray-700">
+            <div ref={qrRef} className="mt-6 flex justify-center items-center p-4 border border-dashed border-orange-400 rounded-lg bg-gray-100 dark:bg-gray-700">
               {input && (
                 <QRCodeSVG
                   value={input}

@@ -157,7 +157,7 @@ export function AdvancedFilters({ entity, onFiltersChange, className = "" }: Adv
           <Filter className="h-5 w-5 text-gray-500" />
           <span className="font-medium text-gray-900">Advanced Filters</span>
           {activeFilters.length > 0 && (
-            <span className="bg-teal-100 text-teal-800 text-xs font-medium px-2 py-1 rounded-full">
+            <span className="bg-orange-100 text-orange-800 text-xs font-medium px-2 py-1 rounded-full">
               {activeFilters.length}
             </span>
           )}
@@ -186,12 +186,12 @@ export function AdvancedFilters({ entity, onFiltersChange, className = "" }: Adv
             {activeFilters.map((filter, index) => (
               <div
                 key={index}
-                className="inline-flex items-center bg-teal-100 text-teal-800 text-sm px-3 py-1 rounded-full"
+                className="inline-flex items-center bg-orange-100 text-orange-800 text-sm px-3 py-1 rounded-full"
               >
                 <span>{filter.label}</span>
                 <button
                   onClick={() => removeFilter(index)}
-                  className="ml-2 text-teal-600 hover:text-teal-800"
+                  className="ml-2 text-orange-600 hover:text-orange-800"
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -249,7 +249,7 @@ export function AdvancedFilters({ entity, onFiltersChange, className = "" }: Adv
               <button
                 onClick={addFilter}
                 disabled={!newFilter.field || !newFilter.operator || newFilter.value === ""}
-                className="w-full px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-4 py-2 bg-orange-600 text-white text-sm font-medium rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Add Filter
               </button>

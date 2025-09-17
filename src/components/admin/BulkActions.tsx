@@ -107,9 +107,9 @@ export function BulkActions({
             className="flex items-center space-x-2 text-sm text-gray-700 hover:text-gray-900"
           >
             {isAllSelected ? (
-              <CheckSquare className="h-5 w-5 text-teal-600" />
+              <CheckSquare className="h-5 w-5 text-orange-600" />
             ) : isPartiallySelected ? (
-              <div className="h-5 w-5 bg-teal-600 rounded border-2 border-teal-600 flex items-center justify-center">
+              <div className="h-5 w-5 bg-orange-600 rounded border-2 border-orange-600 flex items-center justify-center">
                 <div className="h-2 w-2 bg-white rounded-sm" />
               </div>
             ) : (
@@ -130,7 +130,7 @@ export function BulkActions({
             {onBulkEdit && (
               <button
                 onClick={() => onBulkEdit(selectedItems)}
-                className="inline-flex items-center px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
+                className="inline-flex items-center px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
               >
                 <Edit className="h-4 w-4 mr-1" />
                 Edit ({selectedItems.length})
@@ -139,7 +139,7 @@ export function BulkActions({
 
             <button
               onClick={handleExport}
-              className="inline-flex items-center px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
+              className="inline-flex items-center px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
             >
               <Download className="h-4 w-4 mr-1" />
               Export ({selectedItems.length})
@@ -200,7 +200,7 @@ export function SelectableRow({ item, isSelected, onSelect, children }: Selectab
           className="flex items-center"
         >
           {isSelected ? (
-            <CheckSquare className="h-5 w-5 text-teal-600" />
+            <CheckSquare className="h-5 w-5 text-orange-600" />
           ) : (
             <Square className="h-5 w-5 text-gray-400 hover:text-gray-600" />
           )}

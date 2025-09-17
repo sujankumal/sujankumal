@@ -65,7 +65,7 @@ export function Modal({ isOpen, onClose, title, children, size = "md" }: ModalPr
             <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
             <button
               onClick={onClose}
-              className="rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
             >
               <X className="h-5 w-5" />
             </button>

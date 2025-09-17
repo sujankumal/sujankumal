@@ -46,7 +46,7 @@ function Login() {
                         <div className={"rounded-lg shadow-lg h-fit bg-gray-800 text-white text-sm"}>
                             <form className="m-4 p-8" id="form-sign-in" method="POST" action="/api/auth/callback/credentials">
                                 <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
-                                <div className="border-b-2 pb-2 border-b-teal-600">
+                                <div className="border-b-2 pb-2 border-b-orange-600">
                                     <div className="mb-4">
                                         <label className="block text-sm mb-2" htmlFor="email">
                                             Email
@@ -62,10 +62,10 @@ function Login() {
                                     </div>
                                     <div className="flex items-center justify-between">
                                         <button type="submit"
-                                            className="bg-teal-600 hover:bg-teal-800 text-white py-2 px-4 mr-6 rounded-3xl focus:outline-none focus:shadow-outline">
+                                            className="bg-orange-600 hover:bg-orange-800 text-white py-2 px-4 mr-6 rounded-3xl focus:outline-none focus:shadow-outline">
                                             Sign In
                                         </button>
-                                        <a className="inline-block align-baseline text-sm text-teal-600 hover:text-teal-800 ml-6" href="#">
+                                        <a className="inline-block align-baseline text-sm text-orange-600 hover:text-orange-800 ml-6" href="#">
                                             Forgot Password?
                                         </a>
                                     </div>
@@ -76,7 +76,7 @@ function Login() {
                                     <div className="block my-2">Don&apos;t have account?</div>
                                 </div>
                                 <div className="flex items-center justify-center">
-                                    <Link href={'/sign-up'} className="bg-teal-600 hover:bg-teal-800 text-white w-full py-2 px-4 rounded-3xl focus:outline-none focus:shadow-outline text-center">
+                                    <Link href={'/sign-up'} className="bg-orange-600 hover:bg-orange-800 text-white w-full py-2 px-4 rounded-3xl focus:outline-none focus:shadow-outline text-center">
                                         Create account
                                     </Link>
                                 </div>
@@ -85,13 +85,13 @@ function Login() {
                         
                     </div>
                     <div className="w-full flex">
-                        <div className="w-full flex flex-col justify-center"><div className="w-full h-[1px] bg-teal-800"></div></div>
-                        <div className="w-fit m-1 text-teal-800">Or</div>
-                        <div className="w-full flex flex-col justify-center"><div className="w-full h-[1px] bg-teal-800"></div></div>
+                        <div className="w-full flex flex-col justify-center"><div className="w-full h-[1px] bg-orange-800"></div></div>
+                        <div className="w-fit m-1 text-orange-800">Or</div>
+                        <div className="w-full flex flex-col justify-center"><div className="w-full h-[1px] bg-orange-800"></div></div>
                     </div>
                     <div className="w-full p-2">
                         <div className="flex items-center justify-center">
-                            <button onClick={() => { signIn("google") }} className="bg-teal-600 hover:bg-teal-800 text-white w-full py-2 px-4 rounded-3xl focus:outline-none focus:shadow-outline" type="button">
+                            <button onClick={() => { signIn("google") }} className="bg-orange-600 hover:bg-orange-800 text-white w-full py-2 px-4 rounded-3xl focus:outline-none focus:shadow-outline" type="button">
                                 <span>
                                     <Google/>
                                     <span className="inline-flex flex-col justify-center px-2 text-sm">Login with google</span>

@@ -33,11 +33,11 @@ async function Header() {
             </div>
             <div className="bg-gray-800 px-2">
                 <div className="md:flex text-white">
-                    <div className="bg-teal-600 h-8 w-full flex flex-col justify-center  md:w-1/6 md:ml-20 float-left px-3 text-center font-semibold">Latest</div>
+                    <div className="bg-orange-600 h-8 w-full flex flex-col justify-center  md:w-1/6 md:ml-20 float-left px-3 text-center font-semibold">Latest</div>
                     <Ticker items={posts} />
                 </div>
             </div>
-            <div className="border-t-2 border-t-teal-600 bg-gray-800 px-2">
+            <div className="border-t-2 border-t-orange-600 bg-gray-800 px-2">
                 <div className="py-2 sm:px-20 md:flex">
                     <div className="text-sm text-white mb-1 w-full text-center md:max-w-max">
                         <div className="inline-flex float-none text-xs">
@@ -52,25 +52,25 @@ async function Header() {
                                     case "facebook":
                                         return <span className="mx-2" key={index}>
                                             <Link href={"https://www.facebook.com/" + soc.username} target="_blank">
-                                                <Facebook htmlColor="#1877f2" />
+                                                <Facebook htmlColor="#ea580c" />
                                             </Link>
                                         </span>
                                     case "instagram":
                                         return <span className="mx-2" key={index}>
                                             <Link href={"https://www.instagram.com/" + soc.username} target="_blank">
-                                                <Instagram htmlColor="#ff7800" />
+                                                <Instagram htmlColor="#ea580c" />
                                             </Link>
                                         </span>
                                     case "twitter":
                                         return <span className="mx-2" key={index}>
                                             <Link href={"https://www.X.com/" + soc.username} target="_blank">
-                                                <XIcon htmlColor="#1eaaff" />
+                                                <XIcon htmlColor="#ea580c" />
                                             </Link>
                                         </span>
                                     case "threads":
                                         return <span className="mx-2" key={index}>
                                             <Link href={"https://www.threads.net/" + soc.username} target="_blank">
-                                                <SvgIcon htmlColor="#c9510c">
+                                                <SvgIcon htmlColor="#ea580c">
                                                     <svg xmlns="http://www.w3.org/2000/svg" shapeRendering="geometricPrecision"
                                                         textRendering="geometricPrecision" imageRendering="optimizeQuality" fillRule="evenodd"
                                                         clipRule="evenodd" viewBox="0 0 512 512">
@@ -83,13 +83,13 @@ async function Header() {
                                     case "linkedin":
                                         return <span className="mx-2" key={index}>
                                             <Link href={"https://www.linkedin.com/in/" + soc.username} target="_blank">
-                                                <LinkedIn htmlColor="#0077b5" />
+                                                <LinkedIn htmlColor="#ea580c" />
                                             </Link>
                                         </span>
                                     case "github":
                                         return <span className="mx-2" key={index}>
                                             <Link href={"https://www.github.com/" + soc.username} target="_blank">
-                                                <GitHub htmlColor="#c9510c" />
+                                                <GitHub htmlColor="#ea580c" />
                                             </Link>
                                         </span>
                                     default:
@@ -115,7 +115,7 @@ async function Header() {
                         </div>
                         <div className="md:mt-5 mb-2 md:mb-auto">
                             <h1 className="uppercase font-bold text-2xl">
-                                <Link className="text-teal-600" href="/" rel="home">{sites.name}</Link>
+                                <Link className="text-orange-600" href="/" rel="home">{sites.name}</Link>
                             </h1>
                             <p className="text-light">{sites.motto}</p>
                         </div>
