@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useP2P } from '../../contexts/P2PContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { AvailableUsers } from './AvailableUsers';
@@ -11,13 +11,16 @@ import { FaUsers, FaInbox, FaExchangeAlt, FaUpload } from 'react-icons/fa';
 
 export function P2PFileShare() {
   const { user } = useAuth();
-  const { availableUsers, shareRequests, fileTransfers, isAvailable } = useP2P();
+  const { availableUsers, shareRequests, fileTransfers, isAvailable, acceptShareRequest, rejectShareRequest } = useP2P();
 
   const activeTransfers = fileTransfers.filter(t => t.status === 'transferring');
   const [activeTab, setActiveTab] = useState<'users' | 'requests' | 'transfers'>('users');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // transient popover state for incoming requests
+  const [popoverRequest, setPopoverRequest] = useState<any | null>(null);
+  const notifiedRef = useRef<Set<string>>(new Set());
 
   const handleFileSelect = (files: File[]) => {
     setSelectedFiles(files);
@@ -51,6 +54,25 @@ export function P2PFileShare() {
       color: 'purple',
     },
   ];
+
+  // Show a transient popover when a new pending share request arrives
+  useEffect(() => {
+    if (!shareRequests || shareRequests.length === 0) return;
+
+    // find the newest pending request that we haven't notified about
+    const pending = shareRequests.filter(r => r.status === 'pending').sort((a, b) => b.timestamp - a.timestamp);
+    if (pending.length === 0) return;
+    const newest = pending[0];
+    if (notifiedRef.current.has(newest.id)) return;
+
+    // set popover to show
+    setPopoverRequest(newest);
+    notifiedRef.current.add(newest.id);
+
+    // auto-dismiss after 20s
+    const t = setTimeout(() => setPopoverRequest(null), 20_000);
+    return () => clearTimeout(t);
+  }, [shareRequests]);
 
   if (!isAvailable) {
     return (
@@ -219,6 +241,55 @@ export function P2PFileShare() {
         {activeTab === 'requests' && <ShareRequests />}
         {activeTab === 'transfers' && <FileTransfers />}
       </div>
+
+      {/* Incoming share request popover */}
+      {popoverRequest && (
+        <div className="fixed bottom-6 right-6 z-50">
+          <div className="w-96 bg-white border border-gray-200 rounded-lg shadow-lg p-4">
+            <div className="flex items-start">
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-gray-900">Share request from {popoverRequest.fromUserName || 'Unknown'}</h3>
+                <p className="text-xs text-gray-600 mt-1">{popoverRequest.message || `${popoverRequest.files?.length || 0} file(s)`}</p>
+                <div className="mt-3 space-x-2">
+                  <button
+                    onClick={async () => {
+                      try {
+                        await acceptShareRequest(popoverRequest.id);
+                      } catch (e) {
+                        // ignore
+                      }
+                      setPopoverRequest(null);
+                    }}
+                    className="px-3 py-1 bg-green-600 text-white rounded-md text-sm"
+                  >
+                    Accept
+                  </button>
+                  <button
+                    onClick={async () => {
+                      try {
+                        await rejectShareRequest(popoverRequest.id);
+                      } catch (e) {
+                        // ignore
+                      }
+                      setPopoverRequest(null);
+                    }}
+                    className="px-3 py-1 bg-red-50 text-red-700 border border-red-100 rounded-md text-sm"
+                  >
+                    Reject
+                  </button>
+                </div>
+              </div>
+              <button
+                onClick={() => setPopoverRequest(null)}
+                className="ml-3 text-gray-400 hover:text-gray-600"
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

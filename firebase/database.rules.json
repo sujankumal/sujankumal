@@ -1,0 +1,95 @@
+{
+  "rules": {
+    "users": {
+      ".read": "auth != null", 
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid",
+        "publicKey": {
+          "jwk": {
+            ".write": "auth != null && auth.uid === $uid",
+            ".read": "auth != null",
+            ".validate": "newData.hasChild('kty') && newData.hasChild('alg') && newData.child('kty').isString() && newData.child('alg').isString()"
+          }
+        }
+      }
+    },
+
+    "shareRequests": {
+      "$toUid": {
+        ".read": "auth != null && auth.uid === $toUid",
+        "$reqId": {
+          ".write": "((!data.exists() && newData.child('toUserId').val() === $toUid && newData.child('fromUserId').val() === auth.uid && newData.child('status').val() === 'pending') || (data.exists() && auth != null && auth.uid === $toUid))",
+          ".validate": "newData.hasChild('requestId') && newData.child('requestId').isString() && newData.hasChild('fromUserId') && newData.child('fromUserId').isString() && newData.hasChild('toUserId') && newData.child('toUserId').isString()"
+        }
+      }
+    },
+
+    "signaling": {
+      "$sessionId": {
+        ".read": "auth != null && root.child('signaling').child($sessionId).child('peers').child(auth.uid).val() === true",
+        ".write": "auth != null && root.child('signaling').child($sessionId).child('peers').child(auth.uid).val() === true",
+
+        "peers": {
+          "$peerUid": {
+            ".write": "auth != null && auth.uid === $peerUid",
+            ".validate": "newData.val() === true"
+          }
+        },
+
+        "offers": {
+          "$offerUid": {
+            ".write": "auth != null && auth.uid === $offerUid",
+            ".read": "auth != null && root.child('signaling').child($sessionId).child('peers').child(auth.uid).val() === true",
+            ".validate": "newData.hasChild('sdp') && newData.child('sdp').isString() && newData.child('from').val() === $offerUid"
+          }
+        },
+
+        "answers": {
+          "$answerUid": {
+            ".write": "auth != null && auth.uid === $answerUid",
+            ".read": "auth != null && root.child('signaling').child($sessionId).child('peers').child(auth.uid).val() === true",
+            ".validate": "newData.hasChild('sdp') && newData.child('sdp').isString() && newData.child('from').val() === $answerUid"
+          }
+        },
+
+        "candidates": {
+          "$candUid": {
+            "$pushId": {
+              ".write": "auth != null && auth.uid === $candUid",
+              ".read": "auth != null && root.child('signaling').child($sessionId).child('peers').child(auth.uid).val() === true",
+              ".validate": "newData.hasChild('candidate') && newData.child('candidate').isString()"
+            }
+          }
+        },
+
+        "e2ee": {
+          "$peerUid": {
+            ".write": "auth != null && auth.uid === $peerUid",
+            ".read": "auth != null && root.child('signaling').child($sessionId).child('peers').child(auth.uid).val() === true",
+            ".validate": "newData.hasChild('pub') && newData.child('pub').isString() && newData.hasChild('sig') && newData.child('sig').isString()"
+          }
+        },
+
+        "meta": {
+          "$key": {
+            ".write": "auth != null && root.child('signaling').child($sessionId).child('peers').child(auth.uid).val() === true",
+            ".read": "auth != null && root.child('signaling').child($sessionId).child('peers').child(auth.uid).val() === true"
+          }
+        }
+      }
+    },
+
+    "uploads": {
+      "$uploadId": {
+        ".read": "auth != null && data.child('owner').val() === auth.uid",
+        ".write": "auth != null && newData.child('owner').val() === auth.uid && newData.child('size').isNumber() && newData.child('size').val() <= 104857600",
+        "size": {
+          ".validate": "newData.isNumber() && newData.val() <= 104857600"
+        },
+        "mime": {
+          ".validate": "newData.isString()"
+        }
+      }
+    }
+  }
+}
