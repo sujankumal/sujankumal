@@ -494,7 +494,7 @@ export function P2PProvider({ children }: P2PProviderProps) {
       const db = database;
       const requestRef = ref(db, `shareRequests/${user.uid}/${requestId}`);
       await remove(requestRef);
-    }, [user]);
+  }, [user]);
 
     // Setup WebRTC as receiver (when accepting a request)
     const setupWebRTCReceiver = useCallback(async (requestId: string, senderUserId: string, senderName?: string) => {
@@ -921,7 +921,7 @@ export function P2PProvider({ children }: P2PProviderProps) {
 
       // Also return a small cleanup function in case caller wants to close earlier (not used now)
       // Not returning from useCallback; we rely on timer above
-    }, [user]);
+  }, [user, deriveSessionKey, ensurePeerRegistered, exportEphemeralPublicRaw, generateOrEnsureLongtermKey, signBytesWithLongterm, verifyEphemeralSignature]);
 
       // Accept share request
     const acceptShareRequest = useCallback(async (requestId: string) => {
@@ -1372,7 +1372,7 @@ export function P2PProvider({ children }: P2PProviderProps) {
           // ignore
         }
       }, 5 * 60 * 1000);
-    }, [user]);
+  }, [user, deriveSessionKey, ensurePeerRegistered, sendFile, verifyEphemeralSignature]);
 
 
     const value = {
