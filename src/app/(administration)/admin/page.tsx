@@ -32,9 +32,17 @@ async function Admin() {
             </nav>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Database Management</h1>
-                    <p className="text-gray-600">Manage your application data with full CRUD operations. Click on any section to expand and load the data.</p>
+                <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-900 mb-2">Database Management</h1>
+                        <p className="text-gray-600">Manage your application data with full CRUD operations. Click on any section to expand and load the data.</p>
+                    </div>
+                    <a
+                        href="/short-urls"
+                        className="inline-flex w-fit items-center justify-center rounded-md bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700"
+                    >
+                        Manage Short URLs
+                    </a>
                 </div>
 
                 {/* Content Management */}
