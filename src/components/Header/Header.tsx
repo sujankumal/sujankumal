@@ -1,9 +1,7 @@
 import Image from "next/image";
-import headerImage from '/public/images/header.jpg';
 import Ticker from "./Ticker";
 import { Facebook, Instagram, GitHub, LinkedIn, Link as SocialLink } from '@mui/icons-material';
 import XIcon from '@mui/icons-material/X';
-import bird_100_100_20 from '/public/bird-100x100-20.gif';
 
 import Link from "next/link";
 import DigitalClock from "../DateTime/DigitalClock";
@@ -12,7 +10,6 @@ import { SiteType } from "@/types/site";
 import { fetchPostTitleTicker, fetchSite, fetchSocial } from "@/services/data_access";
 import { PostTitleType } from "@/types/post";
 import { SocialType } from "@/types/social";
-import { APP_BASE_URL } from "@/constants/constants";
 import { SvgIcon } from "@mui/material";
 
 export const revalidate = 86400;
@@ -24,11 +21,13 @@ async function Header() {
     
     return (
         <header className="mb-3">
-            <div className="">
+            <div className="relative w-full h-100">
                 <Image
-                    src={headerImage}
+                    src="/images/header.jpg"
                     alt="Sujan Kumal"
                     priority={true}
+                    fill
+                    className="object-cover object-center"
                 />
             </div>
             <div className="bg-gray-800 px-2">
@@ -111,7 +110,14 @@ async function Header() {
                 <div className="w-full">
                     <div className="text-center md:text-left md:flex">
                         <div className="w-full flex justify-center md:w-fit mr-4">
-                            <Image src={bird_100_100_20} alt="Bird with rocket. Site Logo." priority={true} width={100}/>
+                            <Image 
+                                src="/bird-100x100-20.gif" 
+                                alt="Bird with rocket. Site Logo." 
+                                priority={true} 
+                                width={100}
+                                height={100}
+                                unoptimized={true}
+                                />
                         </div>
                         <div className="md:mt-5 mb-2 md:mb-auto">
                             <h1 className="uppercase font-bold text-2xl">

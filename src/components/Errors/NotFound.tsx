@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 function NotFound() {
     return (
     <div className="h-full">
@@ -9,7 +11,7 @@ function NotFound() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
                 </svg>
             </div>
-            <p className="mt-4 text-gray-600">Let&#39;s get you back <a href="/" className="text-blue-500">home</a>.</p>
+            <p className="mt-4 text-gray-600">Let&#39;s get you back <Link href="/" className="text-blue-500">home</Link>.</p>
         </div> 
     </div>
     );

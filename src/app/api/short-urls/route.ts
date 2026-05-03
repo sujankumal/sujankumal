@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: "Validation error", details: error.errors }, { status: 400 });
+      return NextResponse.json({ error: "Validation error", details: error.issues }, { status: 400 });
     }
 
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
@@ -159,7 +159,7 @@ export async function DELETE(request: NextRequest) {
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: "Validation error", details: error.errors }, { status: 400 });
+      return NextResponse.json({ error: "Validation error", details: error.issues }, { status: 400 });
     }
 
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });

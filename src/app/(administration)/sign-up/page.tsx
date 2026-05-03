@@ -3,7 +3,7 @@
 import { useEffect, useState ,Suspense} from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { redirect, useSearchParams } from "next/navigation";
-import { _csrfToken } from "@/services/data_access";
+import { csrfToken as getCsrfToken } from "@/services/csrf";
 import Link from "next/link";
 import { Google } from "@mui/icons-material";
 import { Alert, Slide, Snackbar } from "@mui/material";
@@ -25,7 +25,7 @@ function Signup() {
     
     useEffect(() => {
         let isMounted = true;
-        _csrfToken()
+        getCsrfToken()
             .then((data) => {
                 if (isMounted) setCsrfToken(data);
             })

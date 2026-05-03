@@ -97,8 +97,8 @@ export function TableSection({ title, items, fields, markdownFields = [], imageF
                 {fields.map((field) => (
                   <td key={field} className="px-4 py-2 text-sm">
                     {markdownFields.includes(field) && item[field] ? (
-                      <div className="max-w-xs">
-                        <ReactMarkdown className="prose prose-xs prose-orange max-w-none line-clamp-3">
+                      <div className="max-w-xs prose prose-xs prose-orange line-clamp-3">
+                        <ReactMarkdown>
                           {item[field]}
                         </ReactMarkdown>
                       </div>

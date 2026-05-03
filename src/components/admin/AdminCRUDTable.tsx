@@ -330,8 +330,8 @@ export function AdminCRUDTable({
 
     if (markdownFields.includes(field) && value) {
       return (
-        <div className="max-w-xs">
-          <ReactMarkdown className="prose prose-xs prose-orange max-w-none line-clamp-3">
+        <div className="max-w-xs prose prose-xs prose-orange max-w-none line-clamp-3">
+          <ReactMarkdown>
             {value}
           </ReactMarkdown>
         </div>

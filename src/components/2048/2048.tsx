@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
-import "tailwindcss/tailwind.css";
 
 const styles: { [key: string]: React.CSSProperties } = {
     container: {

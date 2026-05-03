@@ -83,6 +83,76 @@ interface P2PProviderProps {
   children: React.ReactNode;
 }
 
+const LONGTERM_PUB_DB_PATH = (uid: string) => `users/${uid}/publicKey/jwk`;
+
+// Simple IndexedDB helper for storing CryptoKey (uses structured clone to store CryptoKey objects when supported)
+const openKeyDB = () => {
+  return new Promise<IDBDatabase>((resolve, reject) => {
+    const rq = indexedDB.open('p2p-keys', 1);
+    rq.onupgradeneeded = () => {
+      const db = rq.result;
+      if (!db.objectStoreNames.contains('keys')) db.createObjectStore('keys');
+    };
+    rq.onsuccess = () => resolve(rq.result);
+    rq.onerror = () => reject(rq.error);
+  });
+};
+
+const idbGet = async (uid: string) => {
+  const db = await openKeyDB();
+  return new Promise<any>((resolve, reject) => {
+    const tx = db.transaction('keys', 'readonly');
+    const store = tx.objectStore('keys');
+    const rq = store.get(uid);
+    rq.onsuccess = () => resolve(rq.result);
+    rq.onerror = () => reject(rq.error);
+  });
+};
+
+const idbPut = async (uid: string, value: any) => {
+  const db = await openKeyDB();
+  return new Promise<void>((resolve, reject) => {
+    const tx = db.transaction('keys', 'readwrite');
+    const store = tx.objectStore('keys');
+    const rq = store.put(value, uid);
+    rq.onsuccess = () => resolve();
+    rq.onerror = () => reject(rq.error);
+  });
+};
+
+const arrayBufferToBase64 = (buffer: ArrayBuffer) => {
+  const bytes = new Uint8Array(buffer);
+  const len = bytes.length;
+  let binary = '';
+  const chunk = 0x8000; // convert in chunks to avoid call stack issues
+  for (let i = 0; i < len; i += chunk) {
+    binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, Math.min(i + chunk, len))));
+  }
+  return btoa(binary);
+};
+
+const base64ToArrayBuffer = (b64: string) => {
+  const binary = atob(b64);
+  const len = binary.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes.buffer;
+};
+
+const importEphemeralPublicRaw = async (b64: string) => {
+  const raw = base64ToArrayBuffer(b64);
+  return await crypto.subtle.importKey('raw', raw, { name: 'ECDH', namedCurve: 'P-256' }, true, []);
+};
+
+// sha256 hex digest helper
+const sha256Hex = async (buffer: ArrayBuffer) => {
+  const digest = await crypto.subtle.digest('SHA-256', buffer);
+  const hex = Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+  return hex;
+};
+
 export function P2PProvider({ children }: P2PProviderProps) {
   const { user } = useAuth();
   const [availableUsers, setAvailableUsers] = useState<PeerUser[]>([]);
@@ -104,46 +174,9 @@ export function P2PProvider({ children }: P2PProviderProps) {
     ensureClientInitialized().catch(() => { });
   }, []);
 
-  // E2EE helpers: generate long-term signing key (ECDSA P-256) stored locally (prototype uses localStorage).
-  const LONGTERM_PUB_DB_PATH = (uid: string) => `users/${uid}/publicKey/jwk`;
-
-  // Simple IndexedDB helper for storing CryptoKey (uses structured clone to store CryptoKey objects when supported)
-  const openKeyDB = () => {
-    return new Promise<IDBDatabase>((resolve, reject) => {
-      const rq = indexedDB.open('p2p-keys', 1);
-      rq.onupgradeneeded = () => {
-        const db = rq.result;
-        if (!db.objectStoreNames.contains('keys')) db.createObjectStore('keys');
-      };
-      rq.onsuccess = () => resolve(rq.result);
-      rq.onerror = () => reject(rq.error);
-    });
-  };
-
-  const idbGet = async (uid: string) => {
-    const db = await openKeyDB();
-    return new Promise<any>((resolve, reject) => {
-      const tx = db.transaction('keys', 'readonly');
-      const store = tx.objectStore('keys');
-      const rq = store.get(uid);
-      rq.onsuccess = () => resolve(rq.result);
-      rq.onerror = () => reject(rq.error);
-    });
-  };
-
-  const idbPut = async (uid: string, value: any) => {
-    const db = await openKeyDB();
-    return new Promise<void>((resolve, reject) => {
-      const tx = db.transaction('keys', 'readwrite');
-      const store = tx.objectStore('keys');
-      const rq = store.put(value, uid);
-      rq.onsuccess = () => resolve();
-      rq.onerror = () => reject(rq.error);
-    });
-  };
-
+  // E2EE helpers: generate long-term signing key (ECDSA P-256) stored locally.
   // Generate and persist a non-exportable private key stored in IndexedDB using structured clone.
-  const generateOrEnsureLongtermKey = async () => {
+  const generateOrEnsureLongtermKey = useCallback(async () => {
     if (!user || !database) return null;
 
     try {
@@ -184,9 +217,9 @@ export function P2PProvider({ children }: P2PProviderProps) {
     }
 
     return privKeyNonExportable;
-  };
+  }, [user]);
 
-  const getLongtermPrivateKey = async (): Promise<CryptoKey | null> => {
+  const getLongtermPrivateKey = useCallback(async (): Promise<CryptoKey | null> => {
     if (!user || !database) return null;
     try {
       const rec = await idbGet(user.uid);
@@ -207,26 +240,21 @@ export function P2PProvider({ children }: P2PProviderProps) {
       // ignore
     }
     return await generateOrEnsureLongtermKey();
-  };
+  }, [generateOrEnsureLongtermKey, user]);
 
-  const signBytesWithLongterm = async (data: ArrayBuffer) => {
+  const signBytesWithLongterm = useCallback(async (data: ArrayBuffer) => {
     const priv = await getLongtermPrivateKey();
     if (!priv) throw new Error('No long-term key');
     const sig = await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, priv, data);
     return arrayBufferToBase64(sig);
-  };
+  }, [getLongtermPrivateKey]);
 
-  const exportEphemeralPublicRaw = async (pub: CryptoKey) => {
+  const exportEphemeralPublicRaw = useCallback(async (pub: CryptoKey) => {
     const raw = await crypto.subtle.exportKey('raw', pub);
     return arrayBufferToBase64(raw);
-  };
+  }, []);
 
-  const importEphemeralPublicRaw = async (b64: string) => {
-    const raw = base64ToArrayBuffer(b64);
-    return await crypto.subtle.importKey('raw', raw, { name: 'ECDH', namedCurve: 'P-256' }, true, []);
-  };
-
-  const deriveSessionKey = async (ownPriv: CryptoKey, otherPubB64: string, saltB64: string) => {
+  const deriveSessionKey = useCallback(async (ownPriv: CryptoKey, otherPubB64: string, saltB64: string) => {
     const otherPub = await importEphemeralPublicRaw(otherPubB64);
     const salt = new Uint8Array(base64ToArrayBuffer(saltB64));
     // Derive AES-GCM 256 via ECDH -> HKDF
@@ -238,10 +266,10 @@ export function P2PProvider({ children }: P2PProviderProps) {
       ['encrypt', 'decrypt']
     );
     return derived as CryptoKey;
-  };
+  }, []);
 
   // Verify ephemeral pub signature using peer's long-term public JWK from DB
-  const verifyEphemeralSignature = async (peerUid: string, pubB64: string, sigB64: string) => {
+  const verifyEphemeralSignature = useCallback(async (peerUid: string, pubB64: string, sigB64: string) => {
     if (!database) return false;
     try {
       const pubRef = ref(database, LONGTERM_PUB_DB_PATH(peerUid));
@@ -256,13 +284,13 @@ export function P2PProvider({ children }: P2PProviderProps) {
     } catch (e) {
       return false;
     }
-  };
+  }, []);
 
   // Ensure the current user is registered under signaling/<sessionId>/peers/<uid>
   // This must be performed as a separate write because our rules allow the peer
   // to write that specific path even when the top-level session node does not
   // yet exist. Many operations (offer/answer) should call this first and await it.
-  const ensurePeerRegistered = async (sessionId: string) => {
+  const ensurePeerRegistered = useCallback(async (sessionId: string) => {
     if (!database || !user) return;
     const peerRef = ref(database, `signaling/${sessionId}/peers/${user.uid}`);
     try {
@@ -274,7 +302,7 @@ export function P2PProvider({ children }: P2PProviderProps) {
       console.error('ensurePeerRegistered failed for', sessionId, user?.uid, err);
       throw err;
     }
-  };
+  }, [user]);
 
   const drainCandidateQueue = async (sessionId: string, pc: RTCPeerConnection) => {
     const queue = candidateQueueRef.current[sessionId];
@@ -308,22 +336,22 @@ export function P2PProvider({ children }: P2PProviderProps) {
   };
 
   // Helper functions for file transfer progress
-  const addFileTransfer = (transfer: Omit<FileTransfer, 'id'>) => {
+  const addFileTransfer = useCallback((transfer: Omit<FileTransfer, 'id'>) => {
     const newTransfer: FileTransfer = {
       ...transfer,
       id: `${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
     };
     setFileTransfers(prev => [...prev, newTransfer]);
     return newTransfer.id;
-  };
+  }, []);
 
-  const updateFileTransfer = (id: string, updates: Partial<FileTransfer>) => {
+  const updateFileTransfer = useCallback((id: string, updates: Partial<FileTransfer>) => {
     setFileTransfers(prev =>
       prev.map(transfer =>
         transfer.id === id ? { ...transfer, ...updates } : transfer
       )
     );
-  };
+  }, []);
 
 
 
@@ -921,7 +949,7 @@ export function P2PProvider({ children }: P2PProviderProps) {
 
       // Also return a small cleanup function in case caller wants to close earlier (not used now)
       // Not returning from useCallback; we rely on timer above
-  }, [user, deriveSessionKey, ensurePeerRegistered, exportEphemeralPublicRaw, generateOrEnsureLongtermKey, signBytesWithLongterm, verifyEphemeralSignature]);
+  }, [addFileTransfer, deriveSessionKey, ensurePeerRegistered, exportEphemeralPublicRaw, generateOrEnsureLongtermKey, signBytesWithLongterm, updateFileTransfer, user, verifyEphemeralSignature]);
 
       // Accept share request
     const acceptShareRequest = useCallback(async (requestId: string) => {
@@ -942,7 +970,7 @@ export function P2PProvider({ children }: P2PProviderProps) {
 
     // Helper function to send file through data channel
     // Helper: wait for data channel buffer to drain below threshold.
-    const waitForBufferedAmountLow = (dc: RTCDataChannel, threshold: number, timeout = 10000) => {
+    const waitForBufferedAmountLow = useCallback((dc: RTCDataChannel, threshold: number, timeout = 10000) => {
       return new Promise<void>((resolve) => {
         if (typeof dc.bufferedAmount === 'number' && dc.bufferedAmount <= threshold) {
           resolve();
@@ -985,38 +1013,9 @@ export function P2PProvider({ children }: P2PProviderProps) {
           resolve();
         }, timeout);
       });
-    };
-    // base64 helpers (works in browser)
-    const arrayBufferToBase64 = (buffer: ArrayBuffer) => {
-      const bytes = new Uint8Array(buffer);
-      const len = bytes.length;
-      let binary = '';
-      const chunk = 0x8000; // convert in chunks to avoid call stack issues
-      for (let i = 0; i < len; i += chunk) {
-        binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, Math.min(i + chunk, len))));
-      }
-      return btoa(binary);
-    };
-
-    const base64ToArrayBuffer = (b64: string) => {
-      const binary = atob(b64);
-      const len = binary.length;
-      const bytes = new Uint8Array(len);
-      for (let i = 0; i < len; i++) {
-        bytes[i] = binary.charCodeAt(i);
-      }
-      return bytes.buffer;
-    };
-
-    // sha256 hex digest helper
-    const sha256Hex = async (buffer: ArrayBuffer) => {
-      const digest = await crypto.subtle.digest('SHA-256', buffer);
-      const hex = Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
-      return hex;
-    };
-
+    }, []);
     // sendFile: chunk file, include sequence numbers, wait for per-chunk ACKs, and send file-level SHA-256 for verification
-    const sendFile = async (dataChannel: RTCDataChannel, file: File, transferId?: string, sessionId?: string) => {
+    const sendFile = useCallback(async (dataChannel: RTCDataChannel, file: File, transferId?: string, sessionId?: string) => {
       const chunkSize = 64 * 1024; // 64KB
       const totalChunks = Math.ceil(file.size / chunkSize);
       const startTime = Date.now();
@@ -1198,7 +1197,7 @@ export function P2PProvider({ children }: P2PProviderProps) {
       } catch (e) { }
 
       if (transferId) updateFileTransfer(transferId, { progress: 100, status: 'completed' });
-    };
+    }, [updateFileTransfer, waitForBufferedAmountLow]);
     // Start file transfer (WebRTC) - called by sender
     const startFileTransfer = useCallback(async (requestId: string, files: File[]) => {
       if (!user) return;
@@ -1372,7 +1371,7 @@ export function P2PProvider({ children }: P2PProviderProps) {
           // ignore
         }
       }, 5 * 60 * 1000);
-  }, [user, deriveSessionKey, ensurePeerRegistered, sendFile, verifyEphemeralSignature]);
+  }, [addFileTransfer, deriveSessionKey, ensurePeerRegistered, sendFile, user, verifyEphemeralSignature]);
 
 
     const value = {

@@ -3,8 +3,7 @@ import { auth } from "../../../services/auth";
 import { redirect } from "next/navigation";
 import SignOutButton from "@/components/auth/SignOut";
 import Image from "next/image";
-import bird_100_100_20 from '/public/bird-100x100-20.gif';
-import spacex_r from '/public/images/rockets/spacex--p-KCm6xB9I-unsplash.jpg';
+import Link from "next/link";
 
 export const metadata: Metadata = {
     title: 'Dashboard | Sujan Kumal | Software Engineer',
@@ -20,18 +19,20 @@ async function Admin() {
     return (
         <main className="min-h-screen justify-center">
             <nav className=" border-b-2 border-gray-200">
-                <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-1">
+                <div className="max-w-7xl flex flex-wrap items-center justify-between mx-auto p-1">
                     <div className="flex justify-center w-full md:w-fit border-b-2 border-orange-600 md:border-none">
-                        <a href="/" className="space-x-3 rtl:space-x-reverse md:flex">
+                        <Link href="/" className="space-x-3 rtl:space-x-reverse md:flex">
                             <div className="w-full md:w-fit inline-flex justify-center md:block">
                                 <Image
-                                    src={bird_100_100_20}
+                                    src="/bird-100x100-20.gif"
                                     alt="Sujan Kumal"
+                                    width={100}
+                                    height={100}
                                     priority={true} 
                                 />
                             </div>
                             <div className="self-center text-xl font-semibold whitespace-nowrap dark:text-white mb-2 md:m-auto text-orange-600 md:p-0 ">Sujan Kumal</div>
-                        </a>
+                        </Link>
                     </div>
                     <div className="w-full md:w-auto">
                         <ul className="font-medium flex flex-col p-1 md:p-0 mt-1 rounded-lg md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0">
@@ -52,9 +53,9 @@ async function Admin() {
                                 </span>
                             </li>
                             {(session?.user.verified)?
-                                <a href="/admin" className="space-x-3 rtl:space-x-reverse md:flex">
+                                <Link href="/admin" className="space-x-3 rtl:space-x-reverse md:flex">
                                     <li className="inline-flex flex-col justify-center md:py-2 px-3 rounded md:bg-transparent text-orange-600 md:p-0 dark:text-white md:dark:text-orange-600">Admin Page</li>
-                                </a>
+                                </Link>
                                 :null
                             }
                             <li className="inline-flex flex-col justify-center">
@@ -65,11 +66,12 @@ async function Admin() {
                     </div>
                 </div>
             </nav>
-            <div className="w-full h-screen">
+            <div className="w-full h-screen relative">
                 <Image
-                    src={spacex_r}
+                    src="/images/rockets/spacex--p-KCm6xB9I-unsplash.jpg"
                     alt="spacex rocker launch"
-                    className="w-full h-full relative -z-10"
+                    fill
+                    className="object-cover -z-10"
                 />
             </div>
         </main>

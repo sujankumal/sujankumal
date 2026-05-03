@@ -3,7 +3,7 @@ import { useEffect, useState , Suspense} from "react";
 import { signIn, useSession } from "next-auth/react";
 import { redirect, useSearchParams } from "next/navigation";
 import { Google } from "@mui/icons-material";
-import { _csrfToken } from "@/services/data_access";
+import { csrfToken as getCsrfToken } from "@/services/csrf";
 import Link from "next/link";
 
 function Login() {
@@ -23,7 +23,7 @@ function Login() {
     
     useEffect(() => {
         let isMounted = true;
-        _csrfToken()
+        getCsrfToken()
             .then((data) => {
                 if (isMounted) setCsrfToken(data);
             })
@@ -85,9 +85,9 @@ function Login() {
                         
                     </div>
                     <div className="w-full flex">
-                        <div className="w-full flex flex-col justify-center"><div className="w-full h-[1px] bg-orange-800"></div></div>
+                        <div className="w-full flex flex-col justify-center"><div className="w-full h-px bg-orange-800"></div></div>
                         <div className="w-fit m-1 text-orange-800">Or</div>
-                        <div className="w-full flex flex-col justify-center"><div className="w-full h-[1px] bg-orange-800"></div></div>
+                        <div className="w-full flex flex-col justify-center"><div className="w-full h-px bg-orange-800"></div></div>
                     </div>
                     <div className="w-full p-2">
                         <div className="flex items-center justify-center">

@@ -1,4 +1,3 @@
-import "tailwindcss/tailwind.css";
 import Game2048 from "@/components/2048/2048";
 import { Metadata } from "next";
 
