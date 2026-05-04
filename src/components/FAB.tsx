@@ -22,12 +22,26 @@ function FAB() {
     }, [showMenu]);
 
     return <div ref={fabRef} className="fixed bottom-5 left-5 z-50 isolate">
-        <div className={showMenu?"block ml-1 text-orange-600 font-extrabold text-lg drop-shadow-[-2px_2px_0px_rgb(10,10,10)]":"hidden"}>
+        <div className={showMenu?"block ml-1 text-orange-600 font-extrabold text-sm drop-shadow-[-2px_2px_0px_rgb(10,10,10)]":"hidden"}>
             <div className="bg-white/80 dark:bg-gray-800/80 rounded-xl shadow-lg p-4 flex flex-col gap-2">
                 <div className="my-2 hover:scale-110 duration-300">
                     <Link href="/2048/" title="2048" onClick={() => setshowMenu(false)}>
                         <ShuffleOn className="text-orange-700" fontSize="large"/>
                         <span className="ml-4">2048</span>
+                    </Link>
+                </div>
+                <div className="my-2 hover:scale-110 duration-300">
+                    <Link href="/short-urls" title="Generate short links for long links. " onClick={() => setshowMenu(false)}>
+                        <svg 
+                            className="inline-flex w-8 h-8 text-gray-700"                        
+                            xmlns="http://www.w3.org/2000/svg" 
+                            x="0px" 
+                            y="0px" 
+                            viewBox="0 0 24 24" 
+                            width="24" 
+                            height="24">
+                                <g><g><g><path d="M13.358 11.891c-0.08 -0.018 -0.138 -0.095 -0.138 -0.182v-2.761h0.814c0.982 0 1.804 -0.7 1.993 -1.627h-2.806a0.406 0.406 0 0 1 -0.407 -0.407 0.407 0.407 0 0 1 0.407 -0.407h2.847v-1.22a0.407 0.407 0 0 0 -0.407 -0.407H8.339a0.407 0.407 0 0 0 -0.407 0.407v1.627c0 1.121 0.912 2.034 2.034 2.034h0.814v4.068c0 0.673 0.548 1.22 1.22 1.22 0.996 0 1.928 0.394 2.625 1.111 0.696 0.716 1.064 1.66 1.035 2.657 -0.054 1.906 -1.649 3.501 -3.554 3.554 -1.816 0.058 -3.418 -1.263 -3.717 -3.058 -0.097 -0.585 -0.585 -1.01 -1.161 -1.01h-0.082c-0.351 0 -0.682 0.151 -0.907 0.415a1.169 1.169 0 0 0 -0.267 0.943c0.475 3.02 3.038 5.151 6.021 5.151 0.276 0 0.556 -0.018 0.838 -0.056 2.725 -0.363 4.817 -2.434 5.206 -5.153 0.452 -3.16 -1.604 -6.191 -4.68 -6.9"/><path d="M19.322 0H4.678a0.406 0.406 0 0 0 -0.407 0.407v1.22h2.847c0.225 0 0.407 0.182 0.407 0.407s-0.182 0.407 -0.407 0.407H4.312c0.189 0.927 1.011 1.627 1.993 1.627h11.39c1.121 0 2.034 -0.912 2.034 -2.034V0.407A0.406 0.406 0 0 0 19.322 0"/></g></g></g></svg>
+                        <span className="ml-4 pb-4">Short URL</span>
                     </Link>
                 </div>
                 <div className="my-2 hover:scale-110 duration-300">
@@ -38,11 +52,18 @@ function FAB() {
                 </div>
                  <div className="my-2 hover:scale-110 duration-300">
                     <Link href="/qr-scan" title="Scan QR" onClick={() => setshowMenu(false)}>
-                        <svg className="inline-flex w-8 h-8 text-gray-700" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 122.61 122.88">
-                            <title>scan</title>
-                            <path d="M23.38,0h13V11.15h-13a12.22,12.22,0,0,0-8.64,3.57l0,0a12.22,12.22,0,0,0-3.57,8.64V39.32H0V23.38A23.32,23.32,0,0,1,6.86,6.89l0,0A23.31,23.31,0,0,1,23.38,0ZM3.25,54.91H119.36a3.29,3.29,0,0,1,3.25,3.27V64.7A3.29,3.29,0,0,1,119.36,68H3.25A3.28,3.28,0,0,1,0,64.7V58.18a3.27,3.27,0,0,1,3.25-3.27ZM90.57,0h8.66a23.28,23.28,0,0,1,16.49,6.86v0a23.32,23.32,0,0,1,6.87,16.52V39.32H111.46V23.38a12.2,12.2,0,0,0-3.6-8.63v0a12.21,12.21,0,0,0-8.64-3.58H90.57V0Zm32,81.85V99.5a23.46,23.46,0,0,1-23.38,23.38H90.57V111.73h8.66A12.29,12.29,0,0,0,111.46,99.5V81.85Zm-86.23,41h-13A23.32,23.32,0,0,1,6.86,116l-.32-.35A23.28,23.28,0,0,1,0,99.5V81.85H11.15V99.5a12.25,12.25,0,0,0,3.35,8.41l.25.22a12.2,12.2,0,0,0,8.63,3.6h13v11.15Z"/>
-                            <path fill="none" d="M0 0h24v24H0z"/>
-                        </svg>
+                        <svg 
+                            fill="#000000" 
+                            width="24px" 
+                            height="24px" 
+                            viewBox="0 0 0.72 0.72" 
+                            id="scan" 
+                            data-name="Flat Color" 
+                            xmlns="http://www.w3.org/2000/svg" 
+                            className="inline-flex w-8 h-8 text-gray-700">
+                                <path id="secondary" d="M0.63 0.39H0.09a0.03 0.03 0 0 1 0 -0.06h0.54a0.03 0.03 0 0 1 0 0.06" className="fill-[#2ca9bc] "/>
+                                <path id="primary" d="M0.09 0.24a0.03 0.03 0 0 1 -0.03 -0.03V0.12a0.06 0.06 0 0 1 0.06 -0.06h0.09a0.03 0.03 0 0 1 0 0.06H0.12v0.09a0.03 0.03 0 0 1 -0.03 0.03m0.57 -0.03V0.12a0.06 0.06 0 0 0 -0.06 -0.06h-0.09a0.03 0.03 0 0 0 0 0.06h0.09v0.09a0.03 0.03 0 0 0 0.06 0M0.24 0.63a0.03 0.03 0 0 0 -0.03 -0.03H0.12v-0.09a0.03 0.03 0 0 0 -0.06 0v0.09a0.06 0.06 0 0 0 0.06 0.06h0.09a0.03 0.03 0 0 0 0.03 -0.03m0.42 -0.03v-0.09a0.03 0.03 0 0 0 -0.06 0v0.09h-0.09a0.03 0.03 0 0 0 0 0.06h0.09a0.06 0.06 0 0 0 0.06 -0.06"/>
+                            </svg>
                         <span className="ml-4 pb-4">Scan QR</span>
                     </Link>
                 </div>
