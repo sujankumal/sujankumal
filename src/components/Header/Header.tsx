@@ -21,7 +21,7 @@ async function Header() {
     
     return (
         <header className="mb-3">
-            <div className="relative w-full h-100">
+            <div className="relative w-full h-50">
                 <Image
                     src="/images/header.jpg"
                     alt="Sujan Kumal"

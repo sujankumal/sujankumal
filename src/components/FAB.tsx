@@ -23,7 +23,7 @@ function FAB() {
 
     return <div ref={fabRef} className="fixed bottom-5 left-5 z-50 isolate">
         <div className={showMenu?"block ml-1 text-orange-600 font-extrabold text-sm drop-shadow-[-2px_2px_0px_rgb(10,10,10)]":"hidden"}>
-            <div className="bg-white/80 dark:bg-gray-800/80 rounded-xl shadow-lg p-4 flex flex-col gap-2">
+            <div className="bg-white/80 dark:bg-gray-800/80 rounded-xl shadow-lg p-4 flex flex-col gap-2 max-h-48 overflow-auto scrollbar scrollbar-thumb-gray-400 scrollbar-thumb-rounded-full">
                 <div className="my-2 hover:scale-110 duration-300">
                     <Link href="/2048/" title="2048" onClick={() => setshowMenu(false)}>
                         <ShuffleOn className="text-orange-700" fontSize="large"/>

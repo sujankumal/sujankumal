@@ -6,7 +6,7 @@
 /* Firefox */
 * {
   scrollbar-width: auto;
-  scrollbar-color: var(--secondary) var(--primary);
+  /* scrollbar-color: var(--secondary) var(--primary); */
 }
 
 /* Chrome, Edge, Safari */
