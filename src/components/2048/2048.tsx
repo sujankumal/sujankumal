@@ -244,10 +244,7 @@ export default function Game2048() {
     <div
       ref={gameRef}
       style={{ ...styles.container, userSelect: "none", position: 'relative' }}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
+      
       onWheel={e => e.preventDefault()}
       tabIndex={0}
       className="select-none"
@@ -358,7 +355,13 @@ export default function Game2048() {
 
         </div>
       </div>
-      <div style={styles.grid}>
+      <div 
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        style={styles.grid}
+      >
         {grid.flat().map((cell, idx) => (
           <div key={idx} style={styles.cell}>
             {cell !== 0 ? tileIcons[cell] || cell : ""}
