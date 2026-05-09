@@ -104,8 +104,8 @@ function slideAndMergeRow(row: number[]): number[] {
 const tileIcons: { [key: number]: React.ReactNode } = {
     2: "🥚",
     4: "🐣",
-    8: "🐥",
-    16: "🐤",
+    8: "🐤",
+    16: "🐥",
     32: "🐔",
     64: "🐓",
     128: "🦃",
@@ -252,7 +252,7 @@ export default function Game2048() {
       tabIndex={0}
       className="select-none"
     >
-      <h1 className="text-orange-600 font-bold">2048 Game</h1>
+      <h1 className="text-orange-600 font-bold text-4xl mt-8">2048 Game</h1>
       {(won || stopped) && (
         <div style={{
           position: 'absolute',
@@ -283,6 +283,81 @@ export default function Game2048() {
           )}
         </div>
       )}
+      <div className="mx-auto mt-4">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 font-mono text-center">
+          
+          <span>
+            <span className="text-xs align-top mr-1">2</span>
+            <span className="text-3xl">🥚</span>
+          </span>
+
+          <span>
+            <span className="text-xs align-top mr-1">4</span>
+            <span className="text-3xl">🐣</span>
+          </span>
+
+          <span>
+            <span className="text-xs align-top mr-1">8</span>
+            <span className="text-3xl">🐤</span>
+          </span>
+
+          <span>
+            <span className="text-xs align-top mr-1">16</span>
+            <span className="text-3xl">🐥</span>
+          </span>
+
+          <span>
+            <span className="text-xs align-top mr-1">32</span>
+            <span className="text-3xl">🐔</span>
+          </span>
+
+          <span>
+            <span className="text-xs align-top mr-1">64</span>
+            <span className="text-3xl">🐓</span>
+          </span>
+
+          <span>
+            <span className="text-xs align-top mr-1">128</span>
+            <span className="text-3xl">🦃</span>
+          </span>
+
+          <span>
+            <span className="text-xs align-top mr-1">256</span>
+            <span className="text-3xl">🦆</span>
+          </span>
+
+          <span>
+            <span className="text-xs align-top mr-1">512</span>
+            <span className="text-3xl">🦅</span>
+          </span>
+
+          <span>
+            <span className="text-xs align-top mr-1">1024</span>
+            <span className="text-3xl">🦉</span>
+          </span>
+
+          <span>
+            <span className="text-xs align-top mr-1">2048</span>
+            <span className="text-3xl">🦚</span>
+          </span>
+
+          <span>
+            <span className="text-xs align-top mr-1">4096</span>
+            <span className="text-3xl">🦜</span>
+          </span>
+
+          <span>
+            <span className="text-xs align-top mr-1">8192</span>
+            <span className="text-3xl">🦢</span>
+          </span>
+
+          <span>
+            <span className="text-xs align-top mr-1">16384</span>
+            <span className="text-3xl">🦩</span>
+          </span>
+
+        </div>
+      </div>
       <div style={styles.grid}>
         {grid.flat().map((cell, idx) => (
           <div key={idx} style={styles.cell}>
@@ -297,12 +372,13 @@ export default function Game2048() {
           onClick={() => setStopped(true)}
           style={{ zIndex: 20, padding: '4px 12px', fontSize: 16 }}
           disabled={stopped || won}
+          className="text-orange-600 border rounded-2xl hover:text-orange-900"
         >
           Stop
         </button>
         </div>
-        <h2>Steps: {step}</h2>
-        <ul style={{ listStyle: "none", padding: 0 }}>
+        <h2 className="p-4 font-bold">Steps: {step}</h2>
+        <ul style={{ listStyle: "none", padding: 0 }} className="space-y-1 max-h-50 overflow-y-auto border-t border-dashed">
           {history.map((_, idx) => (
             <li key={idx}>
               <button
