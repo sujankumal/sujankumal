@@ -1,6 +1,5 @@
 'use client'
-import { Photo, ShuffleOn, ViewInAr } from '@mui/icons-material';
-import AppsIcon from '@mui/icons-material/Apps';
+import {ShuffleOn} from '@mui/icons-material';
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 

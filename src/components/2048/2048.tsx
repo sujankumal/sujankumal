@@ -242,10 +242,7 @@ export default function Game2048() {
 
   return (
     <div
-      ref={gameRef}
       style={{ ...styles.container, userSelect: "none", position: 'relative' }}
-      
-      onWheel={e => e.preventDefault()}
       tabIndex={0}
       className="select-none"
     >
@@ -356,6 +353,8 @@ export default function Game2048() {
         </div>
       </div>
       <div 
+        ref={gameRef}
+        onWheel={e => e.preventDefault()}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         onMouseDown={handleMouseDown}
