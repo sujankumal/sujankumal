@@ -54,7 +54,14 @@ async function Article({params}:{params: Promise<{url:string}>}) {
                                 // fill={true}
                                 width={900}
                                 height={500}
-                                src={"/images/"+article.main_image}
+                                // src={"/images/"+article.main_image}
+                                src={(() => {
+                                    try {
+                                        new URL(article.main_image);
+                                        return article.main_image;
+                                    } catch { return `/images/${article.main_image}`; }
+                                    })()
+                                }
                                 alt={"Image for "+ article.title}
                                 priority={true}
                             />

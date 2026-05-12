@@ -23,7 +23,7 @@ const nextConfig = {
             },
             {
                 protocol: 'https',
-                hostname: 'via.placeholder.com',
+                hostname: 'drive.google.com',
                 port: '',
                 pathname: '/**',
             },
