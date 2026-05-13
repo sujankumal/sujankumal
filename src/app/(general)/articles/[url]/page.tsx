@@ -31,7 +31,13 @@ async function Article({params}:{params: Promise<{url:string}>}) {
                 datePublished={article.date.toISOString()}
                 dateModified={article.date.toISOString()}
                 url={`https://sujankumal.com.np/articles${article.url}`}
-                image={article.main_image ? [`https://sujankumal.com.np/images/${article.main_image}`] : undefined}
+                image={article.main_image ? [(() => {
+                        try {
+                            new URL(article.main_image);
+                            return article.main_image;
+                        } catch { return `https://sujankumal.com.np/images/${article.main_image}`; }
+                    })(),
+                    ] : undefined}
                 publisher={{
                     name: "Sujan Kumal",
                     url: "https://sujankumal.com.np"
