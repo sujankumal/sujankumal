@@ -525,7 +525,7 @@ export function P2PProvider({ children }: P2PProviderProps) {
   }, [user]);
 
   // Setup WebRTC as receiver (when accepting a request)
-  const setupWebRTCReceiver = useCallback(async (requestId: string, senderUserId: string, senderName?: string) => {
+  const setupWebRTCReceiver = useCallback(async (requestId: string, senderUserId: string, senderName?: string, fileHandle?: any) => {
     if (!user) return;
 
     if (!database) return;
@@ -560,7 +560,7 @@ export function P2PProvider({ children }: P2PProviderProps) {
       dataChannel.binaryType = 'arraybuffer';
 
       // Received file storage by transfer id or file name
-      let receivedFiles: { [fileName: string]: { chunks: ArrayBuffer[] | null[], totalChunks: number, size: number, type: string, transferId?: string, startTime: number, receivedCount: number, fileHash?: string } } = {};
+      let receivedFiles: { [fileName: string]: { chunks: ArrayBuffer[] | null[], totalChunks: number, size: number, type: string, transferId?: string, startTime: number, receivedCount: number, fileHash?: string, writeableStream?: any, e2ee?: boolean, ivPrefix?: string } } = {};
 
       // ACK helper
       const sendAck = (seq: number) => {
@@ -596,14 +596,32 @@ export function P2PProvider({ children }: P2PProviderProps) {
             }
 
             // 2. DoS / Memory Exhaustion Protection
-            const MAX_ALLOWED_CHUNKS = 100000;
-            const MAX_ALLOWED_SIZE = 5 * 1024 * 1024 * 1024; // 5GB
-            if (totalChunks > MAX_ALLOWED_CHUNKS || totalChunks <= 0 || fileSize > MAX_ALLOWED_SIZE || fileSize <= 0) {
+            // If streaming to disk, we can support huge files.
+            // If in memory, limit to 2GB to avoid OOM.
+
+            // const MAX_ALLOWED_CHUNKS = 100000;
+            // const MAX_ALLOWED_SIZE = 5 * 1024 * 1024 * 1024; // 5GB
+            // if (totalChunks > MAX_ALLOWED_CHUNKS || totalChunks <= 0 || fileSize > MAX_ALLOWED_SIZE || fileSize <= 0) {
+            //   return;
+            // }
+            const maxAllowedSize = fileHandle ? 50 * 1024 * 1024 * 1024 : 2 * 1024 * 1024 * 1024; // 50GB vs 2GB
+
+            if (fileSize > maxAllowedSize || fileSize <= 0 || totalChunks <= 0) {
               return;
             }
 
             // 3. Filename Sanitization (Path Traversal Protection)
             const safeFileName = fileName.replace(/[\/\\]/g, '_');
+
+            // Initialize writeable stream if file handle is available
+            let writeableStream: any = null;
+            if (fileHandle) {
+              try {
+                writeableStream = await fileHandle.createWriteable();
+              } catch (error) {
+                writeableStream = null;
+              }
+            }
 
             const transferId = addFileTransfer({
               fileName: safeFileName,
@@ -619,7 +637,7 @@ export function P2PProvider({ children }: P2PProviderProps) {
               direction: 'receiving',
             });
             receivedFiles[safeFileName] = {
-              chunks: new Array(totalChunks).fill(null),
+              chunks: fileHandle ? [] : new Array(totalChunks).fill(null),
               totalChunks,
               size: fileSize,
               type: fileType,
@@ -627,6 +645,7 @@ export function P2PProvider({ children }: P2PProviderProps) {
               startTime: Date.now(),
               receivedCount: 0,
               fileHash,
+              writeableStream,
               // store E2EE metadata if provided
               ...(e2ee ? { e2ee: true, ivPrefix } : {}),
             } as any;
@@ -652,13 +671,53 @@ export function P2PProvider({ children }: P2PProviderProps) {
           if (activeFileName) {
             const fileRecord = receivedFiles[activeFileName];
             if (seq >= 0 && seq < fileRecord.totalChunks) {
-              if (!fileRecord.chunks[seq]) {
-                fileRecord.chunks[seq] = chunkData;
-                fileRecord.receivedCount += 1;
+              // Decrypt on-the-fly
+              let plainChunk: ArrayBuffer;
+              try {
+                if (fileRecord.e2ee) {
+                  const sessionKey = e2eeKeysRef.current[requestId];
+                  if (!sessionKey) throw new Error("No session key");
+                  const ivPrefixBytes = new Uint8Array(base64ToArrayBuffer(fileRecord.ivPrefix!));
+                  const iv = new Uint8Array(12);
+                  iv.set(ivPrefixBytes, 0);
+                  iv[8] = (seq >>> 24) & 0xff;
+                  iv[9] = (seq >>> 16) & 0xff;
+                  iv[10] = (seq >>> 8) & 0xff;
+                  iv[11] = (seq & 0xff);
+                  plainChunk = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: iv.buffer }, sessionKey, chunkData);
+                } else {
+                  plainChunk = chunkData;
+                }
+              } catch (e) {
+                if (fileRecord.transferId) updateFileTransfer(fileRecord.transferId, { status: 'failed' });
+                if (fileRecord.writeableStream) {
+                  try { await fileRecord.writeableStream.abort(); } catch (err) { }
+                }
+                delete receivedFiles[activeFileName];
+                return;
+              }
+              // Write to disk or RAM
+              if (fileRecord.writeableStream) {
+                try {
+                  await fileRecord.writeableStream.write(plainChunk);
+                  fileRecord.receivedCount += 1;
+                } catch (e) {
+                  if (fileRecord.transferId) updateFileTransfer(fileRecord.transferId, { status: 'failed' });
+                  try { await fileRecord.writeableStream.abort(); } catch (err) { }
+                  delete receivedFiles[activeFileName];
+                  return;
+                }
+              } else {
+                if (!fileRecord.chunks[seq]) {
+                  fileRecord.chunks[seq] = plainChunk;
+                  fileRecord.receivedCount += 1;
+                }
               }
 
-              // update progress
-              const receivedBytes = fileRecord.chunks.reduce((acc, c) => acc + (c ? c.byteLength : 0), 0);
+              const receivedBytes = fileRecord.writeableStream
+                ? fileRecord.receivedCount * (64 * 1024) // estimate for progress reporting
+                : fileRecord.chunks.reduce((acc, c) => acc + (c ? c.byteLength : 0), 0);
+
               const progress = Math.min((receivedBytes / fileRecord.size) * 100, 100);
               if (fileRecord.transferId) {
                 const elapsed = (Date.now() - fileRecord.startTime) / 1000;
@@ -670,74 +729,64 @@ export function P2PProvider({ children }: P2PProviderProps) {
               // If we've received all chunks, assemble and decrypt
               if (fileRecord.receivedCount === fileRecord.totalChunks) {
                 try {
-                  let plaintextBuffers: ArrayBuffer[] = [];
-                  // If E2EE, decrypt each chunk using derived session key
-                  if ((fileRecord as any).e2ee) {
-                    const ivPrefixB64 = (fileRecord as any).ivPrefix as string;
-                    const ivPrefixBytes = new Uint8Array(base64ToArrayBuffer(ivPrefixB64));
-                    const sessionKey = e2eeKeysRef.current[requestId];
-                    if (!sessionKey) {
-                      // cannot decrypt yet
+                  if (fileRecord.writeableStream) {
+                    await fileRecord.writeableStream.close();
+                    if (fileRecord.transferId) updateFileTransfer(fileRecord.transferId, { progress: 100, status: 'completed' });
+                    delete receivedFiles[activeFileName];
+                  } else {
+                    // Fallback : Assemble plaintext chunks in memory
+                    const totalSize = fileRecord.chunks.reduce((acc, c) => acc + (c ? c.byteLength : 0), 0);
+                    if (totalSize === 0 || totalSize !== fileRecord.size) {
+                      throw new Error(`File assembly failed: size mismatch (expected ${fileRecord.size}, got ${totalSize})`);
+                    }
+                    const combined = new Uint8Array(totalSize);
+                    let off = 0;
+
+                    for (const chunk of fileRecord.chunks) {
+                      if (chunk === null) {
+                        throw new Error("Cannot assemble file: one or more chunks are missing (null)")
+                      }
+                      const uint8Chunk = new Uint8Array(chunk);
+                      combined.set(uint8Chunk, off);
+                      off += uint8Chunk.byteLength;
+                    }
+
+                    // verify hash if provided
+                    let verified = true;
+                    if (fileRecord.fileHash) {
+                      try {
+                        const digest = await sha256Hex(combined.buffer);
+                        verified = digest === fileRecord.fileHash;
+                      } catch (e) {
+                        verified = false;
+                      }
+                    }
+
+                    if (!verified) {
                       if (fileRecord.transferId) updateFileTransfer(fileRecord.transferId, { status: 'failed' });
+
                       delete receivedFiles[activeFileName];
                       return;
                     }
 
-                    for (let i = 0; i < fileRecord.totalChunks; i++) {
-                      const ct = fileRecord.chunks[i] as ArrayBuffer;
-                      if (!ct) {
-                        throw new Error('Missing chunk');
-                      }
-                      const iv = new Uint8Array(12);
-                      iv.set(ivPrefixBytes, 0);
-                      iv[8] = (i >>> 24) & 0xff;
-                      iv[9] = (i >>> 16) & 0xff;
-                      iv[10] = (i >>> 8) & 0xff;
-                      iv[11] = (i & 0xff);
-                      const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: iv.buffer }, sessionKey, ct);
-                      plaintextBuffers.push(plain);
-                    }
-                  } else {
-                    // not encrypted - combine raw chunks
-                    plaintextBuffers = fileRecord.chunks.map((c: any) => c as ArrayBuffer);
-                  }
+                    const blob = new Blob([combined], { type: fileRecord.type });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = activeFileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
 
-                  const totalSize = plaintextBuffers.reduce((acc, c) => acc + (c ? c.byteLength : 0), 0);
-                  const combined = new Uint8Array(totalSize);
-                  let off = 0;
-                  plaintextBuffers.forEach((chunk) => { combined.set(new Uint8Array(chunk), off); off += chunk.byteLength; });
-
-                  // verify hash if provided
-                  let verified = true;
-                  if (fileRecord.fileHash) {
-                    try {
-                      const digest = await sha256Hex(combined.buffer);
-                      verified = digest === fileRecord.fileHash;
-                    } catch (e) {
-                      verified = false;
-                    }
-                  }
-
-                  if (!verified) {
-                    if (fileRecord.transferId) updateFileTransfer(fileRecord.transferId, { status: 'failed' });
+                    if (fileRecord.transferId) updateFileTransfer(fileRecord.transferId, { progress: 100, status: 'completed' });
                     delete receivedFiles[activeFileName];
-                    return;
                   }
-
-                  const blob = new Blob([combined], { type: fileRecord.type });
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = activeFileName;
-                  document.body.appendChild(a);
-                  a.click();
-                  document.body.removeChild(a);
-                  URL.revokeObjectURL(url);
-
-                  if (fileRecord.transferId) updateFileTransfer(fileRecord.transferId, { progress: 100, status: 'completed' });
-                  delete receivedFiles[activeFileName];
                 } catch (e) {
                   if (fileRecord.transferId) updateFileTransfer(fileRecord.transferId, { status: 'failed' });
+                  if (fileRecord.writeableStream) {
+                    try { await fileRecord.writeableStream.abort(); } catch (err) { }
+                  }
                   delete receivedFiles[activeFileName];
                 }
               }
@@ -915,6 +964,21 @@ export function P2PProvider({ children }: P2PProviderProps) {
 
     const request = shareRequests.find(r => r.id === requestId);
     if (!request) return;
+    // Prompt the user for download location immediately (within user click gesture)
+
+    let fileHandle: any = null;
+    if (typeof window !== 'undefined' && 'showSaveFilePicker' in window) {
+      try {
+        const firstFile = request.files?.[0];
+        const suggestedName = firstFile ? firstFile.name.replace(/[\/\\]/g, '_') : 'download';
+        fileHandle = await (window as any).showSaveFilePicker({
+          suggestedName,
+        });
+      } catch (e) {
+        // User cancelled picker or browser blocked it. Fall back to RAM.
+        fileHandle = null;
+      }
+    }
 
     // Update request status (use update to avoid overwriting unexpected fields)
     if (!database) return;
@@ -923,7 +987,7 @@ export function P2PProvider({ children }: P2PProviderProps) {
     await update(requestRef, { status: 'accepted', acceptedAt: Date.now() });
 
     // Start WebRTC connection as receiver using the requestId from the request
-    await setupWebRTCReceiver(request.requestId, request.fromUserId, request.fromUserName);
+    await setupWebRTCReceiver(request.requestId, request.fromUserId, request.fromUserName, fileHandle);
   }, [user, shareRequests, setupWebRTCReceiver]);
 
   // Helper function to send file through data channel

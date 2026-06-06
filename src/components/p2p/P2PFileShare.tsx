@@ -119,9 +119,8 @@ export function P2PFileShare() {
                 <div key={transfer.id} className="border border-blue-200 bg-blue-50 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center space-x-3">
-                      <div className={`w-3 h-3 rounded-full ${
-                        transfer.senderId === user?.uid ? 'bg-blue-500' : 'bg-green-500'
-                      } animate-pulse`}></div>
+                      <div className={`w-3 h-3 rounded-full ${transfer.senderId === user?.uid ? 'bg-blue-500' : 'bg-green-500'
+                        } animate-pulse`}></div>
                       <div>
                         <h4 className="font-medium text-gray-900">{transfer.fileName}</h4>
                         <p className="text-sm text-gray-600">
@@ -145,9 +144,8 @@ export function P2PFileShare() {
                   {/* Progress Bar */}
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div
-                      className={`h-2 rounded-full transition-all duration-300 ${
-                        transfer.senderId === user?.uid ? 'bg-blue-600' : 'bg-green-600'
-                      }`}
+                      className={`h-2 rounded-full transition-all duration-300 ${transfer.senderId === user?.uid ? 'bg-blue-600' : 'bg-green-600'
+                        }`}
                       style={{ width: `${transfer.progress}%` }}
                     ></div>
                   </div>
@@ -168,13 +166,16 @@ export function P2PFileShare() {
       {/* File Selection Area */}
       <div className="mb-8">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Select Files to Share</h2>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">
+              Select Files to Share
+            </h2>
+
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center justify-center space-x-2 px-5 py-3 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-all active:scale-95 shadow-sm w-full sm:w-auto"
             >
-              <FaUpload />
+              <FaUpload className="text-lg" />
               <span>Browse Files</span>
             </button>
           </div>
@@ -200,25 +201,24 @@ export function P2PFileShare() {
       {/* Tabs */}
       <div className="mb-6">
         <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8">
+          <nav className="flex flex-col sm:flex-row sm:space-x-8 gap-1 sm:gap-0 -mb-px">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
-              
+
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                    isActive
-                      ? `border-${tab.color}-500 text-${tab.color}-600`
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                  className={`flex items-center justify-start sm:justify-center space-x-2 py-3 px-4 sm:px-1 border-b-2 font-medium text-sm transition-colors w-full sm:w-auto ${isActive
+                    ? `border-${tab.color}-500 text-${tab.color}-600 bg-gray-50 sm:bg-transparent`
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
                 >
                   <Icon className="text-lg" />
                   <span>{tab.label}</span>
                   {tab.count > 0 && (
-                    <span className={`inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-${tab.color}-500 rounded-full`}>
+                    <span className={`inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-${tab.color}-500 rounded-full ml-auto sm:ml-0`}>
                       {tab.count}
                     </span>
                   )}

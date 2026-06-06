@@ -70,7 +70,7 @@ export function FileTransfers() {
           Your file transfer history will appear here.
         </p>
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-md mx-auto">
-            <p className="text-blue-800 text-sm">
+          <p className="text-blue-800 text-sm">
             💡 When you send or receive files, you&apos;ll see the transfer progress and history here.
           </p>
         </div>
@@ -129,9 +129,8 @@ export function FileTransfers() {
                 {/* Progress Bar */}
                 <div className="w-full bg-gray-200 rounded-full h-3 relative">
                   <div
-                    className={`h-3 rounded-full transition-all duration-300 ${
-                      transfer.senderId === user?.uid ? 'bg-blue-600' : 'bg-green-600'
-                    }`}
+                    className={`h-3 rounded-full transition-all duration-300 ${transfer.senderId === user?.uid ? 'bg-blue-600' : 'bg-green-600'
+                      }`}
                     style={{ width: `${transfer.progress}%` }}
                   ></div>
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -143,11 +142,10 @@ export function FileTransfers() {
 
                 <div className="flex justify-between items-center mt-2 text-xs text-gray-500">
                   <div className="flex items-center space-x-2">
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${
-                      transfer.senderId === user?.uid
-                        ? 'bg-blue-100 text-blue-800'
-                        : 'bg-green-100 text-green-800'
-                    }`}>
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${transfer.senderId === user?.uid
+                      ? 'bg-blue-100 text-blue-800'
+                      : 'bg-green-100 text-green-800'
+                      }`}>
                       {transfer.senderId === user?.uid ? '📤 Sending' : '📥 Receiving'}
                     </span>
                     <span>{transfer.fileType}</span>
@@ -172,12 +170,12 @@ export function FileTransfers() {
                 key={transfer.id}
                 className={`border rounded-lg p-4 ${getStatusColor(transfer.status)}`}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="flex items-start space-x-3 min-w-0 flex-1">
                     {getStatusIcon(transfer.status)}
-                    <div>
-                      <h4 className="font-medium text-gray-900">{transfer.fileName}</h4>
-                      <p className="text-sm text-gray-600">
+                    <div className="min-w-0 flex-1">
+                      <h4 className="font-medium text-gray-900 break-words break-all">{transfer.fileName}</h4>
+                      <p className="text-sm text-gray-600 mt-1 break-words">
                         {transfer.senderId === user?.uid ? (
                           <>
                             <FaUpload className="inline mr-1" />
@@ -192,8 +190,8 @@ export function FileTransfers() {
                       </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm text-gray-600">
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-sm text-gray-600 font-medium">
                       {formatFileSize(transfer.fileSize)}
                     </p>
                     <p className="text-xs text-gray-500">
@@ -203,7 +201,7 @@ export function FileTransfers() {
                 </div>
 
                 {transfer.status === 'completed' && (
-                  <div className="mt-2 pt-2 border-t border-gray-200">
+                  <div className="mt-3 pt-2 border-t border-gray-200">
                     <p className="text-xs text-green-600 font-medium">
                       ✓ Transfer completed successfully
                     </p>
@@ -211,7 +209,7 @@ export function FileTransfers() {
                 )}
 
                 {transfer.status === 'failed' && (
-                  <div className="mt-2 pt-2 border-t border-gray-200">
+                  <div className="mt-3 pt-2 border-t border-gray-200">
                     <p className="text-xs text-red-600 font-medium">
                       ✗ Transfer failed
                     </p>
