@@ -1,27 +1,27 @@
- "use client";
+"use client";
 
- import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 
 import { ref, set, push, update, onValue, get, remove } from 'firebase/database';
 import { ensureClientInitialized, database } from '@/lib/firebase.client';
 import { useAuth } from '@/contexts/AuthContext';
 
- export interface FileTransfer {
-   id: string;
-   fileName: string;
-   fileSize: number;
-   fileType: string;
-   progress: number;
-   status: 'pending' | 'transferring' | 'completed' | 'failed';
-   senderId: string;
-   senderName: string;
-   receiverId: string;
-   receiverName: string;
-   timestamp: number;
-   direction: 'sending' | 'receiving';
-   speed?: number; // bytes per second
-   eta?: number; // estimated time remaining in seconds
- }
+export interface FileTransfer {
+  id: string;
+  fileName: string;
+  fileSize: number;
+  fileType: string;
+  progress: number;
+  status: 'pending' | 'transferring' | 'completed' | 'failed';
+  senderId: string;
+  senderName: string;
+  receiverId: string;
+  receiverName: string;
+  timestamp: number;
+  direction: 'sending' | 'receiving';
+  speed?: number; // bytes per second
+  eta?: number; // estimated time remaining in seconds
+}
 
 export interface PeerUser {
   uid: string;
@@ -515,882 +515,779 @@ export function P2PProvider({ children }: P2PProviderProps) {
     await push(requestsRef, requestData);
   }, [user, availableUsers]);
 
-    // Reject share request
-    const rejectShareRequest = useCallback(async (requestId: string) => {
-      if (!user) return;
-      if (!database) return;
-      const db = database;
-      const requestRef = ref(db, `shareRequests/${user.uid}/${requestId}`);
-      await remove(requestRef);
+  // Reject share request
+  const rejectShareRequest = useCallback(async (requestId: string) => {
+    if (!user) return;
+    if (!database) return;
+    const db = database;
+    const requestRef = ref(db, `shareRequests/${user.uid}/${requestId}`);
+    await remove(requestRef);
   }, [user]);
 
-    // Setup WebRTC as receiver (when accepting a request)
-    const setupWebRTCReceiver = useCallback(async (requestId: string, senderUserId: string, senderName?: string) => {
-      if (!user) return;
+  // Setup WebRTC as receiver (when accepting a request)
+  const setupWebRTCReceiver = useCallback(async (requestId: string, senderUserId: string, senderName?: string) => {
+    if (!user) return;
 
-      if (!database) return;
-      const db = database;
+    if (!database) return;
+    const db = database;
 
-      // Create RTCPeerConnection
-      const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
-      setPeerConnection(pc);
+    // Create RTCPeerConnection
+    const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+    setPeerConnection(pc);
 
-      // generate ephemeral E2EE keys and publish our ephemeral pub+sig+salt to signaling before offer
-      try {
-        await generateOrEnsureLongtermKey();
-        const eph = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveKey', 'deriveBits']) as CryptoKeyPair;
-        const pubB64 = await exportEphemeralPublicRaw(eph.publicKey);
-        const sig = await signBytesWithLongterm(base64ToArrayBuffer(pubB64));
-        const saltArr = crypto.getRandomValues(new Uint8Array(16));
-        const saltB64 = arrayBufferToBase64(saltArr.buffer);
-        e2eeEphemeralRef.current[requestId] = { priv: eph.privateKey, pubRaw: pubB64, salt: saltB64 };
-        const sigObj: any = { pub: pubB64, sig, salt: saltB64 };
-        const sigPath: any = {};
-        sigPath[`e2ee/${user.uid}`] = sigObj;
-        await update(ref(db, `signaling/${requestId}`), sigPath);
-      } catch (e) {
-        // if E2EE setup fails, proceed without E2EE
-      }
+    // generate ephemeral E2EE keys and publish our ephemeral pub+sig+salt to signaling before offer
+    try {
+      await generateOrEnsureLongtermKey();
+      const eph = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveKey', 'deriveBits']) as CryptoKeyPair;
+      const pubB64 = await exportEphemeralPublicRaw(eph.publicKey);
+      const sig = await signBytesWithLongterm(base64ToArrayBuffer(pubB64));
+      const saltArr = crypto.getRandomValues(new Uint8Array(16));
+      const saltB64 = arrayBufferToBase64(saltArr.buffer);
+      e2eeEphemeralRef.current[requestId] = { priv: eph.privateKey, pubRaw: pubB64, salt: saltB64 };
+      const sigObj: any = { pub: pubB64, sig, salt: saltB64 };
+      const sigPath: any = {};
+      sigPath[`e2ee/${user.uid}`] = sigObj;
+      await update(ref(db, `signaling/${requestId}`), sigPath);
+    } catch (e) {
+      // if E2EE setup fails, proceed without E2EE
+    }
 
-      // Handle incoming data channel
-      pc.ondatachannel = (event) => {
-        const dataChannel = event.channel;
-
-        // Configure data channel for binary data
-        dataChannel.binaryType = 'arraybuffer';
-
-        // Received file storage by transfer id or file name
-        let receivedFiles: { [fileName: string]: { chunks: ArrayBuffer[] | null[], totalChunks: number, size: number, type: string, transferId?: string, startTime: number, receivedCount: number, fileHash?: string } } = {};
-
-        // ACK helper
-        const sendAck = (seq: number) => {
-          try {
-            if (dataChannel.readyState === 'open') {
-              dataChannel.send(JSON.stringify({ type: 'chunk-ack', seq }));
-            }
-          } catch (e) {
-            // ignore
-          }
-        };
-
-        dataChannel.onmessage = async (event) => {
-          // Support both old arraybuffer-based protocol and new JSON-based chunk protocol
-          const isArrayBuffer = event.data instanceof ArrayBuffer;
-          const isString = typeof event.data === 'string';
-
-          if (isString) {
-            let message: any;
-            try {
-              message = JSON.parse(event.data);
-            } catch (e) {
-              return;
-            }
-
-            // New protocol messages: fileStart, chunk (base64), chunk-ack, fileComplete
-            if (message.type === 'fileStart') {
-              const { fileName, fileSize, fileType, totalChunks, fileHash, e2ee, ivPrefix } = message;
-              const transferId = addFileTransfer({
-                fileName,
-                fileSize,
-                fileType,
-                progress: 0,
-                status: 'transferring',
-                senderId: senderUserId,
-                senderName: senderName || 'Unknown User',
-                receiverId: user?.uid || 'unknown',
-                receiverName: user?.displayName || 'Unknown User',
-                timestamp: Date.now(),
-                direction: 'receiving',
-              });
-              receivedFiles[fileName] = {
-                chunks: new Array(totalChunks).fill(null),
-                totalChunks,
-                size: fileSize,
-                type: fileType,
-                transferId,
-                startTime: Date.now(),
-                receivedCount: 0,
-                fileHash,
-                // store E2EE metadata if provided
-                ...(e2ee ? { e2ee: true, ivPrefix } : {}),
-              } as any;
-            } else if (message.type === 'chunk') {
-              const { fileName, seq, data: b64 } = message;
-              const fileRecord = receivedFiles[fileName];
-              if (!fileRecord) return;
-
-              try {
-                const buffer = base64ToArrayBuffer(b64);
-                // store chunk at sequence index
-                if (!fileRecord.chunks[seq]) {
-                  fileRecord.chunks[seq] = buffer;
-                  fileRecord.receivedCount += 1;
-                }
-
-                // update progress
-                const receivedBytes = fileRecord.chunks.reduce((acc, c) => acc + (c ? c.byteLength : 0), 0);
-                const progress = Math.min((receivedBytes / fileRecord.size) * 100, 100);
-                if (fileRecord.transferId) {
-                  const elapsed = (Date.now() - fileRecord.startTime) / 1000;
-                  const speed = elapsed > 0 ? receivedBytes / elapsed : 0;
-                  const eta = speed > 0 ? (fileRecord.size - receivedBytes) / speed : 0;
-                  updateFileTransfer(fileRecord.transferId, { progress, speed, eta });
-                }
-
-                // send ack
-                sendAck(seq);
-
-                // If we've received all chunks, assemble
-                if (fileRecord.receivedCount === fileRecord.totalChunks) {
-                  try {
-                    let plaintextBuffers: ArrayBuffer[] = [];
-                    // If E2EE, decrypt each chunk using derived session key
-                    if ((fileRecord as any).e2ee) {
-                      const ivPrefixB64 = (fileRecord as any).ivPrefix as string;
-                      const ivPrefixBytes = new Uint8Array(base64ToArrayBuffer(ivPrefixB64));
-                      const sessionKey = e2eeKeysRef.current[requestId];
-                      if (!sessionKey) {
-                        // cannot decrypt yet
-                        if (fileRecord.transferId) updateFileTransfer(fileRecord.transferId, { status: 'failed' });
-                        delete receivedFiles[fileName];
-                        return;
-                      }
-
-                      for (let seq = 0; seq < fileRecord.totalChunks; seq++) {
-                        const ct = fileRecord.chunks[seq] as ArrayBuffer;
-                        if (!ct) {
-                          throw new Error('Missing chunk');
-                        }
-                        const iv = new Uint8Array(12);
-                        iv.set(ivPrefixBytes, 0);
-                        iv[8] = (seq >>> 24) & 0xff;
-                        iv[9] = (seq >>> 16) & 0xff;
-                        iv[10] = (seq >>> 8) & 0xff;
-                        iv[11] = (seq & 0xff);
-                        const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: iv.buffer }, sessionKey, ct);
-                        plaintextBuffers.push(plain);
-                      }
-                    } else {
-                      // not encrypted - combine raw chunks
-                      plaintextBuffers = fileRecord.chunks.map((c: any) => c as ArrayBuffer);
-                    }
-
-                    const totalSize = plaintextBuffers.reduce((acc, c) => acc + (c ? c.byteLength : 0), 0);
-                    const combined = new Uint8Array(totalSize);
-                    let off = 0;
-                    plaintextBuffers.forEach((chunk) => { combined.set(new Uint8Array(chunk), off); off += chunk.byteLength; });
-
-                    // verify hash if provided
-                    let verified = true;
-                    if (fileRecord.fileHash) {
-                      try {
-                        const digest = await sha256Hex(combined.buffer);
-                        verified = digest === fileRecord.fileHash;
-                      } catch (e) {
-                        verified = false;
-                      }
-                    }
-
-                    if (!verified) {
-                      if (fileRecord.transferId) updateFileTransfer(fileRecord.transferId, { status: 'failed' });
-                      delete receivedFiles[fileName];
-                      return;
-                    }
-
-                    const blob = new Blob([combined], { type: fileRecord.type });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = fileName;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-
-                    if (fileRecord.transferId) updateFileTransfer(fileRecord.transferId, { progress: 100, status: 'completed' });
-                    delete receivedFiles[fileName];
-                  } catch (e) {
-                    if (fileRecord.transferId) updateFileTransfer(fileRecord.transferId, { status: 'failed' });
-                    delete receivedFiles[fileName];
-                  }
-                }
-              } catch (e) {
-                // conversion failed
-              }
-            } else if (message.type === 'chunk-ack') {
-              // Shouldn't receive ack as receiver; ignore or log
-            } else if (message.type === 'fileComplete') {
-              // old protocol support: finalize if sender used older flow
-              const fileData = receivedFiles[message.fileName];
-              if (fileData) {
-                // assemble as fallback
-                const totalSize = fileData.chunks.reduce((acc, chunk) => acc + (chunk ? chunk.byteLength : 0), 0);
-                const combinedData = new Uint8Array(totalSize);
-                let offset = 0;
-                fileData.chunks.forEach((chunk) => {
-                  if (chunk) {
-                    combinedData.set(new Uint8Array(chunk), offset);
-                    offset += chunk.byteLength;
-                  }
-                });
-
-                const blob = new Blob([combinedData], { type: fileData.type });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = message.fileName;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-
-                if (fileData.transferId) updateFileTransfer(fileData.transferId, { progress: 100, status: 'completed' });
-                delete receivedFiles[message.fileName];
-              }
-            }
-          }
-          // Legacy binary handling - keep for compatibility with older peers
-          else if (isArrayBuffer) {
-            // Find the file that's currently being received (most recent one without completion)
-            const activeFileName = Object.keys(receivedFiles).find(name => {
-              const fileData = receivedFiles[name];
-              const receivedSize = fileData.chunks.reduce((acc, c) => acc + (c ? c.byteLength : 0), 0);
-              return receivedSize < fileData.size;
-            });
-
-            if (activeFileName) {
-              const fileData = receivedFiles[activeFileName];
-              // push into first null slot or at end
-              const idx = fileData.chunks.findIndex(c => c === null);
-              if (idx >= 0) {
-                fileData.chunks[idx] = event.data;
-              } else {
-                (fileData.chunks as any).push(event.data);
-              }
-              fileData.receivedCount = fileData.chunks.filter(Boolean).length;
-              const currentSize = fileData.chunks.reduce((acc, chunk) => acc + (chunk ? chunk.byteLength : 0), 0);
-              const progress = (currentSize / fileData.size) * 100;
-
-              // Calculate speed and ETA
-              const elapsed = (Date.now() - fileData.startTime) / 1000; // seconds
-              const speed = elapsed > 0 ? currentSize / elapsed : 0; // bytes per second
-              const eta = speed > 0 ? (fileData.size - currentSize) / speed : 0; // seconds remaining
-
-              // Update progress in UI
-              if (fileData.transferId) {
-                updateFileTransfer(fileData.transferId, {
-                  progress,
-                  speed,
-                  eta,
-                });
-              }
-            }
-          }
-        };
-      };
-
-      // Handle ICE candidates
-      pc.onicecandidate = (event) => {
-        if (event.candidate) {
-          // console.log('Sending ICE candidate');
-          const candidateRef = ref(db, `signaling/${requestId}/candidates/${user.uid}`);
-          push(candidateRef, {
-            candidate: event.candidate.candidate,
-            sdpMLineIndex: event.candidate.sdpMLineIndex,
-            sdpMid: event.candidate.sdpMid,
-            from: user.uid,
-            ts: Date.now(),
-          });
-        }
-      };
-
-      // Listen for signaling data
-      const signalingRef = ref(db, `signaling/${requestId}`);
-
-      // Add ourselves to peers atomically so DB rules allow us to read/write this session
-          // Ensure we're registered as a peer before doing other signaling writes. With the
-          // current DB rules a multi-path update that includes top-level fields plus a
-          // new peers/ entry may be rejected because the top-level write requires the
-          // peer entry to already exist. Write the peer entry first, then proceed.
-          try {
-            await ensurePeerRegistered(requestId);
-          } catch (e) {
-            // ignore - permissions may block if misconfigured; higher-level code will fail later
-          }
-      const unsubscribe = onValue(signalingRef, async (snapshot) => {
-        const data = snapshot.val();
-        if (!data) return;
-
-        // Handle offer from sender
-        if (data.type === 'offer' && data.from === senderUserId && data.from !== user.uid) {
-          try {
-            // Only set remote description if we're in the right state
-            if (pc.signalingState === 'stable') {
-              await pc.setRemoteDescription(new RTCSessionDescription({ type: 'offer', sdp: data.sdp }));
-
-              // Create answer
-              const answer = await pc.createAnswer();
-              await pc.setLocalDescription(answer);
-
-              // Prepare E2EE ephemeral and publish our ephemeral pub+sig (no salt - offerer provided salt)
-              try {
-                await generateOrEnsureLongtermKey();
-                const eph = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveKey', 'deriveBits']) as CryptoKeyPair;
-                const pubB64 = await exportEphemeralPublicRaw(eph.publicKey);
-                const sig = await signBytesWithLongterm(base64ToArrayBuffer(pubB64));
-                e2eeEphemeralRef.current[requestId] = { priv: eph.privateKey, pubRaw: pubB64 };
-                // Ensure we're registered as a peer, then send answer and e2ee metadata.
-                try {
-                  await ensurePeerRegistered(requestId);
-                } catch (err) {
-                  // eslint-disable-next-line no-console
-                  console.warn('peer registration failed before answer; continuing', err);
-                }
-                try {
-                  await update(signalingRef, {
-                    type: 'answer',
-                    sdp: answer.sdp,
-                    from: user.uid,
-                    answeredAt: Date.now(),
-                    [`e2ee/${user.uid}`]: { pub: pubB64, sig },
-                  });
-                } catch (err) {
-                  // eslint-disable-next-line no-console
-                  console.error('Failed to write answer to signaling', signalingRef.toString(), err);
-                }
-              } catch (e) {
-                // fallback: send answer without e2ee
-                try {
-                  await ensurePeerRegistered(requestId);
-                } catch (err) {
-                  // eslint-disable-next-line no-console
-                  console.warn('peer registration failed before answer (fallback); continuing', err);
-                }
-                try {
-                  await update(signalingRef, {
-                    type: 'answer',
-                    sdp: answer.sdp,
-                    from: user.uid,
-                    answeredAt: Date.now(),
-                  });
-                } catch (err) {
-                  // eslint-disable-next-line no-console
-                  console.error('Failed to write fallback answer to signaling', signalingRef.toString(), err);
-                }
-              }
-            }
-          } catch (error) {
-            // Ignore WebRTC errors
-          }
-        }
-
-        // Handle ICE candidates. Candidates may arrive before remoteDescription is set
-        // (especially in flaky networks). Queue them and drain after remote is set.
-        if (data.candidates) {
-          Object.entries(data.candidates).forEach(([userId, candidates]: [string, any]) => {
-            if (userId !== user.uid) {
-              Object.values(candidates).forEach((candidateData: any) => {
-                const candInit: RTCIceCandidateInit = {
-                  candidate: candidateData.candidate,
-                  sdpMLineIndex: candidateData.sdpMLineIndex,
-                  sdpMid: candidateData.sdpMid,
-                };
-                // attempt to add or queue
-                queueOrAddCandidate(requestId, pc, candInit).catch((err) => {
-                  // eslint-disable-next-line no-console
-                  console.warn('queueOrAddCandidate failed', requestId, err);
-                });
-              });
-            }
-          });
-        }
-
-        // Attempt to derive e2ee session key for receiver when both ephemeral entries exist
-        try {
-          if (data.e2ee && data.e2ee[senderUserId] && data.e2ee[user.uid] && !e2eeKeysRef.current[requestId] && e2eeEphemeralRef.current[requestId]?.priv) {
-            const offererEntry = data.e2ee[senderUserId];
-            const answererEntry = data.e2ee[user.uid];
-            // verify offerer's ephemeral signature before deriving
-            const verified = await verifyEphemeralSignature(senderUserId, offererEntry.pub, offererEntry.sig);
-            if (!verified) {
-              // signature failed - do not derive
-              return;
-            }
-            const salt = offererEntry.salt; // offerer provided salt
-            const otherPub = offererEntry.pub;
-            const key = await deriveSessionKey(e2eeEphemeralRef.current[requestId].priv!, otherPub, salt);
-            e2eeKeysRef.current[requestId] = key;
-          }
-        } catch (e) {
-          // ignore
-        }
-      });
-
-      // Cleanup after 5 minutes
-      const cleanupTimer = setTimeout(() => {
-        try {
-          unsubscribe();
-        } catch (e) {
-          // ignore
-        }
-        try {
-          pc.close();
-        } catch (e) {
-          // ignore
-        }
-        // Attempt to remove signaling session to avoid lingering data
-        try {
-          const sigRef = ref(db, `signaling/${requestId}`);
-          remove(sigRef).catch(() => { /* ignore */ });
-        } catch (e) {
-          // ignore
-        }
-      }, 5 * 60 * 1000);
-
-      // Also return a small cleanup function in case caller wants to close earlier (not used now)
-      // Not returning from useCallback; we rely on timer above
-  }, [addFileTransfer, deriveSessionKey, ensurePeerRegistered, exportEphemeralPublicRaw, generateOrEnsureLongtermKey, signBytesWithLongterm, updateFileTransfer, user, verifyEphemeralSignature]);
-
-      // Accept share request
-    const acceptShareRequest = useCallback(async (requestId: string) => {
-      if (!user) return;
-
-      const request = shareRequests.find(r => r.id === requestId);
-      if (!request) return;
-
-      // Update request status (use update to avoid overwriting unexpected fields)
-      if (!database) return;
-      const db = database;
-      const requestRef = ref(db, `shareRequests/${user.uid}/${requestId}`);
-      await update(requestRef, { status: 'accepted', acceptedAt: Date.now() });
-
-      // Start WebRTC connection as receiver using the requestId from the request
-      await setupWebRTCReceiver(request.requestId, request.fromUserId, request.fromUserName);
-    }, [user, shareRequests, setupWebRTCReceiver]);
-
-    // Helper function to send file through data channel
-    // Helper: wait for data channel buffer to drain below threshold.
-    const waitForBufferedAmountLow = useCallback((dc: RTCDataChannel, threshold: number, timeout = 10000) => {
-      return new Promise<void>((resolve) => {
-        if (typeof dc.bufferedAmount === 'number' && dc.bufferedAmount <= threshold) {
-          resolve();
-          return;
-        }
-
-        let resolved = false;
-
-        const onLow = () => {
-          if (resolved) return;
-          resolved = true;
-          try { dc.removeEventListener('bufferedamountlow', onLow as any); } catch (e) { }
-          resolve();
-        };
-
-        try {
-          // Try to set threshold if supported
-          // @ts-ignore
-          if (typeof dc.bufferedAmountLowThreshold === 'number') {
-            try { /* @ts-ignore */ dc.bufferedAmountLowThreshold = threshold; } catch (e) { }
-          }
-          dc.addEventListener('bufferedamountlow', onLow as any);
-        } catch (e) {
-          // event not supported, fallback to polling
-          const poll = setInterval(() => {
-            if (dc.bufferedAmount <= threshold) {
-              clearInterval(poll);
-              if (resolved) return;
-              resolved = true;
-              resolve();
-            }
-          }, 150);
-        }
-
-        // Fallback timeout to avoid hanging forever
-        setTimeout(() => {
-          if (resolved) return;
-          resolved = true;
-          try { dc.removeEventListener('bufferedamountlow', onLow as any); } catch (e) { }
-          resolve();
-        }, timeout);
-      });
-    }, []);
-    // sendFile: chunk file, include sequence numbers, wait for per-chunk ACKs, and send file-level SHA-256 for verification
-    const sendFile = useCallback(async (dataChannel: RTCDataChannel, file: File, transferId?: string, sessionId?: string) => {
-      const chunkSize = 64 * 1024; // 64KB
-      const totalChunks = Math.ceil(file.size / chunkSize);
-      const startTime = Date.now();
-
-      // Precompute file hash for verification
-      let fileHash = '';
-      try {
-        const whole = await file.arrayBuffer();
-        fileHash = await sha256Hex(whole);
-      } catch (e) {
-        // if hashing fails, proceed without hash (verification skipped)
-        fileHash = '';
-      }
-
-      // Prepare E2EE if session key available
-      let sessionKey: CryptoKey | undefined;
-      try {
-        if (sessionId && e2eeKeysRef.current[sessionId]) {
-          sessionKey = e2eeKeysRef.current[sessionId];
-        }
-      } catch (e) { /* ignore */ }
-
-      const e2eeEnabled = !!sessionKey;
-      let ivPrefixB64: string | undefined;
-      if (e2eeEnabled) {
-        const ivPrefix = crypto.getRandomValues(new Uint8Array(8));
-        ivPrefixB64 = arrayBufferToBase64(ivPrefix.buffer);
-      }
-
-      // Send fileStart with metadata
-      try {
-        const meta: any = {
-          type: 'fileStart',
-          fileName: file.name,
-          fileSize: file.size,
-          fileType: file.type,
-          totalChunks,
-          fileHash,
-        };
-        if (e2eeEnabled && ivPrefixB64) {
-          meta.e2ee = true;
-          meta.ivPrefix = ivPrefixB64;
-        }
-        dataChannel.send(JSON.stringify(meta));
-      } catch (e) {
-        if (transferId) updateFileTransfer(transferId, { status: 'failed' });
-        return;
-      }
-
-      // Setup ACK waiter map
-      const pendingAcks = new Map<number, { resolve: () => void, reject: (r: any) => void, timer: any, retries: number }>();
-
-      const waitForAck = (seq: number, timeout = 5000) => {
-        return new Promise<void>((resolve, reject) => {
-          const record = { resolve, reject, timer: null as any } as any;
-          record.timer = setTimeout(() => {
-            pendingAcks.delete(seq);
-            reject(new Error('ACK timeout'));
-          }, timeout);
-          pendingAcks.set(seq, record);
-        });
-      };
-
-      // Listen for incoming ACK messages on this data channel
-      const onMessage = (ev: MessageEvent) => {
-        if (typeof ev.data !== 'string') return;
-        try {
-          const m = JSON.parse(ev.data);
-          if (m && m.type === 'chunk-ack' && typeof m.seq === 'number') {
-            const rec = pendingAcks.get(m.seq);
-            if (rec) {
-              clearTimeout(rec.timer);
-              pendingAcks.delete(m.seq);
-              try { rec.resolve(); } catch (e) { }
-            }
-          }
-        } catch (e) {
-          // ignore
-        }
-      };
-
-      try {
-        dataChannel.addEventListener('message', onMessage as any);
-      } catch (e) {
-        // fallback
-        dataChannel.onmessage = onMessage as any;
-      }
-
-      // send chunks sequentially, wait for ACK for each
-      for (let seq = 0; seq < totalChunks; seq++) {
-        const start = seq * chunkSize;
-        const end = Math.min(start + chunkSize, file.size);
-        const slice = file.slice(start, end);
-        const arrayBuffer = await slice.arrayBuffer();
-        let b64: string;
-        if (e2eeEnabled && sessionKey) {
-          // create IV = ivPrefix (8) + seq (4)
-          const ivPrefix = ivPrefixB64 ? new Uint8Array(base64ToArrayBuffer(ivPrefixB64)) : crypto.getRandomValues(new Uint8Array(8));
-          const iv = new Uint8Array(12);
-          iv.set(ivPrefix, 0);
-          // set seq big-endian
-          iv[8] = (seq >>> 24) & 0xff;
-          iv[9] = (seq >>> 16) & 0xff;
-          iv[10] = (seq >>> 8) & 0xff;
-          iv[11] = (seq & 0xff);
-          try {
-            const cipher = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv.buffer }, sessionKey, arrayBuffer);
-            b64 = arrayBufferToBase64(cipher);
-          } catch (e) {
-            if (transferId) updateFileTransfer(transferId, { status: 'failed' });
-            return;
-          }
-        } else {
-          b64 = arrayBufferToBase64(arrayBuffer);
-        }
-
-        // Respect channel state
-        if (dataChannel.readyState !== 'open') {
-          if (transferId) updateFileTransfer(transferId, { status: 'failed' });
-          break;
-        }
-
-        // Retry loop for this chunk
-        let sent = false;
-        let attempts = 0;
-        while (!sent && attempts <= 5) {
-          attempts += 1;
-          try {
-            dataChannel.send(JSON.stringify({ type: 'chunk', fileName: file.name, seq, data: b64 }));
-          } catch (e) {
-            // wait and retry
-            await new Promise(r => setTimeout(r, 200));
-            continue;
-          }
-
-          // backpressure check
-          const MAX_BUFFERED = 2 * 1024 * 1024;
-          if (typeof dataChannel.bufferedAmount === 'number' && dataChannel.bufferedAmount > MAX_BUFFERED) {
-            await waitForBufferedAmountLow(dataChannel, Math.floor(MAX_BUFFERED / 2));
-          }
-
-          // wait for ack
-          try {
-            await waitForAck(seq);
-            sent = true;
-          } catch (e) {
-            // ack timeout, retry chunk
-            if (attempts > 5) {
-              if (transferId) updateFileTransfer(transferId, { status: 'failed' });
-              break;
-            }
-            // small backoff
-            await new Promise(r => setTimeout(r, 300 * attempts));
-          }
-        }
-
-        // Update progress
-        if (transferId) {
-          const bytesSent = Math.min((seq + 1) * chunkSize, file.size);
-          const progress = Math.min((bytesSent / file.size) * 100, 100);
-          const elapsed = (Date.now() - startTime) / 1000;
-          const speed = elapsed > 0 ? bytesSent / elapsed : 0;
-          const eta = speed > 0 ? (file.size - bytesSent) / speed : 0;
-          updateFileTransfer(transferId, { progress, speed, eta });
-        }
-      }
-
-      // Cleanup ack listeners
-      pendingAcks.forEach((rec) => { try { clearTimeout(rec.timer); rec.reject(new Error('cleanup')); } catch (e) { } });
-      try {
-        dataChannel.removeEventListener('message', onMessage as any);
-      } catch (e) {
-        try { dataChannel.onmessage = null as any; } catch (e) { }
-      }
-
-      // Finalize
-      try {
-        dataChannel.send(JSON.stringify({ type: 'fileComplete', fileName: file.name }));
-      } catch (e) { }
-
-      if (transferId) updateFileTransfer(transferId, { progress: 100, status: 'completed' });
-    }, [updateFileTransfer, waitForBufferedAmountLow]);
-    // Start file transfer (WebRTC) - called by sender
-    const startFileTransfer = useCallback(async (requestId: string, files: File[]) => {
-      if (!user) return;
-      if (!database) return;
-      const db = database;
-
-      // Create RTCPeerConnection
-      const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
-      setPeerConnection(pc);
-
-      // Create data channel for file transfer
-      const dataChannel = pc.createDataChannel('fileTransfer', {
-        ordered: true,
-      });
+    // Handle incoming data channel
+    pc.ondatachannel = (event) => {
+      const dataChannel = event.channel;
 
       // Configure data channel for binary data
       dataChannel.binaryType = 'arraybuffer';
 
-      // Handle data channel events
-      dataChannel.onopen = () => {
-        // Start sending files with a small delay to ensure connection is stable
-        setTimeout(() => {
-          files.forEach((file) => {
-            // Create file transfer record
+      // Received file storage by transfer id or file name
+      let receivedFiles: { [fileName: string]: { chunks: ArrayBuffer[] | null[], totalChunks: number, size: number, type: string, transferId?: string, startTime: number, receivedCount: number, fileHash?: string } } = {};
+
+      // ACK helper
+      const sendAck = (seq: number) => {
+        try {
+          if (dataChannel.readyState === 'open') {
+            dataChannel.send(JSON.stringify({ type: 'chunk-ack', seq }));
+          }
+        } catch (e) {
+          // ignore
+        }
+      };
+
+      dataChannel.onmessage = async (event) => {
+        const isArrayBuffer = event.data instanceof ArrayBuffer;
+        const isString = typeof event.data === 'string';
+
+        if (isString) {
+          let message: any;
+          try {
+            message = JSON.parse(event.data);
+          } catch (e) {
+            return;
+          }
+
+          if (message.type === 'fileStart') {
+            const { fileName, fileSize, fileType, totalChunks, fileHash, e2ee, ivPrefix } = message;
+
+            // 1. E2EE Downgrade Attack Protection
+            const isSessionE2ee = !!e2eeKeysRef.current[requestId];
+            if (isSessionE2ee && !e2ee) {
+              // Reject: Downgrade attempt detected
+              return;
+            }
+
+            // 2. DoS / Memory Exhaustion Protection
+            const MAX_ALLOWED_CHUNKS = 100000;
+            const MAX_ALLOWED_SIZE = 5 * 1024 * 1024 * 1024; // 5GB
+            if (totalChunks > MAX_ALLOWED_CHUNKS || totalChunks <= 0 || fileSize > MAX_ALLOWED_SIZE || fileSize <= 0) {
+              return;
+            }
+
+            // 3. Filename Sanitization (Path Traversal Protection)
+            const safeFileName = fileName.replace(/[\/\\]/g, '_');
+
             const transferId = addFileTransfer({
-              fileName: file.name,
-              fileSize: file.size,
-              fileType: file.type,
+              fileName: safeFileName,
+              fileSize,
+              fileType,
               progress: 0,
               status: 'transferring',
-              senderId: user?.uid || 'unknown',
-              senderName: user?.displayName || 'Unknown User',
-              receiverId: 'unknown', // Will be updated when we know the receiver
-              receiverName: 'Unknown User',
+              senderId: senderUserId,
+              senderName: senderName || 'Unknown User',
+              receiverId: user?.uid || 'unknown',
+              receiverName: user?.displayName || 'Unknown User',
               timestamp: Date.now(),
-              direction: 'sending',
+              direction: 'receiving',
             });
-
-            sendFile(dataChannel, file, transferId, requestId);
-          });
-        }, 100);
-      };
-
-      dataChannel.onclose = () => {
-        // Data channel closed
-      };
-
-      dataChannel.onerror = () => {
-        // Data channel error
-      };
-
-      // Handle ICE candidates
-      pc.onicecandidate = (event) => {
-        if (event.candidate) {
-          const candidateRef = ref(db, `signaling/${requestId}/candidates/${user.uid}`);
-          push(candidateRef, {
-            candidate: event.candidate.candidate,
-            sdpMLineIndex: event.candidate.sdpMLineIndex,
-            sdpMid: event.candidate.sdpMid,
-            from: user.uid,
-            ts: Date.now(),
-          });
+            receivedFiles[safeFileName] = {
+              chunks: new Array(totalChunks).fill(null),
+              totalChunks,
+              size: fileSize,
+              type: fileType,
+              transferId,
+              startTime: Date.now(),
+              receivedCount: 0,
+              fileHash,
+              // store E2EE metadata if provided
+              ...(e2ee ? { e2ee: true, ivPrefix } : {}),
+            } as any;
+          } else if (message.type === 'fileComplete') {
+            // fileComplete can act as a fallback or explicit finalization triggers
+          }
         }
-      };
+        else if (isArrayBuffer) {
+          const buffer = event.data as ArrayBuffer;
+          if (buffer.byteLength < 4) return;
 
-      // Create offer and set up signaling
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
+          // Extract the 4-byte sequence number
+          const view = new DataView(buffer);
+          const seq = view.getUint32(0, false);
+          const chunkData = buffer.slice(4);
 
-      // Send offer through Firebase signaling. First ensure we're registered as a
-      // peer so the DB rules allow subsequent writes to the session node.
-      const signalingRef = ref(db, `signaling/${requestId}`);
-      try {
-        await ensurePeerRegistered(requestId);
-      } catch (err) {
-        // If registration fails we'll still attempt the offer write and log errors.
-        // eslint-disable-next-line no-console
-        console.warn('peer registration failed before offer; continuing to offer write', err);
-      }
+          // Find the file that's currently being received (most recent one without completion)
+          const activeFileName = Object.keys(receivedFiles).find(name => {
+            const fileData = receivedFiles[name];
+            return fileData.receivedCount < fileData.totalChunks;
+          });
 
-      try {
-        await update(signalingRef, {
-          type: 'offer',
-          sdp: offer.sdp,
-          from: user.uid,
-          createdAt: Date.now(),
-        });
-      } catch (err) {
-        // Log path and error for debugging permission issues
-        // eslint-disable-next-line no-console
-        console.error('Failed to write offer to signaling', signalingRef.toString(), err);
-        throw err;
-      }
-
-      // Listen for answer
-      const unsubscribe = onValue(signalingRef, async (snapshot) => {
-        const data = snapshot.val();
-        if (!data) return;
-
-        // derive e2ee session key when both ephemeral entries present
-        try {
-          if (data.e2ee && data.e2ee[user.uid]) {
-            const otherUid = Object.keys(data.e2ee).find((u) => u !== user.uid);
-            if (otherUid && !e2eeKeysRef.current[requestId] && e2eeEphemeralRef.current[requestId]?.priv) {
-              const mySalt = data.e2ee[user.uid].salt;
-              const otherPub = data.e2ee[otherUid].pub;
-              const otherSig = data.e2ee[otherUid].sig;
-              // verify other party's ephemeral signature before deriving
-              const verified = await verifyEphemeralSignature(otherUid, otherPub, otherSig);
-              if (!verified) {
-                // do not derive session key if verification fails
-                return;
+          if (activeFileName) {
+            const fileRecord = receivedFiles[activeFileName];
+            if (seq >= 0 && seq < fileRecord.totalChunks) {
+              if (!fileRecord.chunks[seq]) {
+                fileRecord.chunks[seq] = chunkData;
+                fileRecord.receivedCount += 1;
               }
-              const key = await deriveSessionKey(e2eeEphemeralRef.current[requestId].priv!, otherPub, mySalt);
-              e2eeKeysRef.current[requestId] = key;
+
+              // update progress
+              const receivedBytes = fileRecord.chunks.reduce((acc, c) => acc + (c ? c.byteLength : 0), 0);
+              const progress = Math.min((receivedBytes / fileRecord.size) * 100, 100);
+              if (fileRecord.transferId) {
+                const elapsed = (Date.now() - fileRecord.startTime) / 1000;
+                const speed = elapsed > 0 ? receivedBytes / elapsed : 0;
+                const eta = speed > 0 ? (fileRecord.size - receivedBytes) / speed : 0;
+                updateFileTransfer(fileRecord.transferId, { progress, speed, eta });
+              }
+
+              // If we've received all chunks, assemble and decrypt
+              if (fileRecord.receivedCount === fileRecord.totalChunks) {
+                try {
+                  let plaintextBuffers: ArrayBuffer[] = [];
+                  // If E2EE, decrypt each chunk using derived session key
+                  if ((fileRecord as any).e2ee) {
+                    const ivPrefixB64 = (fileRecord as any).ivPrefix as string;
+                    const ivPrefixBytes = new Uint8Array(base64ToArrayBuffer(ivPrefixB64));
+                    const sessionKey = e2eeKeysRef.current[requestId];
+                    if (!sessionKey) {
+                      // cannot decrypt yet
+                      if (fileRecord.transferId) updateFileTransfer(fileRecord.transferId, { status: 'failed' });
+                      delete receivedFiles[activeFileName];
+                      return;
+                    }
+
+                    for (let i = 0; i < fileRecord.totalChunks; i++) {
+                      const ct = fileRecord.chunks[i] as ArrayBuffer;
+                      if (!ct) {
+                        throw new Error('Missing chunk');
+                      }
+                      const iv = new Uint8Array(12);
+                      iv.set(ivPrefixBytes, 0);
+                      iv[8] = (i >>> 24) & 0xff;
+                      iv[9] = (i >>> 16) & 0xff;
+                      iv[10] = (i >>> 8) & 0xff;
+                      iv[11] = (i & 0xff);
+                      const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: iv.buffer }, sessionKey, ct);
+                      plaintextBuffers.push(plain);
+                    }
+                  } else {
+                    // not encrypted - combine raw chunks
+                    plaintextBuffers = fileRecord.chunks.map((c: any) => c as ArrayBuffer);
+                  }
+
+                  const totalSize = plaintextBuffers.reduce((acc, c) => acc + (c ? c.byteLength : 0), 0);
+                  const combined = new Uint8Array(totalSize);
+                  let off = 0;
+                  plaintextBuffers.forEach((chunk) => { combined.set(new Uint8Array(chunk), off); off += chunk.byteLength; });
+
+                  // verify hash if provided
+                  let verified = true;
+                  if (fileRecord.fileHash) {
+                    try {
+                      const digest = await sha256Hex(combined.buffer);
+                      verified = digest === fileRecord.fileHash;
+                    } catch (e) {
+                      verified = false;
+                    }
+                  }
+
+                  if (!verified) {
+                    if (fileRecord.transferId) updateFileTransfer(fileRecord.transferId, { status: 'failed' });
+                    delete receivedFiles[activeFileName];
+                    return;
+                  }
+
+                  const blob = new Blob([combined], { type: fileRecord.type });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = activeFileName;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
+
+                  if (fileRecord.transferId) updateFileTransfer(fileRecord.transferId, { progress: 100, status: 'completed' });
+                  delete receivedFiles[activeFileName];
+                } catch (e) {
+                  if (fileRecord.transferId) updateFileTransfer(fileRecord.transferId, { status: 'failed' });
+                  delete receivedFiles[activeFileName];
+                }
+              }
             }
           }
-        } catch (e) {
-          // ignore derivation errors
         }
+      };
+    };
 
-        // Handle answer from receiver
-        if (data.type === 'answer' && data.from !== user.uid) {
-          try {
-            // Only set remote description if we're in the right state
-            if (pc.signalingState === 'have-local-offer') {
-              await pc.setRemoteDescription(new RTCSessionDescription({ type: 'answer', sdp: data.sdp }));
-            }
-          } catch (error) {
-            // Ignore WebRTC state errors
-          }
-        }
+    // Handle ICE candidates
+    pc.onicecandidate = (event) => {
+      if (event.candidate) {
+        // console.log('Sending ICE candidate');
+        const candidateRef = ref(db, `signaling/${requestId}/candidates/${user.uid}`);
+        push(candidateRef, {
+          candidate: event.candidate.candidate,
+          sdpMLineIndex: event.candidate.sdpMLineIndex,
+          sdpMid: event.candidate.sdpMid,
+          from: user.uid,
+          ts: Date.now(),
+        });
+      }
+    };
 
-        // Handle ICE candidates. Use queueOrAddCandidate to tolerate candidates arriving
-        // before remoteDescription is set.
-        if (data.candidates) {
-          Object.entries(data.candidates).forEach(([userId, candidates]: [string, any]) => {
-            if (userId !== user.uid) {
-              Object.values(candidates).forEach((candidateData: any) => {
-                const candInit: RTCIceCandidateInit = {
-                  candidate: candidateData.candidate,
-                  sdpMLineIndex: candidateData.sdpMLineIndex,
-                  sdpMid: candidateData.sdpMid,
-                };
-                queueOrAddCandidate(requestId, pc, candInit).catch((err) => {
-                  // eslint-disable-next-line no-console
-                  console.warn('queueOrAddCandidate failed (sender)', requestId, err);
+    // Listen for signaling data
+    const signalingRef = ref(db, `signaling/${requestId}`);
+
+    // Add ourselves to peers atomically so DB rules allow us to read/write this session
+    // Ensure we're registered as a peer before doing other signaling writes. With the
+    // current DB rules a multi-path update that includes top-level fields plus a
+    // new peers/ entry may be rejected because the top-level write requires the
+    // peer entry to already exist. Write the peer entry first, then proceed.
+    try {
+      await ensurePeerRegistered(requestId);
+    } catch (e) {
+      // ignore - permissions may block if misconfigured; higher-level code will fail later
+    }
+    const unsubscribe = onValue(signalingRef, async (snapshot) => {
+      const data = snapshot.val();
+      if (!data) return;
+
+      // Handle offer from sender
+      if (data.type === 'offer' && data.from === senderUserId && data.from !== user.uid) {
+        try {
+          // Only set remote description if we're in the right state
+          if (pc.signalingState === 'stable') {
+            await pc.setRemoteDescription(new RTCSessionDescription({ type: 'offer', sdp: data.sdp }));
+
+            // Create answer
+            const answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
+
+            // Prepare E2EE ephemeral and publish our ephemeral pub+sig (no salt - offerer provided salt)
+            try {
+              await generateOrEnsureLongtermKey();
+              const eph = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveKey', 'deriveBits']) as CryptoKeyPair;
+              const pubB64 = await exportEphemeralPublicRaw(eph.publicKey);
+              const sig = await signBytesWithLongterm(base64ToArrayBuffer(pubB64));
+              e2eeEphemeralRef.current[requestId] = { priv: eph.privateKey, pubRaw: pubB64 };
+              // Ensure we're registered as a peer, then send answer and e2ee metadata.
+              try {
+                await ensurePeerRegistered(requestId);
+              } catch (err) {
+                // eslint-disable-next-line no-console
+                console.warn('peer registration failed before answer; continuing', err);
+              }
+              try {
+                await update(signalingRef, {
+                  type: 'answer',
+                  sdp: answer.sdp,
+                  from: user.uid,
+                  answeredAt: Date.now(),
+                  [`e2ee/${user.uid}`]: { pub: pubB64, sig },
                 });
-              });
+              } catch (err) {
+                // eslint-disable-next-line no-console
+                console.error('Failed to write answer to signaling', signalingRef.toString(), err);
+              }
+            } catch (e) {
+              // fallback: send answer without e2ee
+              try {
+                await ensurePeerRegistered(requestId);
+              } catch (err) {
+                // eslint-disable-next-line no-console
+                console.warn('peer registration failed before answer (fallback); continuing', err);
+              }
+              try {
+                await update(signalingRef, {
+                  type: 'answer',
+                  sdp: answer.sdp,
+                  from: user.uid,
+                  answeredAt: Date.now(),
+                });
+              } catch (err) {
+                // eslint-disable-next-line no-console
+                console.error('Failed to write fallback answer to signaling', signalingRef.toString(), err);
+              }
             }
-          });
+          }
+        } catch (error) {
+          // Ignore WebRTC errors
         }
-      });
+      }
 
-      const cleanupTimer = setTimeout(() => {
-        try {
-          unsubscribe();
-        } catch (e) {
-          // ignore
+      // Handle ICE candidates. Candidates may arrive before remoteDescription is set
+      // (especially in flaky networks). Queue them and drain after remote is set.
+      if (data.candidates) {
+        Object.entries(data.candidates).forEach(([userId, candidates]: [string, any]) => {
+          if (userId !== user.uid) {
+            Object.values(candidates).forEach((candidateData: any) => {
+              const candInit: RTCIceCandidateInit = {
+                candidate: candidateData.candidate,
+                sdpMLineIndex: candidateData.sdpMLineIndex,
+                sdpMid: candidateData.sdpMid,
+              };
+              // attempt to add or queue
+              queueOrAddCandidate(requestId, pc, candInit).catch((err) => {
+                // eslint-disable-next-line no-console
+                console.warn('queueOrAddCandidate failed', requestId, err);
+              });
+            });
+          }
+        });
+      }
+
+      // Attempt to derive e2ee session key for receiver when both ephemeral entries exist
+      try {
+        if (data.e2ee && data.e2ee[senderUserId] && data.e2ee[user.uid] && !e2eeKeysRef.current[requestId] && e2eeEphemeralRef.current[requestId]?.priv) {
+          const offererEntry = data.e2ee[senderUserId];
+          const answererEntry = data.e2ee[user.uid];
+          // verify offerer's ephemeral signature before deriving
+          const verified = await verifyEphemeralSignature(senderUserId, offererEntry.pub, offererEntry.sig);
+          if (!verified) {
+            // signature failed - do not derive
+            return;
+          }
+          const salt = offererEntry.salt; // offerer provided salt
+          const otherPub = offererEntry.pub;
+          const key = await deriveSessionKey(e2eeEphemeralRef.current[requestId].priv!, otherPub, salt);
+          e2eeKeysRef.current[requestId] = key;
         }
-        try {
-          pc.close();
-        } catch (e) {
-          // ignore
+      } catch (e) {
+        // ignore
+      }
+    });
+
+    // Cleanup after 5 minutes
+    const cleanupTimer = setTimeout(() => {
+      try {
+        unsubscribe();
+      } catch (e) {
+        // ignore
+      }
+      try {
+        pc.close();
+      } catch (e) {
+        // ignore
+      }
+      // Attempt to remove signaling session to avoid lingering data
+      try {
+        const sigRef = ref(db, `signaling/${requestId}`);
+        remove(sigRef).catch(() => { /* ignore */ });
+      } catch (e) {
+        // ignore
+      }
+    }, 5 * 60 * 1000);
+
+    // Also return a small cleanup function in case caller wants to close earlier (not used now)
+    // Not returning from useCallback; we rely on timer above
+  }, [addFileTransfer, deriveSessionKey, ensurePeerRegistered, exportEphemeralPublicRaw, generateOrEnsureLongtermKey, signBytesWithLongterm, updateFileTransfer, user, verifyEphemeralSignature]);
+
+  // Accept share request
+  const acceptShareRequest = useCallback(async (requestId: string) => {
+    if (!user) return;
+
+    const request = shareRequests.find(r => r.id === requestId);
+    if (!request) return;
+
+    // Update request status (use update to avoid overwriting unexpected fields)
+    if (!database) return;
+    const db = database;
+    const requestRef = ref(db, `shareRequests/${user.uid}/${requestId}`);
+    await update(requestRef, { status: 'accepted', acceptedAt: Date.now() });
+
+    // Start WebRTC connection as receiver using the requestId from the request
+    await setupWebRTCReceiver(request.requestId, request.fromUserId, request.fromUserName);
+  }, [user, shareRequests, setupWebRTCReceiver]);
+
+  // Helper function to send file through data channel
+  // Helper: wait for data channel buffer to drain below threshold.
+  const waitForBufferedAmountLow = useCallback((dc: RTCDataChannel, threshold: number, timeout = 10000) => {
+    return new Promise<void>((resolve) => {
+      if (typeof dc.bufferedAmount === 'number' && dc.bufferedAmount <= threshold) {
+        resolve();
+        return;
+      }
+
+      let resolved = false;
+
+      const onLow = () => {
+        if (resolved) return;
+        resolved = true;
+        try { dc.removeEventListener('bufferedamountlow', onLow as any); } catch (e) { }
+        resolve();
+      };
+
+      try {
+        // Try to set threshold if supported
+        // @ts-ignore
+        if (typeof dc.bufferedAmountLowThreshold === 'number') {
+          try { /* @ts-ignore */ dc.bufferedAmountLowThreshold = threshold; } catch (e) { }
         }
-        // Attempt to remove signaling session to avoid lingering data
+        dc.addEventListener('bufferedamountlow', onLow as any);
+      } catch (e) {
+        // event not supported, fallback to polling
+        const poll = setInterval(() => {
+          if (dc.bufferedAmount <= threshold) {
+            clearInterval(poll);
+            if (resolved) return;
+            resolved = true;
+            resolve();
+          }
+        }, 150);
+      }
+
+      // Fallback timeout to avoid hanging forever
+      setTimeout(() => {
+        if (resolved) return;
+        resolved = true;
+        try { dc.removeEventListener('bufferedamountlow', onLow as any); } catch (e) { }
+        resolve();
+      }, timeout);
+    });
+  }, []);
+  // sendFile: chunk file, include sequence numbers, wait for per-chunk ACKs, and send file-level SHA-256 for verification
+  const sendFile = useCallback(async (dataChannel: RTCDataChannel, file: File, transferId?: string, sessionId?: string) => {
+    const chunkSize = 64 * 1024; // 64KB
+    const totalChunks = Math.ceil(file.size / chunkSize);
+    const startTime = Date.now();
+
+    // Precompute file hash for verification
+    let fileHash = '';
+    try {
+      const whole = await file.arrayBuffer();
+      fileHash = await sha256Hex(whole);
+    } catch (e) {
+      // if hashing fails, proceed without hash (verification skipped)
+      fileHash = '';
+    }
+
+    // Prepare E2EE if session key available
+    let sessionKey: CryptoKey | undefined;
+    try {
+      if (sessionId && e2eeKeysRef.current[sessionId]) {
+        sessionKey = e2eeKeysRef.current[sessionId];
+      }
+    } catch (e) { /* ignore */ }
+
+    const e2eeEnabled = !!sessionKey;
+    let ivPrefixB64: string | undefined;
+    if (e2eeEnabled) {
+      const ivPrefix = crypto.getRandomValues(new Uint8Array(8));
+      ivPrefixB64 = arrayBufferToBase64(ivPrefix.buffer);
+    }
+
+    // Send fileStart with metadata
+    try {
+      const meta: any = {
+        type: 'fileStart',
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        totalChunks,
+        fileHash,
+      };
+      if (e2eeEnabled && ivPrefixB64) {
+        meta.e2ee = true;
+        meta.ivPrefix = ivPrefixB64;
+      }
+      dataChannel.send(JSON.stringify(meta));
+    } catch (e) {
+      if (transferId) updateFileTransfer(transferId, { status: 'failed' });
+      return;
+    }
+
+    // send chunks sequentially, streaming through backpressure checks
+    for (let seq = 0; seq < totalChunks; seq++) {
+      const start = seq * chunkSize;
+      const end = Math.min(start + chunkSize, file.size);
+      const slice = file.slice(start, end);
+      const arrayBuffer = await slice.arrayBuffer();
+
+      let chunkBuffer: ArrayBuffer;
+      if (e2eeEnabled && sessionKey) {
+        // create IV = ivPrefix (8) + seq (4)
+        const ivPrefix = ivPrefixB64 ? new Uint8Array(base64ToArrayBuffer(ivPrefixB64)) : crypto.getRandomValues(new Uint8Array(8));
+        const iv = new Uint8Array(12);
+        iv.set(ivPrefix, 0);
+        // set seq big-endian
+        iv[8] = (seq >>> 24) & 0xff;
+        iv[9] = (seq >>> 16) & 0xff;
+        iv[10] = (seq >>> 8) & 0xff;
+        iv[11] = (seq & 0xff);
         try {
-          const sigRef = ref(db, `signaling/${requestId}`);
-          remove(sigRef).catch(() => { /* ignore */ });
+          chunkBuffer = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv.buffer }, sessionKey, arrayBuffer);
         } catch (e) {
-          // ignore
+          if (transferId) updateFileTransfer(transferId, { status: 'failed' });
+          return;
         }
-      }, 5 * 60 * 1000);
+      } else {
+        chunkBuffer = arrayBuffer;
+      }
+
+      // Respect channel state
+      if (dataChannel.readyState !== 'open') {
+        if (transferId) updateFileTransfer(transferId, { status: 'failed' });
+        break;
+      }
+
+      // Construct binary packet: 4 bytes for sequence + data
+      const packet = new Uint8Array(4 + chunkBuffer.byteLength);
+      const view = new DataView(packet.buffer);
+      view.setUint32(0, seq, false); // big-endian
+      packet.set(new Uint8Array(chunkBuffer), 4);
+
+      // Send packet
+      try {
+        dataChannel.send(packet.buffer);
+      } catch (e) {
+        if (transferId) updateFileTransfer(transferId, { status: 'failed' });
+        break;
+      }
+
+      // Check backpressure (e.g., keep buffer below 1MB)
+      const MAX_BUFFERED = 1024 * 1024;
+      if (typeof dataChannel.bufferedAmount === 'number' && dataChannel.bufferedAmount > MAX_BUFFERED) {
+        await waitForBufferedAmountLow(dataChannel, Math.floor(MAX_BUFFERED / 2));
+      }
+
+      // Update progress
+      if (transferId) {
+        const bytesSent = Math.min((seq + 1) * chunkSize, file.size);
+        const progress = Math.min((bytesSent / file.size) * 100, 100);
+        const elapsed = (Date.now() - startTime) / 1000;
+        const speed = elapsed > 0 ? bytesSent / elapsed : 0;
+        const eta = speed > 0 ? (file.size - bytesSent) / speed : 0;
+        updateFileTransfer(transferId, { progress, speed, eta });
+      }
+    }
+
+    // Finalize
+    try {
+      dataChannel.send(JSON.stringify({ type: 'fileComplete', fileName: file.name }));
+    } catch (e) { }
+
+    if (transferId) updateFileTransfer(transferId, { progress: 100, status: 'completed' });
+  }, [updateFileTransfer, waitForBufferedAmountLow]);
+  // Start file transfer (WebRTC) - called by sender
+  const startFileTransfer = useCallback(async (requestId: string, files: File[]) => {
+    if (!user) return;
+    if (!database) return;
+    const db = database;
+
+    // Create RTCPeerConnection
+    const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+    setPeerConnection(pc);
+
+    // Create data channel for file transfer
+    const dataChannel = pc.createDataChannel('fileTransfer', {
+      ordered: true,
+    });
+
+    // Configure data channel for binary data
+    dataChannel.binaryType = 'arraybuffer';
+
+    // Handle data channel events
+    dataChannel.onopen = () => {
+      // Start sending files with a small delay to ensure connection is stable
+      setTimeout(() => {
+        files.forEach((file) => {
+          // Create file transfer record
+          const transferId = addFileTransfer({
+            fileName: file.name,
+            fileSize: file.size,
+            fileType: file.type,
+            progress: 0,
+            status: 'transferring',
+            senderId: user?.uid || 'unknown',
+            senderName: user?.displayName || 'Unknown User',
+            receiverId: 'unknown', // Will be updated when we know the receiver
+            receiverName: 'Unknown User',
+            timestamp: Date.now(),
+            direction: 'sending',
+          });
+
+          sendFile(dataChannel, file, transferId, requestId);
+        });
+      }, 100);
+    };
+
+    dataChannel.onclose = () => {
+      // Data channel closed
+    };
+
+    dataChannel.onerror = () => {
+      // Data channel error
+    };
+
+    // Handle ICE candidates
+    pc.onicecandidate = (event) => {
+      if (event.candidate) {
+        const candidateRef = ref(db, `signaling/${requestId}/candidates/${user.uid}`);
+        push(candidateRef, {
+          candidate: event.candidate.candidate,
+          sdpMLineIndex: event.candidate.sdpMLineIndex,
+          sdpMid: event.candidate.sdpMid,
+          from: user.uid,
+          ts: Date.now(),
+        });
+      }
+    };
+
+    // Create offer and set up signaling
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+
+    // Send offer through Firebase signaling. First ensure we're registered as a
+    // peer so the DB rules allow subsequent writes to the session node.
+    const signalingRef = ref(db, `signaling/${requestId}`);
+    try {
+      await ensurePeerRegistered(requestId);
+    } catch (err) {
+      // If registration fails we'll still attempt the offer write and log errors.
+      // eslint-disable-next-line no-console
+      console.warn('peer registration failed before offer; continuing to offer write', err);
+    }
+
+    try {
+      await update(signalingRef, {
+        type: 'offer',
+        sdp: offer.sdp,
+        from: user.uid,
+        createdAt: Date.now(),
+      });
+    } catch (err) {
+      // Log path and error for debugging permission issues
+      // eslint-disable-next-line no-console
+      console.error('Failed to write offer to signaling', signalingRef.toString(), err);
+      throw err;
+    }
+
+    // Listen for answer
+    const unsubscribe = onValue(signalingRef, async (snapshot) => {
+      const data = snapshot.val();
+      if (!data) return;
+
+      // derive e2ee session key when both ephemeral entries present
+      try {
+        if (data.e2ee && data.e2ee[user.uid]) {
+          const otherUid = Object.keys(data.e2ee).find((u) => u !== user.uid);
+          if (otherUid && !e2eeKeysRef.current[requestId] && e2eeEphemeralRef.current[requestId]?.priv) {
+            const mySalt = data.e2ee[user.uid].salt;
+            const otherPub = data.e2ee[otherUid].pub;
+            const otherSig = data.e2ee[otherUid].sig;
+            // verify other party's ephemeral signature before deriving
+            const verified = await verifyEphemeralSignature(otherUid, otherPub, otherSig);
+            if (!verified) {
+              // do not derive session key if verification fails
+              return;
+            }
+            const key = await deriveSessionKey(e2eeEphemeralRef.current[requestId].priv!, otherPub, mySalt);
+            e2eeKeysRef.current[requestId] = key;
+          }
+        }
+      } catch (e) {
+        // ignore derivation errors
+      }
+
+      // Handle answer from receiver
+      if (data.type === 'answer' && data.from !== user.uid) {
+        try {
+          // Only set remote description if we're in the right state
+          if (pc.signalingState === 'have-local-offer') {
+            await pc.setRemoteDescription(new RTCSessionDescription({ type: 'answer', sdp: data.sdp }));
+          }
+        } catch (error) {
+          // Ignore WebRTC state errors
+        }
+      }
+
+      // Handle ICE candidates. Use queueOrAddCandidate to tolerate candidates arriving
+      // before remoteDescription is set.
+      if (data.candidates) {
+        Object.entries(data.candidates).forEach(([userId, candidates]: [string, any]) => {
+          if (userId !== user.uid) {
+            Object.values(candidates).forEach((candidateData: any) => {
+              const candInit: RTCIceCandidateInit = {
+                candidate: candidateData.candidate,
+                sdpMLineIndex: candidateData.sdpMLineIndex,
+                sdpMid: candidateData.sdpMid,
+              };
+              queueOrAddCandidate(requestId, pc, candInit).catch((err) => {
+                // eslint-disable-next-line no-console
+                console.warn('queueOrAddCandidate failed (sender)', requestId, err);
+              });
+            });
+          }
+        });
+      }
+    });
+
+    const cleanupTimer = setTimeout(() => {
+      try {
+        unsubscribe();
+      } catch (e) {
+        // ignore
+      }
+      try {
+        pc.close();
+      } catch (e) {
+        // ignore
+      }
+      // Attempt to remove signaling session to avoid lingering data
+      try {
+        const sigRef = ref(db, `signaling/${requestId}`);
+        remove(sigRef).catch(() => { /* ignore */ });
+      } catch (e) {
+        // ignore
+      }
+    }, 5 * 60 * 1000);
   }, [addFileTransfer, deriveSessionKey, ensurePeerRegistered, sendFile, user, verifyEphemeralSignature]);
 
 
-    const value = {
-      availableUsers,
-      fileTransfers,
-      shareRequests,
-      isAvailable,
-      availabilityLoaded,
-      setAvailable,
-      sendShareRequest,
-      acceptShareRequest,
-      rejectShareRequest,
-      startFileTransfer,
-      peerConnection,
-    };
+  const value = {
+    availableUsers,
+    fileTransfers,
+    shareRequests,
+    isAvailable,
+    availabilityLoaded,
+    setAvailable,
+    sendShareRequest,
+    acceptShareRequest,
+    rejectShareRequest,
+    startFileTransfer,
+    peerConnection,
+  };
 
-    return (
-      <P2PContext.Provider value={value}>
-        {children}
-      </P2PContext.Provider>
-    );
-  }
+  return (
+    <P2PContext.Provider value={value}>
+      {children}
+    </P2PContext.Provider>
+  );
+}

@@ -4,6 +4,12 @@
       ".read": "auth != null", 
       "$uid": {
         ".write": "auth != null && auth.uid === $uid",
+        "status": {
+          ".validate": "newData.hasChild('online') && newData.child('online').isBoolean() && newData.hasChild('available') && newData.child('available').isBoolean() && newData.hasChild('lastSeen') && newData.child('lastSeen').isNumber()"
+        },
+        "info": {
+          ".validate": "newData.hasChild('displayName') && newData.child('displayName').isString() && (!newData.hasChild('email') || newData.child('email').isString()) && (!newData.hasChild('photoURL') || newData.child('photoURL').isString())"
+        },
         "publicKey": {
           "jwk": {
             ".write": "auth != null && auth.uid === $uid",
