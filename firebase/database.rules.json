@@ -14,7 +14,7 @@
           "jwk": {
             ".write": "auth != null && auth.uid === $uid",
             ".read": "auth != null",
-            ".validate": "newData.hasChildren(['kty', 'alg', 'crv', 'x', 'y']) && !newData.hasChild('d') && newData.val().toString().length < 1000",
+            ".validate": "newData.hasChildren(['kty','alg','crv','x','y']) && !newData.child('d').exists() && newData.child('kty').isString() && newData.child('alg').isString() && newData.child('crv').isString() && newData.child('x').isString() && newData.child('y').isString() && newData.child('x').val().length < 500 && newData.child('y').val().length < 500",
             "kty": {
               ".validate": "newData.isString() && newData.val() === 'EC'"
             },
