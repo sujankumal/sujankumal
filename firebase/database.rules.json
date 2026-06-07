@@ -14,7 +14,22 @@
           "jwk": {
             ".write": "auth != null && auth.uid === $uid",
             ".read": "auth != null",
-            ".validate": "newData.hasChild('kty') && newData.hasChild('alg') && newData.child('kty').isString() && newData.child('alg').isString()"
+            ".validate": "newData.hasChildren(['kty', 'alg', 'crv', 'x', 'y']) && !newData.hasChild('d') && newData.val().toString().length < 1000",
+            "kty": {
+              ".validate": "newData.isString() && newData.val() === 'EC'"
+            },
+            "alg": {
+              ".validate": "newData.isString() && newData.val() === 'ES256'"
+            },
+            "crv": {
+              ".validate": "newData.isString() && newData.val() === 'P-256'"
+            },
+            "x": {
+              ".validate": "newData.isString() && newData.val().length >= 40"
+            },
+            "y": {
+              ".validate": "newData.isString() && newData.val().length >= 40"
+            }
           }
         }
       }
