@@ -1,14 +1,14 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { 
-  User, 
-  signInWithPopup, 
+import {
+  User,
+  signInWithPopup,
   signOut as firebaseSignOut,
   onAuthStateChanged,
   signInAnonymously
 } from 'firebase/auth';
-import { ref, set, onDisconnect, serverTimestamp } from 'firebase/database';
+import { ref, set, update, get, onDisconnect, serverTimestamp } from 'firebase/database';
 import { auth, googleProvider, githubProvider, database, ensureClientInitialized } from '@/lib/firebase.client';
 
 // console.log('AuthContext loading...');
@@ -70,6 +70,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
             const userStatusRef = ref(database, `users/${user.uid}/status`);
             const userInfoRef = ref(database, `users/${user.uid}/info`);
 
+            // Set offline when disconnected
+            onDisconnect(userStatusRef).set({
+              online: false,
+              available: false,
+              lastSeen: serverTimestamp(),
+            });
+
             // Set user info
             const userInfo = {
               displayName: user.displayName || 'Anonymous User',
@@ -79,19 +86,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
             };
             await set(userInfoRef, userInfo);
 
+            const snap = await get(userStatusRef);
+            const previousStatus = snap.exists()
+              ? snap.val()
+              : { available: false };
+
             // Set online status
             const userStatus = {
               online: true,
-              available: false, // Default to not available until user sets themselves as available
+              available: previousStatus.available ?? false, // Default to not available until user sets themselves as available
               lastSeen: serverTimestamp(),
             };
-            await set(userStatusRef, userStatus);
+            await update(userStatusRef, userStatus);
 
-            // Set offline when disconnected
-            onDisconnect(userStatusRef).set({
-              online: false,
-              lastSeen: serverTimestamp(),
-            });
           } catch (e) {
             // ignore DB errors
           }
@@ -100,9 +107,33 @@ export function AuthProvider({ children }: AuthProviderProps) {
     });
 
     // Handle online/offline status
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
+    const handleOnline = async () => {
+      setIsOnline(true);
 
+      if (user && database) {
+        const userStatusRef = ref(database, `users/${user.uid}/status`);
+
+        await update(userStatusRef, {
+          online: true,
+          available: true,
+          lastSeen: serverTimestamp(),
+        });
+      }
+    };
+
+    const handleOffline = async () => {
+      setIsOnline(false);
+
+      if (user && database) {
+        const userStatusRef = ref(database, `users/${user.uid}/status`);
+
+        await update(userStatusRef, {
+          online: false,
+          available: false,
+          lastSeen: serverTimestamp(),
+        });
+      }
+    };
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
@@ -120,8 +151,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const signInWithGoogle = async () => {
     try {
-  if (!auth) throw new Error('Auth not initialized');
-  await signInWithPopup(auth, googleProvider);
+      if (!auth) throw new Error('Auth not initialized');
+      await signInWithPopup(auth, googleProvider);
     } catch (error) {
       throw error;
     }
@@ -129,8 +160,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const signInWithGithub = async () => {
     try {
-  if (!auth) throw new Error('Auth not initialized');
-  await signInWithPopup(auth, githubProvider);
+      if (!auth) throw new Error('Auth not initialized');
+      await signInWithPopup(auth, githubProvider);
     } catch (error) {
       throw error;
     }
@@ -138,8 +169,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const signInAsGuest = async () => {
     try {
-  if (!auth) throw new Error('Auth not initialized');
-  await signInAnonymously(auth);
+      if (!auth) throw new Error('Auth not initialized');
+      await signInAnonymously(auth);
     } catch (error) {
       throw error;
     }
@@ -147,15 +178,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const signOut = async () => {
     try {
-      if (user) {
+      if (user && database) {
         // Set user as offline before signing out
-        if (database) {
-          const userStatusRef = ref(database, `users/${user.uid}/status`);
-          await set(userStatusRef, {
-            online: false,
-            lastSeen: serverTimestamp(),
-          });
-        }
+        const userStatusRef = ref(database, `users/${user.uid}/status`);
+        await update(userStatusRef, {
+          online: false,
+          available: false,
+          lastSeen: serverTimestamp(),
+        });
+        // Prevent the queued disconnect write from firing later
+        await onDisconnect(userStatusRef).cancel();
       }
       if (!auth) throw new Error('Auth not initialized');
       await firebaseSignOut(auth);
