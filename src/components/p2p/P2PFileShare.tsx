@@ -244,13 +244,19 @@ export function P2PFileShare() {
 
       {/* Incoming share request popover */}
       {popoverRequest && (
-        <div className="fixed bottom-6 right-6 z-50">
-          <div className="w-96 bg-white border border-gray-200 rounded-lg shadow-lg p-4">
-            <div className="flex items-start">
+        <div className="fixed bottom-4 left-4 right-4 md:bottom-6 md:right-6 md:left-auto z-50 max-w-[380px] mx-auto md:mx-0">
+          <div className="w-full bg-white border border-gray-200 rounded-2xl shadow-xl p-5">
+            <div className="flex items-start gap-3">
               <div className="flex-1">
-                <h3 className="text-sm font-semibold text-gray-900">Share request from {popoverRequest.fromUserName || 'Unknown'}</h3>
-                <p className="text-xs text-gray-600 mt-1">{popoverRequest.message || `${popoverRequest.files?.length || 0} file(s)`}</p>
-                <div className="mt-3 space-x-2">
+                <h3 className="text-sm font-semibold text-gray-900">
+                  Share request from {popoverRequest.fromUserName || 'Unknown'}
+                </h3>
+
+                <p className="text-xs text-gray-600 mt-1 line-clamp-2">
+                  {popoverRequest.message || `${popoverRequest.files?.length || 0} file(s)`}
+                </p>
+
+                <div className="mt-4 flex flex-col xs:flex-row gap-2">
                   <button
                     onClick={async () => {
                       try {
@@ -260,10 +266,11 @@ export function P2PFileShare() {
                       }
                       setPopoverRequest(null);
                     }}
-                    className="px-3 py-1 bg-green-600 text-white rounded-md text-sm"
+                    className="flex-1 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-medium transition-colors"
                   >
                     Accept
                   </button>
+
                   <button
                     onClick={async () => {
                       try {
@@ -273,15 +280,16 @@ export function P2PFileShare() {
                       }
                       setPopoverRequest(null);
                     }}
-                    className="px-3 py-1 bg-red-50 text-red-700 border border-red-100 rounded-md text-sm"
+                    className="flex-1 px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-100 rounded-xl text-sm font-medium transition-colors"
                   >
                     Reject
                   </button>
                 </div>
               </div>
+
               <button
                 onClick={() => setPopoverRequest(null)}
-                className="ml-3 text-gray-400 hover:text-gray-600"
+                className="ml-2 text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition-colors"
                 aria-label="Close"
               >
                 ✕
