@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server';
+import { auth } from "@/services/auth";
 import { database as adminDatabase } from '@/lib/firebase';
 
 export async function GET(_req: Request, context: any) {
+  const session = await auth();
+  if (!session?.user?.verified) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { params } = context || {};
   const { action } = params || {};
 
@@ -12,12 +18,13 @@ export async function GET(_req: Request, context: any) {
         return NextResponse.json({ error: 'Admin SDK not initialized' }, { status: 500 });
       }
       const snap = await adminDatabase.ref('path/to/data').once('value');
-      if (snap && typeof snap.val === 'function' && snap.exists && snap.exists()) {
-        return NextResponse.json(snap.val());
-      } else if (snap && typeof snap.val === 'function') {
-        return NextResponse.json({ error: 'Data not found' }, { status: 404 });
+      if (!snap.exists()) {
+        return NextResponse.json(
+          { error: 'Data not found' },
+          { status: 404 }
+        );
       }
-      return NextResponse.json({ error: 'Data not found' }, { status: 404 });
+      return NextResponse.json(snap.val());
     } catch (error) {
       return NextResponse.json({ error: 'Server error' }, { status: 500 });
     }

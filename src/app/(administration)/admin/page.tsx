@@ -37,12 +37,20 @@ async function Admin() {
                         <h1 className="text-3xl font-bold text-gray-900 mb-2">Database Management</h1>
                         <p className="text-gray-600">Manage your application data with full CRUD operations. Click on any section to expand and load the data.</p>
                     </div>
-                    <a
-                        href="/short-urls"
-                        className="inline-flex w-fit items-center justify-center rounded-md bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700"
-                    >
-                        Manage Short URLs
-                    </a>
+                    <div className="flex flex-wrap gap-2">
+                        <a
+                            href="/admin/firebase"
+                            className="inline-flex w-fit items-center justify-center rounded-md bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700"
+                        >
+                            Manage Firebase
+                        </a>
+                        <a
+                            href="/short-urls"
+                            className="inline-flex w-fit items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                        >
+                            Manage Short URLs
+                        </a>
+                    </div>
                 </div>
 
                 {/* Content Management */}
