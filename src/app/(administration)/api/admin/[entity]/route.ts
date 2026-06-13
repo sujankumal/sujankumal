@@ -13,24 +13,24 @@ const entitySchemas = {
     main_image_credit: z.string().nullable().optional(),
     date: z.string().transform((str) => new Date(str)),
     published: z.boolean().default(false),
-    authorId: z.number().nullable().optional(),
+    authorId: z.coerce.number().nullable().optional(),
   }),
   category: z.object({
     name: z.string().min(1, "Name is required"),
   }),
   user: z.object({
     name: z.string().min(1, "Name is required"),
-    email: z.string().email("Valid email is required"),
+    email: z.email("Valid email is required"),
     verified: z.boolean().default(false),
     image: z.string().nullable().optional(),
   }),
   profile: z.object({
-    authorId: z.number(),
+    authorId: z.coerce.number(),
     status: z.string().nullable().optional(),
     image: z.string().nullable().optional(),
     about: z.string().nullable().optional(),
     phone: z.string().nullable().optional(),
-    email: z.string().email().nullable().optional(),
+    email: z.email().nullable().optional(),
   }),
   project: z.object({
     title: z.string().min(1, "Title is required"),
@@ -57,20 +57,20 @@ const entitySchemas = {
     description: z.string().min(1, "Description is required"),
     detail: z.string().min(1, "Detail is required"),
     copyright: z.string().min(1, "Copyright is required"),
-    year: z.number().min(1900).max(new Date().getFullYear() + 10),
+    year: z.coerce.number().min(1900).max(new Date().getFullYear() + 10),
     privacy_policy: z.string().nullable().optional(),
-    contact_email: z.string().email().nullable().optional(),
+    contact_email: z.email().nullable().optional(),
     contact_phone: z.string().nullable().optional(),
   }),
   content: z.object({
     type: z.string().min(1, "Type is required"),
     content: z.string().min(1, "Content is required"),
-    sequence: z.number().min(0, "Sequence must be 0 or greater"),
-    postId: z.number().min(1, "Post ID is required"),
+    sequence: z.coerce.number().min(0, "Sequence must be 0 or greater"),
+    postId: z.coerce.number().min(1, "Post ID is required"),
   }),
   categoriesOnPosts: z.object({
-    postId: z.number().min(1, "Post ID is required"),
-    categoryId: z.number().min(1, "Category ID is required"),
+    postId: z.coerce.number().min(1, "Post ID is required"),
+    categoryId: z.coerce.number().min(1, "Category ID is required"),
   }),
 };
 
@@ -122,8 +122,13 @@ export async function GET(
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
     const search = searchParams.get("search") || "";
-    const sortBy = searchParams.get("sortBy") || "id";
+    let sortBy = searchParams.get("sortBy") || "id";
     const sortOrder = searchParams.get("sortOrder") || "desc";
+
+    // Fallback sort field for entities that do not have an 'id' field (like verificationToken)
+    if (entity === "verificationToken" && sortBy === "id") {
+      sortBy = "identifier";
+    }
 
     const skip = (page - 1) * limit;
 
@@ -176,6 +181,14 @@ export async function GET(
               { status: { contains: search, mode: "insensitive" } },
               { about: { contains: search, mode: "insensitive" } },
               { author: { name: { contains: search, mode: "insensitive" } } },
+            ],
+          };
+          break;
+        case "verificationToken":
+          whereClause = {
+            OR: [
+              { identifier: { contains: search, mode: "insensitive" } },
+              { token: { contains: search, mode: "insensitive" } },
             ],
           };
           break;
@@ -382,11 +395,30 @@ export async function PUT(
       finalUpdateData.year = date.getFullYear();
     }
 
-    const updatedItem = await model.update({
-      where: { id: parseInt(id) },
-      data: finalUpdateData,
-      include: entity === "post" ? { author: true, categories: { include: { category: true } } } : undefined,
-    });
+    let updatedItem;
+    if (entity === "categoriesOnPosts") {
+      const existingItem = await prisma.categoriesOnPosts.findFirst({
+        where: { id: parseInt(id) },
+      });
+      if (!existingItem) {
+        return NextResponse.json({ error: "Item not found" }, { status: 404 });
+      }
+      updatedItem = await prisma.categoriesOnPosts.update({
+        where: {
+          postId_categoryId: {
+            postId: existingItem.postId,
+            categoryId: existingItem.categoryId,
+          },
+        },
+        data: finalUpdateData,
+      });
+    } else {
+      updatedItem = await model.update({
+        where: { id: parseInt(id) },
+        data: finalUpdateData,
+        include: entity === "post" ? { author: true, categories: { include: { category: true } } } : undefined,
+      });
+    }
 
     return NextResponse.json(updatedItem);
   } catch (error) {
@@ -425,17 +457,35 @@ export async function DELETE(
     }
 
     // Check if item exists
-    const existingItem = await model.findUnique({
-      where: { id: parseInt(id) },
-    });
+    let existingItem;
+    if (entity === "categoriesOnPosts") {
+      existingItem = await prisma.categoriesOnPosts.findFirst({
+        where: { id: parseInt(id) },
+      });
+    } else {
+      existingItem = await model.findUnique({
+        where: { id: parseInt(id) },
+      });
+    }
 
     if (!existingItem) {
       return NextResponse.json({ error: "Item not found" }, { status: 404 });
     }
 
-    await model.delete({
-      where: { id: parseInt(id) },
-    });
+    if (entity === "categoriesOnPosts") {
+      await prisma.categoriesOnPosts.delete({
+        where: {
+          postId_categoryId: {
+            postId: existingItem.postId,
+            categoryId: existingItem.categoryId,
+          },
+        },
+      });
+    } else {
+      await model.delete({
+        where: { id: parseInt(id) },
+      });
+    }
 
     return NextResponse.json({ message: "Item deleted successfully" });
   } catch (error) {

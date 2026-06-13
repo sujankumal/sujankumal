@@ -318,7 +318,7 @@ export function AdminCRUDTable({
             setImageError(true);
             setIsLoading(false);
           }}
-          // Remove unoptimized prop to let Next.js handle optimization
+          unoptimized
           sizes="64px"
         />
       </div>
