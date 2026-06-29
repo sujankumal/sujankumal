@@ -3,17 +3,21 @@ import DateTime from "@/components/DateTime/DateTime";
 import Sidebar from "@/components/Sidebar";
 import UserLinkButton from "@/components/User/UserLinkButton";
 
-import { fetchCategoryCountIdArray, fetchPostsByCategoryID, fetchCategoryByName } from "@/services/data_access";
+import { fetchCategoryNameArray, fetchPostsByCategoryID, fetchCategoryByName } from "@/services/data_access";
 import { CatergoryType } from "@/types/category";
 import { PostType } from "@/types/post";
 import { Metadata, ResolvingMetadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
+import { notFound } from "next/navigation";
 
 async function Category({params}:{params: Promise<{name:string}>}) {
     const {name} = await params;
-    const id = (await fetchCategoryByName(name)).id;
-    const posts = await fetchPostsByCategoryID(id);
+    const category = await fetchCategoryByName(name);
+    if (!category) {
+        notFound();
+    }
+    const posts = await fetchPostsByCategoryID(category.id);
 
     return (
       <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>  
@@ -68,19 +72,16 @@ export const revalidate = 10
 export async function generateStaticParams() {
     // Generate the possible values for the parameter
     
-    const possibleValues = await fetchCategoryCountIdArray().then((data)=>{
-        // console.log("Array of post ids: ", data);
+    const possibleValues = await fetchCategoryNameArray().then((data)=>{
         return data.map((item)=>{
-            return item.id;
+            return item.name;
         });
-    }); // Adjust based on your data
-    // console.log(possibleValues);
+    });
 
     // Generate an array of objects with the correct structure for static generation
     const paths = possibleValues.map((value) => ({
-      id: value.toString(),
+      name: value,
     }));
-    // console.log("Paths ", paths);
     return paths;
   }
 
@@ -89,6 +90,9 @@ export async function generateStaticParams() {
     const {name} = await params;
     
     const category: CatergoryType = await fetchCategoryByName(name);
+    if (!category) {
+        return {};
+    }
 
     return  {
         title: `Category | ${category.name}` ,

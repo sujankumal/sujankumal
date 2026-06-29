@@ -6,14 +6,15 @@ import UserLinkButton from "@/components/User/UserLinkButton";
 import { fetchPostBySlug, fetchJokePostsUrl} from "@/services/data_access";
 import { Metadata, ResolvingMetadata } from "next";
 import Image from "next/image";
+import { notFound } from "next/navigation";
 
 async function Joke({params}:{params: Promise<{url:string}>}) {
     const {url} = await params;
-    const joke = await fetchPostBySlug(url);
-    // .then((data)=>{
-    //     // console.log("Received Joke data: ", data);
-    //     return data;
-    // });
+    const decodedUrl = decodeURIComponent(url);
+    const joke = await fetchPostBySlug(decodedUrl);
+    if (!joke) {
+        notFound();
+    }
     const joke_mds = joke.content?.map((content, index)=>{
         // console.log(content, "cont");
         return (content.content)?<MarkdownComponent key={index} content={content.content} />:<div></div>;
@@ -103,7 +104,11 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({params}:{params: Promise<{url:string}>}, parent: ResolvingMetadata): Promise<Metadata>{
     const url = (await params).url;
-    const article = await fetchPostBySlug(url);
+    const decodedUrl = decodeURIComponent(url);
+    const article = await fetchPostBySlug(decodedUrl);
+    if (!article) {
+        return {};
+    }
 
     return  {
         title: `Jokes | ${article.title}`,

@@ -7,11 +7,15 @@ import { fetchPostBySlug, fetchPostUrlArray } from "@/services/data_access";
 import { Metadata } from "next";
 import Image from "next/image";
 import { ArticleJsonLd, BreadcrumbJsonLd } from "../../../../components/seo/JsonLd";
+import { notFound } from "next/navigation";
 
 async function Article({params}:{params: Promise<{url:string}>}) {
     const url = (await params).url;
-    
-    const article = await fetchPostBySlug(url);
+    const decodedUrl = decodeURIComponent(url);
+    const article = await fetchPostBySlug(decodedUrl);
+    if (!article) {
+        notFound();
+    }
     
     const article_mds = article.content?.map((content, index)=>{
         // console.log(content, "cont");
@@ -139,7 +143,11 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({params}:{params: Promise<{url:string}>}): Promise<Metadata>{
     const string = (await params).url;
-    const article = await fetchPostBySlug(string);
+    const decodedUrl = decodeURIComponent(string);
+    const article = await fetchPostBySlug(decodedUrl);
+    if (!article) {
+        return {};
+    }
 
     return  {
         title: `Articles | ${article.title}`,

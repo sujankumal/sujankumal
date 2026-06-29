@@ -8,7 +8,10 @@ if (!connectionString) {
   throw new Error('POSTGRES_PRISMA_URL or DATABASE_URL must be set to initialize Prisma Client')
 }
 
-const adapter = new PrismaPg({ connectionString })
+const adapter = new PrismaPg({
+  connectionString,
+  max: 2, // Limit pool size per worker/serverless instance to prevent connection exhaustion
+})
 
 const prismaClientSingleton = () => {
   return new PrismaClient({ adapter })
@@ -24,4 +27,4 @@ const prisma = globalForPrisma.prisma ?? prismaClientSingleton()
 
 export default prisma
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+globalForPrisma.prisma = prisma

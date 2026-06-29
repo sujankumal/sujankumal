@@ -9,11 +9,17 @@ import { fetchArchivesByYearAndMonth, fetchPostCountYearMonthArray } from "@/ser
 import { PostType } from "@/types/post";
 import { Metadata, ResolvingMetadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
 async function Archives({params}:{params: Promise<{year:number, month:number}>}) {
     const {year, month} = await params;
+    const parsedYear = Number(year);
+    const parsedMonth = Number(month);
+    if (isNaN(parsedYear) || isNaN(parsedMonth) || parsedMonth < 1 || parsedMonth > 12) {
+        notFound();
+    }
     // console.log(year,month)
-    const posts = await fetchArchivesByYearAndMonth(year, month);
+    const posts = await fetchArchivesByYearAndMonth(parsedYear, parsedMonth);
 
     return (  
         <main className="grid md:grid-cols-4 min-h-screen justify-center">
@@ -80,25 +86,30 @@ export async function generateStaticParams() {
 
   export async function generateMetadata({params}:{params: Promise<{year:number, month:number}>}, parent: ResolvingMetadata): Promise<Metadata>{
     const {year, month} = await params;
+    const parsedYear = Number(year);
+    const parsedMonth = Number(month);
+    if (isNaN(parsedYear) || isNaN(parsedMonth) || parsedMonth < 1 || parsedMonth > 12) {
+        return {};
+    }
 
     return  {
-        title: `Archives | ${MONTHS[month-1]} ${year}` ,
-        description: `This page provides concise summaries of key topics and links to related archives of ${MONTHS[month-1]} ${year} for further exploration.`,
+        title: `Archives | ${MONTHS[parsedMonth-1]} ${parsedYear}` ,
+        description: `This page provides concise summaries of key topics and links to related archives of ${MONTHS[parsedMonth-1]} ${parsedYear} for further exploration.`,
         openGraph:{
           images:['/bird-1024x576-20.gif'],
           type:'website',
           url:'https://sujankumal.com.np/',
           siteName:'Sujan Kumal | Software Engineer',
-          title: `Archives | ${MONTHS[month-1]} ${year}` ,
-          description: `This page provides concise summaries of key topics and links to related archives of ${MONTHS[month-1]} ${year} for further exploration.`,
+          title: `Archives | ${MONTHS[parsedMonth-1]} ${parsedYear}` ,
+          description: `This page provides concise summaries of key topics and links to related archives of ${MONTHS[parsedMonth-1]} ${parsedYear} for further exploration.`,
         },
         twitter:{
           card:'summary',
           creator:'@sujan_03_',
           site:'@sujan_03_',
           images:['/bird-1024x576-20.gif'],
-          title: `Archives | ${MONTHS[month-1]} ${year}` ,
-          description: `This page provides concise summaries of key topics and links to related archives of ${MONTHS[month-1]} ${year} for further exploration.`,
+          title: `Archives | ${MONTHS[parsedMonth-1]} ${parsedYear}` ,
+          description: `This page provides concise summaries of key topics and links to related archives of ${MONTHS[parsedMonth-1]} ${parsedYear} for further exploration.`,
         },
         robots: {
             index: true,

@@ -6,10 +6,15 @@ import UserLinkButton from "@/components/User/UserLinkButton";
 import { fetchTechPostsUrl, fetchPostBySlug } from "@/services/data_access";
 import { Metadata, ResolvingMetadata } from "next";
 import Image from "next/image";
+import { notFound } from "next/navigation";
 
 async function Tech({params}:{params: Promise<{url:string}>}) {
     const {url} = await params;
-    const tech = await fetchPostBySlug(url);
+    const decodedUrl = decodeURIComponent(url);
+    const tech = await fetchPostBySlug(decodedUrl);
+    if (!tech) {
+        notFound();
+    }
     
     const tech_mds = tech.content?.map((content, index)=>{
         return (content.content)?<MarkdownComponent key={index} content={content.content} />:<div></div>;
@@ -95,7 +100,11 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({params}:{params: Promise<{url:string}>}, parent: ResolvingMetadata): Promise<Metadata>{
     const url = (await params).url;
-    const article = await fetchPostBySlug(url);
+    const decodedUrl = decodeURIComponent(url);
+    const article = await fetchPostBySlug(decodedUrl);
+    if (!article) {
+        return {};
+    }
 
     return  {
         title: `Technologies | ${article.title}`,
