@@ -298,7 +298,6 @@ export function P2PProvider({ children }: P2PProviderProps) {
       const metaRef = ref(database, `signaling/${sessionId}/meta/lastSeen/${user.uid}`);
       await set(metaRef, Date.now());
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.error('ensurePeerRegistered failed for', sessionId, user?.uid, err);
       throw err;
     }
@@ -311,7 +310,6 @@ export function P2PProvider({ children }: P2PProviderProps) {
       try {
         await pc.addIceCandidate(new RTCIceCandidate(candInit));
       } catch (err) {
-        // eslint-disable-next-line no-console
         console.warn('Failed to add queued ICE candidate', sessionId, err);
       }
     }
@@ -850,7 +848,6 @@ export function P2PProvider({ children }: P2PProviderProps) {
               try {
                 await ensurePeerRegistered(requestId);
               } catch (err) {
-                // eslint-disable-next-line no-console
                 console.warn('peer registration failed before answer; continuing', err);
               }
               try {
@@ -862,7 +859,6 @@ export function P2PProvider({ children }: P2PProviderProps) {
                   [`e2ee/${user.uid}`]: { pub: pubB64, sig },
                 });
               } catch (err) {
-                // eslint-disable-next-line no-console
                 console.error('Failed to write answer to signaling', signalingRef.toString(), err);
               }
             } catch (e) {
@@ -870,7 +866,6 @@ export function P2PProvider({ children }: P2PProviderProps) {
               try {
                 await ensurePeerRegistered(requestId);
               } catch (err) {
-                // eslint-disable-next-line no-console
                 console.warn('peer registration failed before answer (fallback); continuing', err);
               }
               try {
@@ -881,7 +876,6 @@ export function P2PProvider({ children }: P2PProviderProps) {
                   answeredAt: Date.now(),
                 });
               } catch (err) {
-                // eslint-disable-next-line no-console
                 console.error('Failed to write fallback answer to signaling', signalingRef.toString(), err);
               }
             }
@@ -904,7 +898,6 @@ export function P2PProvider({ children }: P2PProviderProps) {
               };
               // attempt to add or queue
               queueOrAddCandidate(requestId, pc, candInit).catch((err) => {
-                // eslint-disable-next-line no-console
                 console.warn('queueOrAddCandidate failed', requestId, err);
               });
             });
@@ -1235,7 +1228,6 @@ export function P2PProvider({ children }: P2PProviderProps) {
       await ensurePeerRegistered(requestId);
     } catch (err) {
       // If registration fails we'll still attempt the offer write and log errors.
-      // eslint-disable-next-line no-console
       console.warn('peer registration failed before offer; continuing to offer write', err);
     }
 
@@ -1248,7 +1240,6 @@ export function P2PProvider({ children }: P2PProviderProps) {
       });
     } catch (err) {
       // Log path and error for debugging permission issues
-      // eslint-disable-next-line no-console
       console.error('Failed to write offer to signaling', signalingRef.toString(), err);
       throw err;
     }
@@ -1304,7 +1295,6 @@ export function P2PProvider({ children }: P2PProviderProps) {
                 sdpMid: candidateData.sdpMid,
               };
               queueOrAddCandidate(requestId, pc, candInit).catch((err) => {
-                // eslint-disable-next-line no-console
                 console.warn('queueOrAddCandidate failed (sender)', requestId, err);
               });
             });

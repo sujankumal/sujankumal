@@ -147,7 +147,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, []);
+  }, [user]);
 
   const signInWithGoogle = async () => {
     try {

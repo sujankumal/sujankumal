@@ -13,6 +13,18 @@ const config: Config = {
         'gradient-conic':
           'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
       },
+      typography: {
+        DEFAULT: {
+          css: {
+            'font-family': 'var(--font-noto-english), var(--font-noto-nepali), serif',
+            'line-height': '1.8',
+            'h1, h2, h3, h4': {
+              'font-family': 'var(--font-noto-english), var(--font-noto-nepali), serif',
+              'line-height': '1.4',
+            },
+          },
+        },
+      }
     },
   },
   plugins: [

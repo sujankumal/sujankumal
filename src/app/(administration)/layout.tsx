@@ -20,21 +20,21 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
-  openGraph:{
-    images:['/bird-1024x576-20.gif'],
-    type:'website',
-    url:'https://sujankumal.com.np/',
-    siteName:'Sujan Kumal | Software Engineer',
-    title:'Sujan Kumal | Software Engineer',
-    description:"Welcome to Sujan Kumal's Site. Experienced Software Engineer | Innovative Problem Solver | Passionate About Technology",
+  openGraph: {
+    images: ['/bird-1024x576-20.gif'],
+    type: 'website',
+    url: 'https://sujankumal.com.np/',
+    siteName: 'Sujan Kumal | Software Engineer',
+    title: 'Sujan Kumal | Software Engineer',
+    description: "Welcome to Sujan Kumal's Site. Experienced Software Engineer | Innovative Problem Solver | Passionate About Technology",
   },
-  twitter:{
-    card:'summary',
-    creator:'@sujan_03_',
-    site:'@sujan_03_',
-    images:['/bird-1024x576-20.gif'],
-    title:'Sujan Kumal | Software Engineer',
-    description:"Welcome to Sujan Kumal's Site. Experienced Software Engineer | Innovative Problem Solver | Passionate About Technology",
+  twitter: {
+    card: 'summary',
+    creator: '@sujan_03_',
+    site: '@sujan_03_',
+    images: ['/bird-1024x576-20.gif'],
+    title: 'Sujan Kumal | Software Engineer',
+    description: "Welcome to Sujan Kumal's Site. Experienced Software Engineer | Innovative Problem Solver | Passionate About Technology",
   },
   icons: {
     icon: '/bird-32x32-20.gif',
@@ -47,7 +47,7 @@ export default async function AdminLayout({
   children: React.ReactNode,
 }) {
   const session = await auth();
-  
+
   return (
     <html lang="en">
       {/* <!-- Google tag (gtag.js) --> */}

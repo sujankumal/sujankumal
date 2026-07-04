@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, FormEvent } from "react";
+import { useCallback, useState, useEffect, SubmitEvent } from "react";
 import {
   Folder,
   Key,
@@ -17,7 +17,6 @@ import {
   ChevronRight,
   AlertTriangle,
   FileText,
-  Check,
   X,
   CornerDownRight,
 } from "lucide-react";
@@ -82,7 +81,7 @@ export default function FirebaseManager() {
   ];
 
   // Fetch data from Firebase at currentPath
-  const fetchData = async (path: string = currentPath) => {
+  const fetchData = useCallback(async (path: string = currentPath) => {
     setIsLoading(true);
     setError(null);
     try {
@@ -103,11 +102,11 @@ export default function FirebaseManager() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentPath]);
 
   useEffect(() => {
     fetchData();
-  }, [currentPath]);
+  }, [fetchData]);
 
   // Navigate to a specific path
   const handleNavigate = (path: string) => {
@@ -196,7 +195,7 @@ export default function FirebaseManager() {
   };
 
   // Safe add node form submission
-  const handleAddNodeSubmit = async (e: FormEvent) => {
+  const handleAddNodeSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isReadOnly || !newKey.trim()) return;
 
@@ -250,7 +249,7 @@ export default function FirebaseManager() {
   const triggerEdit = (key: string, value: any) => {
     if (isReadOnly) return;
     setSelectedKey(key);
-    
+
     let type: "string" | "number" | "boolean" | "object" = "string";
     let valStr = String(value);
 
@@ -269,7 +268,7 @@ export default function FirebaseManager() {
   };
 
   // Safe edit node form submission
-  const handleEditNodeSubmit = async (e: FormEvent) => {
+  const handleEditNodeSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isReadOnly) return;
 
@@ -377,11 +376,10 @@ export default function FirebaseManager() {
           </div>
         </td>
         <td className="px-4 py-3">
-          <span className={`px-2 py-0.5 rounded-full text-xs font-semibold uppercase ${
-            isObject ? "bg-orange-100 text-orange-800" :
+          <span className={`px-2 py-0.5 rounded-full text-xs font-semibold uppercase ${isObject ? "bg-orange-100 text-orange-800" :
             valueType === "boolean" ? "bg-blue-100 text-blue-800" :
-            valueType === "number" ? "bg-emerald-100 text-emerald-800" : "bg-purple-100 text-purple-800"
-          }`}>
+              valueType === "number" ? "bg-emerald-100 text-emerald-800" : "bg-purple-100 text-purple-800"
+            }`}>
             {valueType}
           </span>
         </td>
@@ -440,7 +438,7 @@ export default function FirebaseManager() {
   return (
     <main className="min-h-screen bg-zinc-50 text-zinc-950 font-sans pb-12">
       <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
-        
+
         {/* Header Block */}
         <header className="flex flex-col gap-3 border-b border-zinc-200 pb-5 md:flex-row md:items-center md:justify-between">
           <div>
@@ -452,16 +450,15 @@ export default function FirebaseManager() {
               Firebase Realtime Database
             </h1>
           </div>
-          
+
           <div className="flex items-center gap-3">
             {/* Read-Only Safety Switch */}
             <button
               onClick={() => setIsReadOnly(!isReadOnly)}
-              className={`inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-all duration-300 shadow-sm border ${
-                isReadOnly
-                  ? "bg-zinc-900 border-zinc-900 text-white hover:bg-zinc-800"
-                  : "bg-orange-500 border-orange-500 text-white hover:bg-orange-600 animate-pulse-subtle"
-              }`}
+              className={`inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-all duration-300 shadow-sm border ${isReadOnly
+                ? "bg-zinc-900 border-zinc-900 text-white hover:bg-zinc-800"
+                : "bg-orange-500 border-orange-500 text-white hover:bg-orange-600 animate-pulse-subtle"
+                }`}
             >
               {isReadOnly ? (
                 <>
@@ -475,7 +472,7 @@ export default function FirebaseManager() {
                 </>
               )}
             </button>
-            
+
             <a
               href="/admin"
               className="inline-flex w-fit items-center justify-center rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium hover:bg-zinc-100 transition-colors"
@@ -500,9 +497,8 @@ export default function FirebaseManager() {
 
         {/* Status Alerts */}
         {(error || successMsg) && (
-          <div className={`p-4 rounded-lg text-sm border flex items-center justify-between ${
-            error ? "bg-red-50 border-red-200 text-red-700" : "bg-emerald-50 border-emerald-200 text-emerald-700"
-          }`}>
+          <div className={`p-4 rounded-lg text-sm border flex items-center justify-between ${error ? "bg-red-50 border-red-200 text-red-700" : "bg-emerald-50 border-emerald-200 text-emerald-700"
+            }`}>
             <div className="flex items-center gap-2">
               <span className="font-semibold">{error ? "Error: " : "Success: "}</span>
               <span>{error || successMsg}</span>
@@ -523,11 +519,10 @@ export default function FirebaseManager() {
                   <button
                     key={qp.path}
                     onClick={() => handleNavigate(qp.path)}
-                    className={`text-left px-3 py-2 text-xs font-semibold rounded transition-colors ${
-                      currentPath === qp.path
-                        ? "bg-orange-50 text-orange-700"
-                        : "text-zinc-700 hover:bg-zinc-50"
-                    }`}
+                    className={`text-left px-3 py-2 text-xs font-semibold rounded transition-colors ${currentPath === qp.path
+                      ? "bg-orange-50 text-orange-700"
+                      : "text-zinc-700 hover:bg-zinc-50"
+                      }`}
                   >
                     {qp.label}
                   </button>
@@ -590,22 +585,20 @@ export default function FirebaseManager() {
             <div className="flex border-b border-zinc-200">
               <button
                 onClick={() => setViewMode("tree")}
-                className={`py-2.5 px-4 text-sm font-semibold border-b-2 flex items-center gap-1.5 transition-colors ${
-                  viewMode === "tree"
-                    ? "border-orange-600 text-orange-600"
-                    : "border-transparent text-zinc-500 hover:text-zinc-800"
-                }`}
+                className={`py-2.5 px-4 text-sm font-semibold border-b-2 flex items-center gap-1.5 transition-colors ${viewMode === "tree"
+                  ? "border-orange-600 text-orange-600"
+                  : "border-transparent text-zinc-500 hover:text-zinc-800"
+                  }`}
               >
                 <Folder className="h-4 w-4" />
                 <span>Tree Browser</span>
               </button>
               <button
                 onClick={() => setViewMode("raw")}
-                className={`py-2.5 px-4 text-sm font-semibold border-b-2 flex items-center gap-1.5 transition-colors ${
-                  viewMode === "raw"
-                    ? "border-orange-600 text-orange-600"
-                    : "border-transparent text-zinc-500 hover:text-zinc-800"
-                }`}
+                className={`py-2.5 px-4 text-sm font-semibold border-b-2 flex items-center gap-1.5 transition-colors ${viewMode === "raw"
+                  ? "border-orange-600 text-orange-600"
+                  : "border-transparent text-zinc-500 hover:text-zinc-800"
+                  }`}
               >
                 <Code className="h-4 w-4" />
                 <span>Raw JSON View</span>
@@ -921,7 +914,7 @@ export default function FirebaseManager() {
               <p className="text-xs text-zinc-600">
                 You are about to permanently delete the node <span className="font-mono font-bold bg-zinc-100 text-zinc-800 px-1 rounded">{deleteTargetKey}</span> at path:
               </p>
-              
+
               <div className="w-full bg-zinc-100 p-2.5 rounded text-xs font-mono text-zinc-700 break-all">
                 {currentPath === "/" ? `/${deleteTargetKey}` : `${currentPath}/${deleteTargetKey}`}
               </div>

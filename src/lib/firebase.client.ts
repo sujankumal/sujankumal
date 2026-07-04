@@ -30,7 +30,7 @@ let analytics: Analytics | null = null;
 // Auth providers (safe to create even on server)
 export const googleProvider = new GoogleAuthProvider();
 export const githubProvider = new GithubAuthProvider();
-try { googleProvider.addScope('profile'); googleProvider.addScope('email'); githubProvider.addScope('user:email'); } catch (e) {}
+try { googleProvider.addScope('profile'); googleProvider.addScope('email'); githubProvider.addScope('user:email'); } catch (e) { }
 
 // Internal initializer used from ensureClientInitialized
 async function initAppFromConfig(config: any) {
@@ -62,7 +62,6 @@ async function initAppFromConfig(config: any) {
     try { analytics = getAnalytics(app); } catch (e) { analytics = null; }
   } catch (e) {
     // initialization failed; keep instances null and warn
-    // eslint-disable-next-line no-console
     console.warn('firebase.client: initAppFromConfig failed', e);
   }
 }
@@ -94,7 +93,6 @@ export async function ensureClientInitialized() {
       await initAppFromConfig(cfg);
     } catch (e) {
       // ignore - client will operate without Firebase
-      // eslint-disable-next-line no-console
       console.warn('firebase.client: failed to fetch runtime config', e);
     }
   })();

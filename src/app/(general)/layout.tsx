@@ -1,7 +1,7 @@
 import Footer from '@/components/Footer'
 import '../globals.css'
 import type { Metadata } from 'next'
-import { Noto_Sans } from 'next/font/google'
+import { Noto_Sans, Noto_Serif_Devanagari } from 'next/font/google'
 import Header from '@/components/Header/Header'
 import Script from 'next/script'
 import { GA_TRACKING_ID } from '@/constants/constants'
@@ -11,9 +11,16 @@ import { WebSiteJsonLd, PersonJsonLd } from '../../components/seo/JsonLd'
 import PageLoader from '@/components/PageLoader'
 
 const noto = Noto_Sans({
-  weight:['100','200','300','400','500','600','700','800'],
-  style:['normal','italic'],
-  subsets:['latin', 'devanagari']
+  weight: ['300', '400', '500', '600', '700'],
+  subsets: ['latin'],
+  variable: '--font-noto-english',
+})
+
+const notoNepali = Noto_Serif_Devanagari({
+  weight: ['300', '400', '500', '600', '700'],
+  subsets: ['devanagari'],
+  style: ['normal'],
+  variable: '--font-noto-nepali',
 })
 
 export const metadata: Metadata = generateSEOMetadata({
@@ -74,13 +81,13 @@ export default function RootLayout({
           "https://twitter.com/sujan_03_"
         ]}
       />
-      <body className={noto.className}>
-        <Header/>
+      <body className={`${noto.variable} ${notoNepali.variable} antialiased`}>
+        <Header />
         <PageLoader />
         {children}
-        <Footer/>
-        <FAB/>
+        <Footer />
+        <FAB />
       </body>
-    </html>
+    </html >
   )
 }
