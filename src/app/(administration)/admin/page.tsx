@@ -1,9 +1,6 @@
 import { Metadata } from "next";
-import { auth, signOut } from "../../../services/auth";
+import { auth } from "../../../services/auth";
 import { redirect } from "next/navigation";
-import SignOutButton from "@/components/auth/SignOut";
-import Image from "next/image";
-import bird_100_100_20 from '/public/bird-100x100-20.gif';
 import { CollapsibleSection, CollapsibleSectionGroup } from "../../../components/admin/CollapsibleSection";
 import { LazyAdminTable } from "../../../components/admin/LazyAdminTable";
 
@@ -67,10 +64,10 @@ async function Admin() {
                         <LazyAdminTable
                             title="Posts"
                             entity="post"
-                            fields={["id","title","description","main_image","date","published","author"]}
+                            fields={["id", "title", "description", "main_image", "date", "published", "author"]}
                             markdownFields={["description"]}
                             imageFields={["main_image"]}
-                            searchableFields={["title","description"]}
+                            searchableFields={["title", "description"]}
                             isCRUD={true}
                         />
                     </CollapsibleSection>
@@ -82,7 +79,7 @@ async function Admin() {
                         <LazyAdminTable
                             title="Categories"
                             entity="category"
-                            fields={["id","name"]}
+                            fields={["id", "name"]}
                             searchableFields={["name"]}
                             isCRUD={true}
                         />
@@ -95,9 +92,9 @@ async function Admin() {
                         <LazyAdminTable
                             title="Content"
                             entity="content"
-                            fields={["id","type","content","sequence","postId","post"]}
+                            fields={["id", "type", "content", "sequence", "postId", "post"]}
                             markdownFields={["content"]}
-                            searchableFields={["type","content"]}
+                            searchableFields={["type", "content"]}
                             isCRUD={true}
                         />
                     </CollapsibleSection>
@@ -109,7 +106,7 @@ async function Admin() {
                         <LazyAdminTable
                             title="Categories On Posts"
                             entity="categoriesOnPosts"
-                            fields={["id","postId","categoryId","post","category"]}
+                            fields={["id", "postId", "categoryId", "post", "category"]}
                             searchableFields={[]}
                             isCRUD={true}
                         />
@@ -128,9 +125,9 @@ async function Admin() {
                         <LazyAdminTable
                             title="Users"
                             entity="user"
-                            fields={["id","name","email","verified","image"]}
+                            fields={["id", "name", "email", "verified", "image"]}
                             imageFields={["image"]}
-                            searchableFields={["name","email"]}
+                            searchableFields={["name", "email"]}
                             isCRUD={true}
                         />
                     </CollapsibleSection>
@@ -142,10 +139,10 @@ async function Admin() {
                         <LazyAdminTable
                             title="Profiles"
                             entity="profile"
-                            fields={["id","authorId","status","image","about","phone","email","author"]}
+                            fields={["id", "authorId", "status", "image", "about", "phone", "email", "author"]}
                             markdownFields={["about"]}
                             imageFields={["image"]}
-                            searchableFields={["email","phone"]}
+                            searchableFields={["email", "phone"]}
                             isCRUD={true}
                         />
                     </CollapsibleSection>
@@ -163,10 +160,10 @@ async function Admin() {
                         <LazyAdminTable
                             title="Site"
                             entity="site"
-                            fields={["id","header_image","title","name","motto","greeting","description","year","contact_email"]}
-                            markdownFields={["description","detail","privacy_policy"]}
+                            fields={["id", "header_image", "title", "name", "motto", "greeting", "description", "year", "contact_email"]}
+                            markdownFields={["description", "detail", "privacy_policy"]}
                             imageFields={["header_image"]}
-                            searchableFields={["title","name","motto","greeting"]}
+                            searchableFields={["title", "name", "motto", "greeting"]}
                             isCRUD={true}
                         />
                     </CollapsibleSection>
@@ -178,9 +175,9 @@ async function Admin() {
                         <LazyAdminTable
                             title="Projects"
                             entity="project"
-                            fields={["id","title","description","link"]}
+                            fields={["id", "title", "description", "link"]}
                             markdownFields={["description"]}
-                            searchableFields={["title","description"]}
+                            searchableFields={["title", "description"]}
                             isCRUD={true}
                         />
                     </CollapsibleSection>
@@ -192,8 +189,8 @@ async function Admin() {
                         <LazyAdminTable
                             title="Socials"
                             entity="social"
-                            fields={["id","name","username","embed"]}
-                            searchableFields={["name","username"]}
+                            fields={["id", "name", "username", "embed"]}
+                            searchableFields={["name", "username"]}
                             isCRUD={true}
                         />
                     </CollapsibleSection>
@@ -205,9 +202,9 @@ async function Admin() {
                         <LazyAdminTable
                             title="Updates"
                             entity="updates"
-                            fields={["id","title","update","date"]}
+                            fields={["id", "title", "update", "date"]}
                             markdownFields={["update"]}
-                            searchableFields={["title","update"]}
+                            searchableFields={["title", "update"]}
                             isCRUD={true}
                         />
                     </CollapsibleSection>
@@ -225,7 +222,7 @@ async function Admin() {
                         <LazyAdminTable
                             title="Accounts"
                             entity="account"
-                            fields={["id","userId","type","provider","providerAccountId"]}
+                            fields={["id", "userId", "type", "provider", "providerAccountId"]}
                             isCRUD={false}
                         />
                     </CollapsibleSection>
@@ -237,7 +234,7 @@ async function Admin() {
                         <LazyAdminTable
                             title="Sessions"
                             entity="session"
-                            fields={["id","sessionToken","userId","expires"]}
+                            fields={["id", "sessionToken", "userId", "expires"]}
                             isCRUD={false}
                         />
                     </CollapsibleSection>
@@ -249,7 +246,7 @@ async function Admin() {
                         <LazyAdminTable
                             title="Verification Tokens"
                             entity="verificationToken"
-                            fields={["identifier","token","expires"]}
+                            fields={["identifier", "token", "expires"]}
                             isCRUD={false}
                         />
                     </CollapsibleSection>

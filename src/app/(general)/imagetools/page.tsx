@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 import dynamic from 'next/dynamic';
-import React, { Suspense } from 'react';
+import { Suspense } from 'react';
 import Sidebar from "@/components/Sidebar";
 
 export const metadata: Metadata = {
@@ -13,13 +13,13 @@ export const metadata: Metadata = {
     type: 'website',
     url: 'https://sujankumal.com.np/imagetools',
     siteName: 'Sujan Kumal',
-    images: ['/bird-1024x576-20.gif'],
+    images: ['/bird-1024x576-20.png'],
   },
   twitter: {
     card: 'summary',
     title: 'Image Tools | Sujan Kumal | Software Engineer',
     description: 'Compress, crop, rotate, and edit images online with Sujan Kumal’s Image Tools.',
-    images: ['/bird-1024x576-20.gif'],
+    images: ['/bird-1024x576-20.png'],
     creator: '@sujan_03_',
     site: '@sujan_03_',
   },
@@ -40,9 +40,9 @@ export default function ToolsPage() {
         </Suspense>
       </div>
       <aside className="w-full md:col-span-1">
-          <div className="h-full px-3 py-4 overflow-y-auto dark:bg-gray-800">
-              <Sidebar />
-          </div>
+        <div className="h-full px-3 py-4 overflow-y-auto dark:bg-gray-800">
+          <Sidebar />
+        </div>
       </aside>
     </main>
   );

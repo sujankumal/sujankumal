@@ -1,7 +1,7 @@
 import Footer from '@/components/Footer'
 import '../globals.css'
 import type { Metadata } from 'next'
-import { Noto_Sans, Noto_Serif_Devanagari } from 'next/font/google'
+import { Noto_Serif, Noto_Serif_Devanagari } from 'next/font/google'
 import Header from '@/components/Header/Header'
 import Script from 'next/script'
 import { GA_TRACKING_ID } from '@/constants/constants'
@@ -10,7 +10,7 @@ import { generateMetadata as generateSEOMetadata } from '../../lib/seo'
 import { WebSiteJsonLd, PersonJsonLd } from '../../components/seo/JsonLd'
 import PageLoader from '@/components/PageLoader'
 
-const noto = Noto_Sans({
+const noto = Noto_Serif({
   weight: ['300', '400', '500', '600', '700'],
   subsets: ['latin'],
   variable: '--font-noto-english',

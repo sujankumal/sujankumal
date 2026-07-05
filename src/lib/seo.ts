@@ -135,7 +135,7 @@ export function generateArticleSchema(article: {
   image?: string;
 }): ArticleSchema {
   const url = `${siteConfig.url}/articles/${article.slug}`;
-  
+
   return {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -197,7 +197,7 @@ export function generateMetadata({
   const url = `${siteConfig.url}${path}`;
   const fullTitle = title ? `${title} | ${siteConfig.name}` : siteConfig.name;
   const fullDescription = description || siteConfig.description;
-  const imageUrl = image ? `${siteConfig.url}/images/${image}` : `${siteConfig.url}/bird-1024x576-20.gif`;
+  const imageUrl = image ? `${siteConfig.url}/images/${image}` : `${siteConfig.url}/bird-1024x576.png`;
 
   return {
     title: fullTitle,

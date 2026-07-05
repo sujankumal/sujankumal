@@ -1,14 +1,14 @@
 "use client"
 
 import { Noto_Sans_Mono } from "next/font/google";
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { HexColorPicker } from 'react-colorful';
 
 export const revalidate = 86400;
 
 const noto_mono = Noto_Sans_Mono({
-    subsets:['latin']
+  subsets: ['latin']
 });
 
 function svgToPng(svgElement: SVGSVGElement, size: number, fg: string, bg: string, callback: (dataUrl: string) => void) {
@@ -76,77 +76,77 @@ function QR() {
 
   return (
     <div className={"max-w-2xl mx-auto bg-white p-6 rounded shadow " + noto_mono.className}>
-       <div className="max-w-none w-full flex flex-col items-center">
-          <div className="p-6 w-full flex flex-col items-center">
-            <h2 className="text-2xl font-bold mb-4 text-center">QR Code Generator</h2>
-            <p className="text-xs text-gray-500 mb-2 text-center">Tip: Paste or type a link (e.g., https://example.com) in the field below to generate a QR code for it.</p>
-            <input
-              type="text"
-              placeholder="Enter any link or text"
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              className="w-full max-w-md px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 mb-4 text-gray-900 dark:text-gray-100 dark:bg-gray-700 dark:border-gray-600"
-            />
-            <div className="flex flex-col sm:flex-row gap-4 mb-4 justify-center items-center">
-              <button onClick={() => setShowFgPicker(v => !v)} className="flex items-center gap-2 px-3 py-1 bg-gray-200 rounded">
-                <span className="w-4 h-4 rounded border border-gray-400" style={{ background: fgColor }}></span>
-                QR Color
+      <div className="max-w-none w-full flex flex-col items-center">
+        <div className="p-6 w-full flex flex-col items-center">
+          <h2 className="text-2xl font-bold mb-4 text-center">QR Code Generator</h2>
+          <p className="text-xs text-gray-500 mb-2 text-center">Tip: Paste or type a link (e.g., https://example.com) in the field below to generate a QR code for it.</p>
+          <input
+            type="text"
+            placeholder="Enter any link or text"
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            className="w-full max-w-md px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 mb-4 text-gray-900 dark:text-gray-100 dark:bg-gray-700 dark:border-gray-600"
+          />
+          <div className="flex flex-col sm:flex-row gap-4 mb-4 justify-center items-center">
+            <button onClick={() => setShowFgPicker(v => !v)} className="flex items-center gap-2 px-3 py-1 bg-gray-200 rounded">
+              <span className="w-4 h-4 rounded border border-gray-400" style={{ background: fgColor }}></span>
+              QR Color
+            </button>
+            <button onClick={() => setShowBgPicker(v => !v)} className="flex items-center gap-2 px-3 py-1 bg-gray-200 rounded">
+              <span className="w-4 h-4 rounded border border-gray-400" style={{ background: bgColor }}></span>
+              Background
+            </button>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-4 w-full mb-2 justify-center items-center">
+            {showFgPicker && <div className="mb-2 sm:mb-0"><HexColorPicker color={fgColor} onChange={setFgColor} /></div>}
+            {showBgPicker && <div><HexColorPicker color={bgColor} onChange={setBgColor} /></div>}
+          </div>
+          <div className="flex flex-col items-start gap-2 mb-6">
+            <span className="font-medium text-gray-700 dark:text-gray-200 mb-1">Download as</span>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => downloadQR(256, true)}
+                disabled={!input}
+                className="px-2 py-1 text-xs bg-orange-600 text-white rounded shadow hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                PNG 256x256
               </button>
-              <button onClick={() => setShowBgPicker(v => !v)} className="flex items-center gap-2 px-3 py-1 bg-gray-200 rounded">
-                <span className="w-4 h-4 rounded border border-gray-400" style={{ background: bgColor }}></span>
-                Background
+              <button
+                onClick={() => downloadQR(512, true)}
+                disabled={!input}
+                className="px-2 py-1 text-xs bg-orange-600 text-white rounded shadow hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                PNG 512x512
               </button>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-4 w-full mb-2 justify-center items-center">
-              {showFgPicker && <div className="mb-2 sm:mb-0"><HexColorPicker color={fgColor} onChange={setFgColor} /></div>}
-              {showBgPicker && <div><HexColorPicker color={bgColor} onChange={setBgColor} /></div>}
-            </div>
-            <div className="flex flex-col items-start gap-2 mb-6">
-              <span className="font-medium text-gray-700 dark:text-gray-200 mb-1">Download as</span>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  onClick={() => downloadQR(256, true)}
-                  disabled={!input}
-                  className="px-2 py-1 text-xs bg-orange-600 text-white rounded shadow hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                >
-                  PNG 256x256
-                </button>
-                <button
-                  onClick={() => downloadQR(512, true)}
-                  disabled={!input}
-                  className="px-2 py-1 text-xs bg-orange-600 text-white rounded shadow hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                >
-                  PNG 512x512
-                </button>
-                <button
-                  onClick={() => downloadQR(800, true)}
-                  disabled={!input}
-                  className="px-2 py-1 text-xs bg-orange-600 text-white rounded shadow hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                >
-                  PNG 800x800
-                </button>
-                <button
-                  onClick={() => downloadQR(256, false)}
-                  disabled={!input}
-                  className="px-2 py-1 text-xs bg-gray-700 text-white rounded shadow hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                >
-                  SVG
-                </button>
-              </div>
-            </div>
-            <div ref={qrRef} className="mt-6 flex justify-center items-center p-4 border border-dashed border-orange-400 rounded-lg bg-gray-100 dark:bg-gray-700">
-              {input && (
-                <QRCodeSVG
-                  value={input}
-                  size={256}
-                  fgColor={fgColor}
-                  bgColor={bgColor}
-                  level="Q"
-                />
-              )}
+              <button
+                onClick={() => downloadQR(800, true)}
+                disabled={!input}
+                className="px-2 py-1 text-xs bg-orange-600 text-white rounded shadow hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                PNG 800x800
+              </button>
+              <button
+                onClick={() => downloadQR(256, false)}
+                disabled={!input}
+                className="px-2 py-1 text-xs bg-gray-700 text-white rounded shadow hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                SVG
+              </button>
             </div>
           </div>
+          <div ref={qrRef} className="mt-6 flex justify-center items-center p-4 border border-dashed border-orange-400 rounded-lg bg-gray-100 dark:bg-gray-700">
+            {input && (
+              <QRCodeSVG
+                value={input}
+                size={256}
+                fgColor={fgColor}
+                bgColor={bgColor}
+                level="Q"
+              />
+            )}
+          </div>
         </div>
+      </div>
     </div>
   );
 }

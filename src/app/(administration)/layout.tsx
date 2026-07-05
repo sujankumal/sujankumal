@@ -1,15 +1,23 @@
 import '../globals.css'
-import { Noto_Sans } from 'next/font/google'
+import { Noto_Serif, Noto_Serif_Devanagari } from 'next/font/google'
 import { SessionProvider } from 'next-auth/react'
 import Script from 'next/script'
 import { GA_TRACKING_ID, METADATA_BASE_URL } from '@/constants/constants'
 import { auth } from '@/services/auth'
 import { Metadata } from 'next'
 
-const noto = Noto_Sans({
-  weight: ['100', '200', '300', '400', '500', '600', '700', '800'],
-  style: ['normal', 'italic'],
-  subsets: ['latin', 'devanagari']
+
+const noto = Noto_Serif({
+  weight: ['300', '400', '500', '600', '700'],
+  subsets: ['latin'],
+  variable: '--font-noto-english',
+})
+
+const notoNepali = Noto_Serif_Devanagari({
+  weight: ['300', '400', '500', '600', '700'],
+  subsets: ['devanagari'],
+  style: ['normal'],
+  variable: '--font-noto-nepali',
 })
 
 export const metadata: Metadata = {
@@ -21,7 +29,7 @@ export const metadata: Metadata = {
     follow: true,
   },
   openGraph: {
-    images: ['/bird-1024x576-20.gif'],
+    images: ['/bird-1024x576-20.png'],
     type: 'website',
     url: 'https://sujankumal.com.np/',
     siteName: 'Sujan Kumal | Software Engineer',
@@ -32,7 +40,7 @@ export const metadata: Metadata = {
     card: 'summary',
     creator: '@sujan_03_',
     site: '@sujan_03_',
-    images: ['/bird-1024x576-20.gif'],
+    images: ['/bird-1024x576-20.png'],
     title: 'Sujan Kumal | Software Engineer',
     description: "Welcome to Sujan Kumal's Site. Experienced Software Engineer | Innovative Problem Solver | Passionate About Technology",
   },
@@ -74,7 +82,7 @@ export default async function AdminLayout({
           "description": "Experienced Software Engineer | Innovative Problem Solver | Passionate About Technology"
         })}
       </Script>
-      <body className={noto.className}>
+      <body className={`${noto.variable} ${notoNepali.variable} antialiased`}>
         <SessionProvider session={session}>
           {children}
         </SessionProvider>
