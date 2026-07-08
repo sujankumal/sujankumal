@@ -1,13 +1,14 @@
 import { API_BASE_URL } from "@/constants/constants";
+import { CACHE_TAGS } from "@/constants/cache-tags";
 import { CatergoryType } from "@/types/category";
 import { PostTitleType, PostType } from "@/types/post";
 import { SiteType } from "@/types/site";
 import { SocialType } from "@/types/social";
-import { notFound } from "next/navigation";
 import path from "path";
 import prisma from "../../prisma/prisma";
 import { UpdateType } from "@/types/update";
 import { ProjectType } from "@/types/project";
+import { cacheTag } from "next/cache";
 
 const dataDirectory = path.join(process.cwd(), 'data'); // Path to your JSON data files
 
@@ -16,39 +17,41 @@ export function isExternalFetchSet(): Boolean {
     return (API_BASE_URL === '') ? false : true;
 }
 
-export async function _csrfToken():Promise<string>{
+export async function _csrfToken(): Promise<string> {
     try {
-      return await fetch(API_BASE_URL+'/api/auth/csrf',{
-        method: "GET",
-        next: {
-            revalidate: 10,
-        }
-      }).then((res)=>{
-        return res.json()
-      }).then((data)=>{
-        return data.csrfToken??''
-      })
-    }catch(error){
-      return '';
+        return await fetch(API_BASE_URL + '/api/auth/csrf', {
+            method: "GET",
+            next: {
+                revalidate: 10,
+            }
+        }).then((res) => {
+            return res.json()
+        }).then((data) => {
+            return data.csrfToken ?? ''
+        })
+    } catch (error) {
+        return '';
     }
-  } 
-  
-export async function fetchSite():Promise<SiteType> {
+}
+
+export async function fetchSite(): Promise<SiteType> {
+    "use cache";
+    cacheTag(CACHE_TAGS.site);
     try {
         if (!isExternalFetchSet()) {
             // data
             // to do
             const site = prisma.site.findFirst({
-                orderBy:{
-                    id:'desc'
+                orderBy: {
+                    id: 'desc'
                 }
             });
             return site.then();
-        }    
+        }
         return fetch(API_BASE_URL + "/api/site", {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.site],
             }
         }).then((response) => {
             if (!response.ok) {
@@ -60,16 +63,18 @@ export async function fetchSite():Promise<SiteType> {
         throw error;
     }
 }
-export async function fetchSitePrivacyPolicy():Promise<{privacy_policy:string}>{
+export async function fetchSitePrivacyPolicy(): Promise<{ privacy_policy: string }> {
+    "use cache";
+    cacheTag(CACHE_TAGS.site);
     try {
         if (!isExternalFetchSet()) {
             // data
             const site = prisma.site.findFirst({
-                orderBy:{
-                    id:'desc'
+                orderBy: {
+                    id: 'desc'
                 },
-                select:{
-                    privacy_policy:true
+                select: {
+                    privacy_policy: true
                 }
             });
             return site.then();
@@ -77,7 +82,7 @@ export async function fetchSitePrivacyPolicy():Promise<{privacy_policy:string}>{
         return fetch(API_BASE_URL + "/api/site/privacy-policy", {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.site],
             }
         }).then((response) => {
             if (!response.ok) {
@@ -85,17 +90,19 @@ export async function fetchSitePrivacyPolicy():Promise<{privacy_policy:string}>{
             }
             return response.json();
         });
-    }catch(error){
+    } catch (error) {
         throw error;
     }
 }
-export async function fetchProjects():Promise<ProjectType[]>{
+export async function fetchProjects(): Promise<ProjectType[]> {
+    "use cache";
+    cacheTag(CACHE_TAGS.projects);
     try {
         if (!isExternalFetchSet()) {
             // data
             const site = prisma.project.findMany({
-                orderBy:{
-                    title:'asc'
+                orderBy: {
+                    title: 'asc'
                 },
             });
             return site.then();
@@ -103,7 +110,7 @@ export async function fetchProjects():Promise<ProjectType[]>{
         return fetch(API_BASE_URL + "/api/project/", {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.projects],
             }
         }).then((response) => {
             if (!response.ok) {
@@ -111,23 +118,25 @@ export async function fetchProjects():Promise<ProjectType[]>{
             }
             return response.json();
         });
-    }catch(error){
+    } catch (error) {
         throw error;
     }
 }
 export async function fetchPostTitle(): Promise<Array<PostTitleType>> {
+    "use cache";
+    cacheTag(CACHE_TAGS.posts);
     try {
         if (!isExternalFetchSet()) {
             // data
             const posts = await prisma.post.findMany(
                 {
-                    select:{
+                    select: {
                         id: true,
                         url: true,
                         title: true,
                     },
-                    orderBy:{
-                        date:'desc',
+                    orderBy: {
+                        date: 'desc',
                     }
                 }
             );
@@ -136,7 +145,7 @@ export async function fetchPostTitle(): Promise<Array<PostTitleType>> {
         return fetch(API_BASE_URL + "/api/post/title", {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.posts],
             }
         }).then((response) => {
             if (!response.ok) {
@@ -151,20 +160,22 @@ export async function fetchPostTitle(): Promise<Array<PostTitleType>> {
 
 
 export async function fetchPostTitleTicker(): Promise<Array<PostTitleType>> {
+    "use cache";
+    cacheTag(CACHE_TAGS.posts);
     try {
         if (!isExternalFetchSet()) {
             // data
             const posts = await prisma.post.findMany(
                 {
-                    select:{
+                    select: {
                         id: true,
                         url: true,
                         title: true,
                     },
-                    orderBy:{
-                        date:'desc',
+                    orderBy: {
+                        date: 'desc',
                     },
-                    take:5,
+                    take: 5,
                 }
             );
             return posts;
@@ -172,7 +183,7 @@ export async function fetchPostTitleTicker(): Promise<Array<PostTitleType>> {
         return fetch(API_BASE_URL + "/api/post/title-ticker", {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.posts],
             }
         }).then((response) => {
             if (!response.ok) {
@@ -185,30 +196,32 @@ export async function fetchPostTitleTicker(): Promise<Array<PostTitleType>> {
     }
 }
 export async function fetchArchivesDates(): Promise<Array<PostType>> {
+    "use cache";
+    cacheTag(CACHE_TAGS.posts, CACHE_TAGS.archives);
     try {
         if (!isExternalFetchSet()) {
             // data 
             const posts = prisma.post.findMany({
-                distinct:['year','month'],
-                select:{
-                    date:true,
-                    month:true,
-                    year:true,
+                distinct: ['year', 'month'],
+                select: {
+                    date: true,
+                    month: true,
+                    year: true,
                 },
-                orderBy:[{
-                        year:'asc',
-                    },
-                    {
-                        month:'asc',
+                orderBy: [{
+                    year: 'asc',
+                },
+                {
+                    month: 'asc',
                 },
                 ]
             });
-            return posts.then();    
-        }    
+            return posts.then();
+        }
         return fetch(API_BASE_URL + "/api/post/archives", {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.posts, CACHE_TAGS.archives],
             }
         }).then((response) => {
             if (!response.ok) {
@@ -222,47 +235,49 @@ export async function fetchArchivesDates(): Promise<Array<PostType>> {
 }
 
 export async function fetchArchivesByYearAndMonth(year: number, month: number): Promise<Array<PostType>> {
+    "use cache";
+    cacheTag(CACHE_TAGS.posts, CACHE_TAGS.archives);
     try {
         if (!isExternalFetchSet()) {
             // data 
             const posts = prisma.post.findMany({
-                where:{
-                    AND:{
+                where: {
+                    AND: {
                         year: Number(year),
                         month: Number(month)
                     }
                 },
-                select:{
+                select: {
                     id: true,
                     url: true,
                     title: true,
-                    description:true,
-                    date:true,
-                    published:true,
-                    categories:{
-                        select:{
-                            category:{
-                                select:{
-                                    id:true,
-                                    name:true,
+                    description: true,
+                    date: true,
+                    published: true,
+                    categories: {
+                        select: {
+                            category: {
+                                select: {
+                                    id: true,
+                                    name: true,
                                 },
                             },
                         }
                     },
-                    author:{
-                        select:{
-                            id:true,
-                            name:true,
+                    author: {
+                        select: {
+                            id: true,
+                            name: true,
                         }
                     },
-                }            
+                }
             });
             return posts.then();
-        }    
+        }
         return fetch(API_BASE_URL + "/api/post/archives/" + year + '/' + month, {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.posts, CACHE_TAGS.archives],
             }
         }).then((response) => {
             if (!response.ok) {
@@ -277,20 +292,22 @@ export async function fetchArchivesByYearAndMonth(year: number, month: number): 
 
 
 export async function fetchCategories(): Promise<Array<CatergoryType>> {
+    "use cache";
+    cacheTag(CACHE_TAGS.categories);
     try {
         if (!isExternalFetchSet()) {
             // data 
             const site = await prisma.category.findMany({
-                orderBy:{
-                    name:'asc'
+                orderBy: {
+                    name: 'asc'
                 },
             });
             return site;
-        }    
+        }
         return fetch(API_BASE_URL + "/api/categories", {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.categories],
             }
         }).then((response) => {
             if (!response.ok) {
@@ -305,59 +322,61 @@ export async function fetchCategories(): Promise<Array<CatergoryType>> {
 
 
 export async function fetchPostHome(): Promise<Array<PostType>> {
+    "use cache";
+    cacheTag(CACHE_TAGS.posts);
 
     try {
         if (!isExternalFetchSet()) {
             // data 
-                const posts = prisma.post.findMany(
-                    {
-                        where:{
-                            categories:{
-                                some:{
-                                    category:{    
-                                        name:{
-                                            equals:'index',
-                                            mode:'insensitive',
-                                        },
-                                    }
-                                },
+            const posts = prisma.post.findMany(
+                {
+                    where: {
+                        categories: {
+                            some: {
+                                category: {
+                                    name: {
+                                        equals: 'index',
+                                        mode: 'insensitive',
+                                    },
+                                }
                             },
                         },
-                        orderBy:{
-                            id:'desc'
-                        },
-                        select:{
-                            id:true,
-                            url: true,
-                            title: true,
-                            description:true,
-                            date:true,
-                            published:true,
-                            categories:{
-                                select:{
-                                    category:{
-                                        select:{
-                                            id:true,
-                                            name:true,
-                                        },
+                    },
+                    orderBy: {
+                        id: 'desc'
+                    },
+                    select: {
+                        id: true,
+                        url: true,
+                        title: true,
+                        description: true,
+                        date: true,
+                        published: true,
+                        categories: {
+                            select: {
+                                category: {
+                                    select: {
+                                        id: true,
+                                        name: true,
                                     },
                                 },
                             },
-                            author:{
-                                select:{
-                                    id:true,
-                                    name:true,
-                                }
-                            },
-                        }
+                        },
+                        author: {
+                            select: {
+                                id: true,
+                                name: true,
+                            }
+                        },
                     }
-                );
+                }
+            );
             return posts.then();
-        }    
+        }
         return fetch(API_BASE_URL + "/api/post/home", {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.posts],
             }
         }).then((response) => {
             if (!response.ok) {
@@ -371,41 +390,43 @@ export async function fetchPostHome(): Promise<Array<PostType>> {
 }
 
 export async function fetchAbout(): Promise<Array<PostType>> {
+    "use cache";
+    cacheTag(CACHE_TAGS.posts);
 
     try {
         if (!isExternalFetchSet()) {
             // data 
             const posts = prisma.post.findMany(
                 {
-                    where:{
-                        categories:{
-                            some:{
-                                category:{
-                                    name:{
-                                        equals:'about',
-                                        mode:'insensitive',
+                    where: {
+                        categories: {
+                            some: {
+                                category: {
+                                    name: {
+                                        equals: 'about',
+                                        mode: 'insensitive',
                                     }
                                 },
                             },
                         },
                     },
-                    orderBy:{
-                        id:'desc'
+                    orderBy: {
+                        id: 'desc'
                     },
-                    take:1,
-                    select:{
-                        content:true,
-                        main_image:true,
-                        main_image_credit:true,
+                    take: 1,
+                    select: {
+                        content: true,
+                        main_image: true,
+                        main_image_credit: true,
                     }
                 }
             );
             return posts.then();
-        }    
+        }
         return fetch(API_BASE_URL + "/api/post/about", {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.posts],
             }
         }).then((response) => {
             if (!response.ok) {
@@ -419,30 +440,32 @@ export async function fetchAbout(): Promise<Array<PostType>> {
 }
 
 export async function fetchTwitter(): Promise<Array<SocialType>> {
+    "use cache";
+    cacheTag(CACHE_TAGS.social);
 
     try {
         if (!isExternalFetchSet()) {
             // data 
             const site = prisma.social.findMany(
                 {
-                    where:{
-                        name:{
-                            equals:'twitter',
-                            mode:'insensitive',
+                    where: {
+                        name: {
+                            equals: 'twitter',
+                            mode: 'insensitive',
                         },
                     },
-                    select:{
-                        embed:true,
-                        username:true
+                    select: {
+                        embed: true,
+                        username: true
                     },
                 }
             );
             return site.then();
-        }    
+        }
         return fetch(API_BASE_URL + "/api/social/twitter", {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.social],
             }
         }).then((response) => {
             if (!response.ok) {
@@ -456,47 +479,49 @@ export async function fetchTwitter(): Promise<Array<SocialType>> {
 }
 
 export async function fetchArticles(): Promise<Array<PostType>> {
+    "use cache";
+    cacheTag(CACHE_TAGS.posts, CACHE_TAGS.articles);
 
     try {
         if (!isExternalFetchSet()) {
             // data 
             const posts = prisma.post.findMany(
                 {
-                    select:{
+                    select: {
                         id: true,
                         url: true,
                         title: true,
-                        description:true,
-                        date:true,
-                        published:true,
-                        categories:{
-                            select:{
-                                category:{
-                                    select:{
-                                        id:true,
-                                        name:true,
+                        description: true,
+                        date: true,
+                        published: true,
+                        categories: {
+                            select: {
+                                category: {
+                                    select: {
+                                        id: true,
+                                        name: true,
                                     },
                                 },
                             }
                         },
-                        author:{
-                            select:{
-                                id:true,
-                                name:true,
+                        author: {
+                            select: {
+                                id: true,
+                                name: true,
                             }
                         },
                     },
-                    orderBy:{
-                        id:'desc'
+                    orderBy: {
+                        id: 'desc'
                     },
                 }
             );
             return posts.then();
-        }    
+        }
         return fetch(API_BASE_URL + "/api/post/article", {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.posts, CACHE_TAGS.articles],
             }
         }).then((response) => {
             if (!response.ok) {
@@ -510,56 +535,58 @@ export async function fetchArticles(): Promise<Array<PostType>> {
 }
 
 export async function fetchJokes(): Promise<Array<PostType>> {
+    "use cache";
+    cacheTag(CACHE_TAGS.posts, CACHE_TAGS.jokes);
 
     try {
         if (!isExternalFetchSet()) {
             // data 
             const posts = prisma.post.findMany(
                 {
-                    where:{
-                        categories:{
-                            some:{
-                                category:{
-                                    name:{
-                                        equals:'joke',
-                                        mode:'insensitive',
+                    where: {
+                        categories: {
+                            some: {
+                                category: {
+                                    name: {
+                                        equals: 'joke',
+                                        mode: 'insensitive',
                                     },
                                 },
                             },
                         },
                     },
-                    select:{
+                    select: {
                         id: true,
                         url: true,
                         title: true,
-                        description:true,
-                        date:true,
-                        published:true,
-                        categories:{
-                            select:{
-                                category:{
-                                    select:{
-                                        id:true,
-                                        name:true
-                                    },  
+                        description: true,
+                        date: true,
+                        published: true,
+                        categories: {
+                            select: {
+                                category: {
+                                    select: {
+                                        id: true,
+                                        name: true
+                                    },
                                 },
                             },
                         },
-                        author:{
-                            select:{
-                                id:true,
-                                name:true,
+                        author: {
+                            select: {
+                                id: true,
+                                name: true,
                             }
                         },
                     }
                 }
             );
             return posts.then();
-        }    
+        }
         return fetch(API_BASE_URL + "/api/post/joke", {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.posts, CACHE_TAGS.jokes],
             }
         }).then((response) => {
             if (!response.ok) {
@@ -573,6 +600,8 @@ export async function fetchJokes(): Promise<Array<PostType>> {
 }
 
 export async function fetchJokeByID(id: number): Promise<PostType> {
+    "use cache";
+    cacheTag(CACHE_TAGS.posts, CACHE_TAGS.jokes, CACHE_TAGS.post(id));
     // console.log("Hello JOKER");
     try {
         if (!isExternalFetchSet()) {
@@ -580,36 +609,36 @@ export async function fetchJokeByID(id: number): Promise<PostType> {
 
             const joke = prisma.post.findUnique(
                 {
-                    where:{
+                    where: {
                         id: Number(id),
                     },
-                    include:{
-                        categories:{
-                            include:{
-                                category:{
-                                    select:{
-                                        id:true,
-                                        name:true,
+                    include: {
+                        categories: {
+                            include: {
+                                category: {
+                                    select: {
+                                        id: true,
+                                        name: true,
                                     },
                                 },
                             },
                         },
-                        author:{
-                            select:{
-                                id:true,
-                                name:true,
+                        author: {
+                            select: {
+                                id: true,
+                                name: true,
                             }
                         },
-                        content:true,
+                        content: true,
                     }
                 }
             );
             return joke.then();
-        }    
+        }
         return fetch(API_BASE_URL + "/api/post/joke/by-id/" + id, {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.posts, CACHE_TAGS.jokes, CACHE_TAGS.post(id)],
             }
         }).then((response) => {
             if (!response.ok) {
@@ -625,6 +654,8 @@ export async function fetchJokeByID(id: number): Promise<PostType> {
 
 
 export async function fetchJokeCountIdArray(): Promise<Array<{ id: number }>> {
+    "use cache";
+    cacheTag(CACHE_TAGS.posts, CACHE_TAGS.jokes);
     try {
         if (!isExternalFetchSet()) {
 
@@ -652,7 +683,7 @@ export async function fetchJokeCountIdArray(): Promise<Array<{ id: number }>> {
         return fetch(API_BASE_URL + "/api/post/joke/count/", {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.posts, CACHE_TAGS.jokes],
             }
         }).then((response) => {
             if (!response.ok) {
@@ -666,41 +697,43 @@ export async function fetchJokeCountIdArray(): Promise<Array<{ id: number }>> {
 }
 
 export async function fetchPostByID(id: number): Promise<PostType> {
+    "use cache";
+    cacheTag(CACHE_TAGS.posts, CACHE_TAGS.post(id));
     try {
         if (!isExternalFetchSet()) {
             // data 
             const post = prisma.post.findUnique(
                 {
-                    where:{
+                    where: {
                         id: Number(id),
                     },
-                    include:{
-                        categories:{
-                            select:{
-                                category:{
-                                    select:{
-                                        id:true,
-                                        name:true,
+                    include: {
+                        categories: {
+                            select: {
+                                category: {
+                                    select: {
+                                        id: true,
+                                        name: true,
                                     },
                                 },
                             },
                         },
-                        author:{
-                            select:{
-                                id:true,
-                                name:true,
+                        author: {
+                            select: {
+                                id: true,
+                                name: true,
                             }
                         },
-                        content:true,
+                        content: true,
                     }
                 }
             );
             return post.then();
-        }    
+        }
         return fetch(API_BASE_URL + "/api/post/by-id/" + id, {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.posts, CACHE_TAGS.post(id)],
             }
         }).then((response) => {
             if (!response.ok) {
@@ -714,6 +747,8 @@ export async function fetchPostByID(id: number): Promise<PostType> {
 }
 
 export async function fetchPostCountIdArray(): Promise<Array<{ id: number }>> {
+    "use cache";
+    cacheTag(CACHE_TAGS.posts);
     try {
         if (!isExternalFetchSet()) {
             const posts = await prisma.post.findMany(
@@ -728,7 +763,7 @@ export async function fetchPostCountIdArray(): Promise<Array<{ id: number }>> {
         return fetch(API_BASE_URL + "/api/post/count/", {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.posts],
             }
         }).then((response) => {
             if (!response.ok) {
@@ -743,6 +778,8 @@ export async function fetchPostCountIdArray(): Promise<Array<{ id: number }>> {
 
 
 export async function fetchPostUrlArray(): Promise<Array<{ url: string }>> {
+    "use cache";
+    cacheTag(CACHE_TAGS.posts);
     try {
         if (!isExternalFetchSet()) {
             const posts = await prisma.post.findMany(
@@ -757,7 +794,7 @@ export async function fetchPostUrlArray(): Promise<Array<{ url: string }>> {
         return fetch(API_BASE_URL + "/api/post/url/", {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.posts],
             }
         }).then((response) => {
             if (!response.ok) {
@@ -770,12 +807,14 @@ export async function fetchPostUrlArray(): Promise<Array<{ url: string }>> {
     }
 }
 export async function fetchCategoryNameArray(): Promise<Array<{ name: string }>> {
+    "use cache";
+    cacheTag(CACHE_TAGS.categories);
     try {
         if (!isExternalFetchSet()) {
             const categories = await prisma.category.findMany(
                 {
                     select: {
-                        name:true
+                        name: true
                     }
                 }
             );
@@ -784,7 +823,7 @@ export async function fetchCategoryNameArray(): Promise<Array<{ name: string }>>
         return fetch(API_BASE_URL + "/api/categories/name/", {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.categories],
             }
         }).then((response) => {
             if (!response.ok) {
@@ -798,6 +837,8 @@ export async function fetchCategoryNameArray(): Promise<Array<{ name: string }>>
 }
 
 export async function fetchCategoryCountIdArray(): Promise<Array<{ id: number }>> {
+    "use cache";
+    cacheTag(CACHE_TAGS.categories);
     try {
         if (!isExternalFetchSet()) {
             const posts = await prisma.category.findMany(
@@ -812,7 +853,7 @@ export async function fetchCategoryCountIdArray(): Promise<Array<{ id: number }>
         return fetch(API_BASE_URL + "/api/categories/count/", {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.categories],
             }
         }).then((response) => {
             if (!response.ok) {
@@ -826,6 +867,8 @@ export async function fetchCategoryCountIdArray(): Promise<Array<{ id: number }>
 }
 
 export async function fetchCategoryById(id: number): Promise<CatergoryType> {
+    "use cache";
+    cacheTag(CACHE_TAGS.categories, CACHE_TAGS.category(id));
     try {
         if (!isExternalFetchSet()) {
             const category = prisma.category.findUnique(
@@ -837,10 +880,10 @@ export async function fetchCategoryById(id: number): Promise<CatergoryType> {
             );
             return category.then();
         }
-        return fetch(API_BASE_URL + "/api/category/"+id, {
+        return fetch(API_BASE_URL + "/api/category/" + id, {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.categories, CACHE_TAGS.category(id)],
             }
         }).then((response) => {
             if (!response.ok) {
@@ -853,6 +896,8 @@ export async function fetchCategoryById(id: number): Promise<CatergoryType> {
     }
 }
 export async function fetchCategoryByName(name: string): Promise<CatergoryType> {
+    "use cache";
+    cacheTag(CACHE_TAGS.categories, CACHE_TAGS.category(name));
     try {
         if (!isExternalFetchSet()) {
             const category = prisma.category.findFirst(
@@ -864,10 +909,10 @@ export async function fetchCategoryByName(name: string): Promise<CatergoryType> 
             );
             return category.then();
         }
-        return fetch(API_BASE_URL + "/api/categories/"+name, {
+        return fetch(API_BASE_URL + "/api/categories/" + name, {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.categories, CACHE_TAGS.category(name)],
             }
         }).then((response) => {
             if (!response.ok) {
@@ -881,6 +926,8 @@ export async function fetchCategoryByName(name: string): Promise<CatergoryType> 
 }
 
 export async function fetchPostCountYearMonthArray(): Promise<Array<{ year: number, month: number }>> {
+    "use cache";
+    cacheTag(CACHE_TAGS.posts, CACHE_TAGS.archives);
     try {
         if (!isExternalFetchSet()) {
             const posts = prisma.post.findMany(
@@ -889,8 +936,8 @@ export async function fetchPostCountYearMonthArray(): Promise<Array<{ year: numb
                         year: true,
                         month: true,
                     },
-                    orderBy:{
-                        id:'desc'
+                    orderBy: {
+                        id: 'desc'
                     },
                 }
             )
@@ -900,7 +947,7 @@ export async function fetchPostCountYearMonthArray(): Promise<Array<{ year: numb
                 method: "GET",
                 credentials: "same-origin",
                 next: {
-                    revalidate: 10,
+                    tags: [CACHE_TAGS.posts, CACHE_TAGS.archives],
                 }
             }).then((response) => {
                 if (!response.ok) {
@@ -915,55 +962,57 @@ export async function fetchPostCountYearMonthArray(): Promise<Array<{ year: numb
 }
 
 export async function fetchPostsByCategoryID(id: number): Promise<Array<PostType>> {
+    "use cache";
+    cacheTag(CACHE_TAGS.posts, CACHE_TAGS.categories, CACHE_TAGS.category(id));
     try {
         if (!isExternalFetchSet()) {
             // data 
             const post = prisma.post.findMany(
                 {
-                    where:{
-                        categories:{
-                            some:{
-                                category:{
+                    where: {
+                        categories: {
+                            some: {
+                                category: {
                                     id: Number(id),
                                 },
                             },
                         },
                     },
-                    select:{
+                    select: {
                         id: true,
                         url: true,
                         title: true,
-                        description:true,
-                        date:true,
-                        published:true,
-                        categories:{
-                            select:{
-                                category:{
-                                    select:{
-                                        id:true,
-                                        name:true,
+                        description: true,
+                        date: true,
+                        published: true,
+                        categories: {
+                            select: {
+                                category: {
+                                    select: {
+                                        id: true,
+                                        name: true,
                                     },
                                 },
                             }
                         },
-                        author:{
-                            select:{
-                                id:true,
-                                name:true,
+                        author: {
+                            select: {
+                                id: true,
+                                name: true,
                             }
                         },
                     },
-                    orderBy:{
-                        date:'desc'
+                    orderBy: {
+                        date: 'desc'
                     },
                 }
             );
             return post.then();
-        }    
+        }
         return fetch(API_BASE_URL + "/api/post/category/" + id, {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.posts, CACHE_TAGS.categories, CACHE_TAGS.category(id)],
             }
         }).then((response) => {
             if (!response.ok) {
@@ -978,6 +1027,8 @@ export async function fetchPostsByCategoryID(id: number): Promise<Array<PostType
 
 
 export async function fetchSocial(): Promise<Array<SocialType>> {
+    "use cache";
+    cacheTag(CACHE_TAGS.social);
     try {
         if (!isExternalFetchSet()) {
             const social = await prisma.social.findMany();
@@ -987,7 +1038,7 @@ export async function fetchSocial(): Promise<Array<SocialType>> {
         return fetch(API_BASE_URL + "/api/social/", {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.social],
             }
         }).then((response) => {
             if (!response.ok) {
@@ -1002,59 +1053,61 @@ export async function fetchSocial(): Promise<Array<SocialType>> {
 
 
 export async function fetchTechPosts(): Promise<Array<PostType>> {
+    "use cache";
+    cacheTag(CACHE_TAGS.posts, CACHE_TAGS.tech);
 
     try {
         if (!isExternalFetchSet()) {
             // data 
             const posts = prisma.post.findMany(
                 {
-                    where:{
-                        categories:{
-                            some:{
-                                category:{
-                                    name:{
-                                        equals:'tech',
-                                        mode:'insensitive',
+                    where: {
+                        categories: {
+                            some: {
+                                category: {
+                                    name: {
+                                        equals: 'tech',
+                                        mode: 'insensitive',
                                     },
                                 },
                             },
                         },
                     },
-                    orderBy:{
-                        id:'desc'
+                    orderBy: {
+                        id: 'desc'
                     },
-                    select:{
+                    select: {
                         id: true,
                         url: true,
                         title: true,
-                        description:true,
-                        date:true,
-                        published:true,
-                        categories:{
-                            select:{
-                                category:{
-                                    select:{
-                                        id:true,
-                                        name:true
-                                    },  
+                        description: true,
+                        date: true,
+                        published: true,
+                        categories: {
+                            select: {
+                                category: {
+                                    select: {
+                                        id: true,
+                                        name: true
+                                    },
                                 },
                             },
                         },
-                        author:{
-                            select:{
-                                id:true,
-                                name:true,
+                        author: {
+                            select: {
+                                id: true,
+                                name: true,
                             }
                         },
                     }
                 }
             );
             return posts.then();
-        }    
+        }
         return fetch(API_BASE_URL + "/api/post/tech", {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.posts, CACHE_TAGS.tech],
             }
         }).then((response) => {
             if (!response.ok) {
@@ -1068,38 +1121,40 @@ export async function fetchTechPosts(): Promise<Array<PostType>> {
 }
 
 export async function fetchTechPostsUrl(): Promise<Array<PostType>> {
+    "use cache";
+    cacheTag(CACHE_TAGS.posts, CACHE_TAGS.tech);
     try {
         if (!isExternalFetchSet()) {
             // data 
             const posts = prisma.post.findMany(
                 {
-                    where:{
-                        categories:{
-                            some:{
-                                category:{
-                                    name:{
-                                        equals:'tech',
-                                        mode:'insensitive',
+                    where: {
+                        categories: {
+                            some: {
+                                category: {
+                                    name: {
+                                        equals: 'tech',
+                                        mode: 'insensitive',
                                     },
                                 },
                             },
                         },
                     },
-                    orderBy:{
-                        id:'desc'
+                    orderBy: {
+                        id: 'desc'
                     },
-                    select:{
+                    select: {
                         id: true,
                         url: true,
                     }
                 }
             );
             return posts.then();
-        }    
+        }
         return fetch(API_BASE_URL + "/api/post/tech/url", {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.posts, CACHE_TAGS.tech],
             }
         }).then((response) => {
             if (!response.ok) {
@@ -1113,43 +1168,45 @@ export async function fetchTechPostsUrl(): Promise<Array<PostType>> {
 }
 
 export async function fetchTechPostByID(id: number): Promise<PostType> {
-    
+    "use cache";
+    cacheTag(CACHE_TAGS.posts, CACHE_TAGS.tech, CACHE_TAGS.post(id));
+
     try {
         if (!isExternalFetchSet()) {
             // data 
 
             const joke = prisma.post.findUnique(
                 {
-                    where:{
+                    where: {
                         id: Number(id),
                     },
-                    include:{
-                        categories:{
-                            include:{
-                                category:{
-                                    select:{
-                                        id:true,
-                                        name:true,
+                    include: {
+                        categories: {
+                            include: {
+                                category: {
+                                    select: {
+                                        id: true,
+                                        name: true,
                                     },
                                 },
                             },
                         },
-                        author:{
-                            select:{
-                                id:true,
-                                name:true,
+                        author: {
+                            select: {
+                                id: true,
+                                name: true,
                             }
                         },
-                        content:true,
+                        content: true,
                     }
                 }
             );
             return joke.then();
-        }    
+        }
         return fetch(API_BASE_URL + "/api/post/tech/by-id/" + id, {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.posts, CACHE_TAGS.tech, CACHE_TAGS.post(id)],
             }
         }).then((response) => {
             if (!response.ok) {
@@ -1164,38 +1221,40 @@ export async function fetchTechPostByID(id: number): Promise<PostType> {
 
 
 export async function fetchJokePostsUrl(): Promise<Array<PostType>> {
+    "use cache";
+    cacheTag(CACHE_TAGS.posts, CACHE_TAGS.jokes);
     try {
         if (!isExternalFetchSet()) {
             // data 
             const posts = prisma.post.findMany(
                 {
-                    where:{
-                        categories:{
-                            some:{
-                                category:{
-                                    name:{
-                                        equals:'joke',
-                                        mode:'insensitive',
+                    where: {
+                        categories: {
+                            some: {
+                                category: {
+                                    name: {
+                                        equals: 'joke',
+                                        mode: 'insensitive',
                                     },
                                 },
                             },
                         },
                     },
-                    orderBy:{
-                        id:'desc'
+                    orderBy: {
+                        id: 'desc'
                     },
-                    select:{
+                    select: {
                         id: true,
                         url: true,
                     }
                 }
             );
             return posts.then();
-        }    
+        }
         return fetch(API_BASE_URL + "/api/post/joke/url", {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.posts, CACHE_TAGS.jokes],
             }
         }).then((response) => {
             if (!response.ok) {
@@ -1209,6 +1268,8 @@ export async function fetchJokePostsUrl(): Promise<Array<PostType>> {
 }
 
 export async function fetchTechPostCountIdArray(): Promise<Array<{ id: number }>> {
+    "use cache";
+    cacheTag(CACHE_TAGS.posts, CACHE_TAGS.tech);
     try {
         if (!isExternalFetchSet()) {
 
@@ -1236,7 +1297,7 @@ export async function fetchTechPostCountIdArray(): Promise<Array<{ id: number }>
         return fetch(API_BASE_URL + "/api/post/tech/count/", {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.posts, CACHE_TAGS.tech],
             }
         }).then((response) => {
             if (!response.ok) {
@@ -1250,12 +1311,14 @@ export async function fetchTechPostCountIdArray(): Promise<Array<{ id: number }>
 }
 
 export async function fetchUpdates(): Promise<Array<UpdateType>> {
+    "use cache";
+    cacheTag(CACHE_TAGS.updates);
     try {
         if (!isExternalFetchSet()) {
             const updates = prisma.updates.findMany(
                 {
-                    orderBy:{
-                        id:'desc',
+                    orderBy: {
+                        id: 'desc',
                     }
                 }
             );
@@ -1264,7 +1327,7 @@ export async function fetchUpdates(): Promise<Array<UpdateType>> {
         return fetch(API_BASE_URL + "/api/post/tech/count/", {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.updates],
             }
         }).then((response) => {
             if (!response.ok) {
@@ -1278,6 +1341,8 @@ export async function fetchUpdates(): Promise<Array<UpdateType>> {
 }
 
 export async function fetchPostBySlug(slug: string): Promise<PostType> {
+    "use cache";
+    cacheTag(CACHE_TAGS.posts, CACHE_TAGS.post(slug));
     // console.log('fetchPostBySlug',slug)
     try {
         if (!isExternalFetchSet()) {
@@ -1311,7 +1376,7 @@ export async function fetchPostBySlug(slug: string): Promise<PostType> {
         return fetch(API_BASE_URL + "/api/post/by-url/" + slug, {
             method: "GET",
             next: {
-                revalidate: 10,
+                tags: [CACHE_TAGS.posts, CACHE_TAGS.post(slug)],
             },
         }).then((response) => {
             if (!response.ok) {

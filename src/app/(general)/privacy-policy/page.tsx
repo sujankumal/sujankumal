@@ -27,7 +27,6 @@ export const metadata: Metadata = {
         follow: true,
     },
 }
-export const revalidate = 86400;
 
 async function PrivacyPolicy() {
     const privacyPolicy: { privacy_policy: string } = await fetchSitePrivacyPolicy();

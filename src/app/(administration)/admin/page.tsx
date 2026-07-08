@@ -9,7 +9,8 @@ export const metadata: Metadata = {
     description: "Admin page.",
 }
 
-export const revalidate = 86400;
+export const dynamic = 'force-dynamic';
+
 async function Admin() {
     const session = await auth();
     if (!session?.user) {

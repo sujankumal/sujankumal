@@ -29,7 +29,6 @@ export const metadata: Metadata = {
         follow: true,
     },
 }
-export const revalidate = 86400;
 
 const noto_mono = Noto_Sans_Mono({
     subsets: ['latin']

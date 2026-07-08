@@ -49,5 +49,3 @@ async function Articles() {
 }
 
 export default Articles;
-
-export const revalidate = 86400;

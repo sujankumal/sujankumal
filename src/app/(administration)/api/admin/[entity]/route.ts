@@ -3,6 +3,7 @@ import { auth } from "../../../../../services/auth";
 import prisma from "../../../../../../prisma/prisma";
 import { z } from "zod";
 import { headers } from "next/headers";
+import { revalidateEntityTags } from "@/services/revalidate";
 
 // Entity validation schemas
 const entitySchemas = {
@@ -335,6 +336,9 @@ export async function POST(
       include: entity === "post" ? { author: true, categories: { include: { category: true } } } : undefined,
     });
 
+    // Purge cache tags for the affected entity
+    revalidateEntityTags(entity, newItem.id);
+
     return NextResponse.json(newItem, { status: 201 });
   } catch (error) {
     console.error("POST error:", error);
@@ -420,6 +424,9 @@ export async function PUT(
       });
     }
 
+    // Purge cache tags for the affected entity
+    revalidateEntityTags(entity, parseInt(id));
+
     return NextResponse.json(updatedItem);
   } catch (error) {
     console.error("PUT error:", error);
@@ -486,6 +493,9 @@ export async function DELETE(
         where: { id: parseInt(id) },
       });
     }
+
+    // Purge cache tags for the deleted entity
+    revalidateEntityTags(entity, parseInt(id));
 
     return NextResponse.json({ message: "Item deleted successfully" });
   } catch (error) {

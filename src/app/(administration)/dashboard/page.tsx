@@ -10,7 +10,8 @@ export const metadata: Metadata = {
     description: "Dashboard page.",
 }
 
-export const revalidate = 86400;
+export const dynamic = 'force-dynamic';
+
 async function Admin() {
     const session = await auth();
     if (!session?.user) {
@@ -28,7 +29,7 @@ async function Admin() {
                                     alt="Sujan Kumal"
                                     width={100}
                                     height={100}
-                                    priority={true} 
+                                    priority={true}
                                 />
                             </div>
                             <div className="self-center text-xl font-semibold whitespace-nowrap dark:text-white mb-2 md:m-auto text-orange-600 md:p-0 ">Sujan Kumal</div>
@@ -38,30 +39,30 @@ async function Admin() {
                         <ul className="font-medium flex flex-col p-1 md:p-0 mt-1 rounded-lg md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0">
                             <li className="inline-flex flex-col justify-center">
                                 <span className="inline-flex justify-center md:py-2 px-3 rounded md:bg-transparent text-orange-600 md:p-0 dark:text-white md:dark:text-orange-600">
-                                    <p className="inline-flex flex-col justify-center mx-2">Hello, { session?.user?.name ?? "Unknown" }. </p>
-                                    {(session?.user.image)?
+                                    <p className="inline-flex flex-col justify-center mx-2">Hello, {session?.user?.name ?? "Unknown"}. </p>
+                                    {(session?.user.image) ?
                                         <Image
                                             className="rounded-full"
                                             width={50}
                                             height={50}
-                                            src={session?.user.image??''}
+                                            src={session?.user.image ?? ''}
                                             alt={"User Image"}
                                             unoptimized
                                         />
-                                    :null
-                                    }    
+                                        : null
+                                    }
                                 </span>
                             </li>
-                            {(session?.user.verified)?
+                            {(session?.user.verified) ?
                                 <Link href="/admin" className="space-x-3 rtl:space-x-reverse md:flex">
                                     <li className="inline-flex flex-col justify-center md:py-2 px-3 rounded md:bg-transparent text-orange-600 md:p-0 dark:text-white md:dark:text-orange-600">Admin Page</li>
                                 </Link>
-                                :null
+                                : null
                             }
                             <li className="inline-flex flex-col justify-center">
                                 <span className="inline-flex justify-center md:py-2 px-2 text-orange-600 rounded hover:bg-orange-600 md:hover:shadow-sm md:hover:text-orange-900 md:border-0 md:p-0 dark:text-white md:dark:hover:text-orange-600 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"><SignOutButton /></span>
                             </li>
-                            
+
                         </ul>
                     </div>
                 </div>

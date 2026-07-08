@@ -78,8 +78,6 @@ export default Tech;
 
 
 export const dynamicParams = true // true | false,
-export const revalidate = 10
-// false | 'force-cache' | 0 | number
 
 // Implement the required generateStaticParams function
 export async function generateStaticParams() {

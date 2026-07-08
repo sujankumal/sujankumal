@@ -1,23 +1,14 @@
 import { MONTHS } from "@/constants/constants";
 import { fetchArchivesDates, fetchCategories, fetchPostTitle } from "@/services/data_access";
-import { CatergoryType } from "@/types/category";
-import { PostTitleType } from "@/types/post";
 import Link from "next/link";
 
-const recentPost: Array<PostTitleType> = await fetchPostTitle();
+export default async function Sidebar() {
 
-// const archives = [
-//     {name:"July 2020", url:"/archives/2020/7"},
-//     {name:"August 2020", url:"/archives/2020/8"},
-//     {name:"September 2020", url:"/archives/2020/9"},
-//     {name:"October 20202", url:"/archives/2020/10"},
-// ]
-const archives = await fetchArchivesDates();
+    const recentPost = await fetchPostTitle();
+    const archives = await fetchArchivesDates();
+    const catogries = await fetchCategories();
 
-const catogries: Array<CatergoryType> = await fetchCategories();
-
-function Sidebar() {
-    return ( <>
+    return (<>
         <div className="block">
             <section className=" block mb-5 pb-3 w-full overflow-auto">
                 <div className="border-b-2 border-orange-600 mb-5">
@@ -26,10 +17,10 @@ function Sidebar() {
                 <div className="max-h-80 overflow-auto scrollbar">
                     <ul className="pl-2">
                         {
-                            recentPost.map(({title, url}, index)=>(
-                            <li key={index} className="w-full inline-flex text-gray-400 border-b border-gray-300 my-1 py-1 before:content-['\00BB'] hover:text-orange-600">
-                                <Link href={'/articles/'+url} className="pl-2 inline-flex flex-col justify-center text-sm text-gray-800 dark:text-inherit hover:text-inherit">{title}</Link>
-                            </li>
+                            recentPost.map(({ title, url }, index) => (
+                                <li key={index} className="w-full inline-flex text-gray-400 border-b border-gray-300 my-1 py-1 before:content-['\00BB'] hover:text-orange-600">
+                                    <Link href={'/articles/' + url} className="pl-2 inline-flex flex-col justify-center text-sm text-gray-800 dark:text-inherit hover:text-inherit">{title}</Link>
+                                </li>
                             ))
                         }
                     </ul>
@@ -42,10 +33,10 @@ function Sidebar() {
                 <div className="max-h-80 overflow-auto scrollbar">
                     <ul className="pl-2">
                         {
-                            archives.map(({year, month}, index)=>(
-                            <li key={index} className="w-full inline-flex text-gray-400 border-b border-gray-300 my-1 py-1 before:content-['\1F5BF'] hover:text-orange-600">
-                                <Link href={'/archives/'+year+'/'+month} className="pl-2 inline-flex flex-col justify-center text-sm text-gray-800 dark:text-inherit hover:text-inherit">{ MONTHS[month-1] }  { year }</Link>
-                            </li>
+                            archives.map(({ year, month }, index) => (
+                                <li key={index} className="w-full inline-flex text-gray-400 border-b border-gray-300 my-1 py-1 before:content-['\1F5BF'] hover:text-orange-600">
+                                    <Link href={'/archives/' + year + '/' + month} className="pl-2 inline-flex flex-col justify-center text-sm text-gray-800 dark:text-inherit hover:text-inherit">{MONTHS[month - 1]}  {year}</Link>
+                                </li>
                             ))
                         }
                     </ul>
@@ -58,17 +49,15 @@ function Sidebar() {
                 <div className="max-h-80 overflow-auto scrollbar">
                     <ul className="pl-2">
                         {
-                            catogries.map(({id, name}, index)=>(
-                            <li key={index} className="w-full inline-flex text-gray-400 border-b border-gray-300 my-1 py-1 before:content-['\2756'] hover:text-orange-600">
-                                <Link href={'/categories/'+name} className="pl-2 inline-flex flex-col justify-center text-sm text-gray-800 dark:text-inherit hover:text-inherit">{name}</Link>
-                            </li>
+                            catogries.map(({ id, name }, index) => (
+                                <li key={index} className="w-full inline-flex text-gray-400 border-b border-gray-300 my-1 py-1 before:content-['\2756'] hover:text-orange-600">
+                                    <Link href={'/categories/' + name} className="pl-2 inline-flex flex-col justify-center text-sm text-gray-800 dark:text-inherit hover:text-inherit">{name}</Link>
+                                </li>
                             ))
                         }
                     </ul>
                 </div>
             </section>
         </div>
-    </> );
+    </>);
 }
-
-export default Sidebar;

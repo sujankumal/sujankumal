@@ -29,8 +29,6 @@ export const metadata: Metadata = {
     },
 }
 
-export const revalidate = 86400;
-
 async function Technologies() {
 
     const technologies: Array<PostType> = await fetchTechPosts();

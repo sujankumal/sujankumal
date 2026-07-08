@@ -7,9 +7,8 @@ import { Metadata } from 'next';
 import { BlogJsonLd } from '../../components/seo/JsonLd';
 
 
-const site:SiteType = await fetchSite();
-
 export async function generateMetadata():Promise<Metadata>{
+  const site:SiteType = await fetchSite();
   return {
     title: site.title,
     robots: {
@@ -18,8 +17,6 @@ export async function generateMetadata():Promise<Metadata>{
     },
   }
 }
-
-export const revalidate = 86400;
 
 export default async function Home() {
   const posts:Array<PostType> = await fetchPostHome();
