@@ -18,7 +18,7 @@ export default async function Sidebar() {
                     <ul className="pl-2">
                         {
                             recentPost.map(({ title, url }, index) => (
-                                <li key={index} className="w-full inline-flex text-gray-400 border-b border-gray-300 my-1 py-1 before:content-['\00BB'] hover:text-orange-600">
+                                <li key={index} className="w-full inline-flex text-gray-400 border-b border-gray-300 my-1 py-1 before:content-['\1F4F0'] hover:text-orange-600">
                                     <Link href={'/articles/' + url} className="pl-2 inline-flex flex-col justify-center text-sm text-gray-800 dark:text-inherit hover:text-inherit">{title}</Link>
                                 </li>
                             ))
@@ -34,7 +34,7 @@ export default async function Sidebar() {
                     <ul className="pl-2">
                         {
                             archives.map(({ year, month }, index) => (
-                                <li key={index} className="w-full inline-flex text-gray-400 border-b border-gray-300 my-1 py-1 before:content-['\1F5BF'] hover:text-orange-600">
+                                <li key={index} className="w-full inline-flex text-gray-400 border-b border-gray-300 my-1 py-1 before:content-['\1F5C4'] hover:text-orange-600">
                                     <Link href={'/archives/' + year + '/' + month} className="pl-2 inline-flex flex-col justify-center text-sm text-gray-800 dark:text-inherit hover:text-inherit">{MONTHS[month - 1]}  {year}</Link>
                                 </li>
                             ))
@@ -50,7 +50,7 @@ export default async function Sidebar() {
                     <ul className="pl-2">
                         {
                             catogries.map(({ id, name }, index) => (
-                                <li key={index} className="w-full inline-flex text-gray-400 border-b border-gray-300 my-1 py-1 before:content-['\2756'] hover:text-orange-600">
+                                <li key={index} className="w-full inline-flex text-gray-400 border-b border-gray-300 my-1 py-1 before:content-['\1F3F7'] hover:text-orange-600">
                                     <Link href={'/categories/' + name} className="pl-2 inline-flex flex-col justify-center text-sm text-gray-800 dark:text-inherit hover:text-inherit">{name}</Link>
                                 </li>
                             ))
