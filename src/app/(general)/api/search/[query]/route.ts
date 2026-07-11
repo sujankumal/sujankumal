@@ -1,31 +1,40 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "../../../../../../prisma/prisma";
 
-export async function GET(request: NextRequest, context: {params: Promise<{ query: string}>}){
-    
+export async function GET(request: NextRequest, context: { params: Promise<{ query: string }> }) {
     try {
+        const { query } = await context.params;
+
+        if (!query || query.trim() === "") {
+            return NextResponse.json([]);
+        }
         const searched_data = await prisma.post.findMany(
-            {   
-                select:{
-                    id:true,
-                    title:true,
+            {
+                select: {
+                    id: true,
+                    title: true,
+                    url: true,
                 },
-                where:{
-                    OR:[
+                where: {
+                    OR: [
                         {
-                            title:{
-                                search:(await context.params).query,
-                            },},
-                        {
-                            description:{
-                                search:(await context.params).query,
+                            title: {
+                                contains: query,
+                                mode: "insensitive",
                             },
                         },
                         {
-                            content:{
-                                some:{
-                                    content:{
-                                        search:(await context.params).query,
+                            description: {
+                                contains: query,
+                                mode: "insensitive",
+                            },
+                        },
+                        {
+                            content: {
+                                some: {
+                                    content: {
+                                        contains: query,
+                                        mode: "insensitive",
                                     }
                                 },
                             },
@@ -34,14 +43,13 @@ export async function GET(request: NextRequest, context: {params: Promise<{ quer
                 },
             }
         );
-        return NextResponse.json(searched_data);    
+        return NextResponse.json(searched_data);
     } catch (error) {
-        throw error;
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }
 
 
 
-export const dynamicParams = true // true | false,
+export const dynamicParams = true
 export const revalidate = 10
-// false | 'force-cache' | 0 | number

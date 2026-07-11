@@ -23,8 +23,8 @@ async function Header() {
         <header className="mb-3">
             <div className="relative w-full h-50">
                 <Image
-                    src="/images/header.jpg"
-                    alt="Sujan Kumal"
+                    src={sites.header_image ? (sites.header_image.startsWith('/') || sites.header_image.startsWith('http') ? sites.header_image : `/images/${sites.header_image}`) : "/images/header.jpg"}
+                    alt={sites.name || "Header Image"}
                     priority={true}
                     fill
                     className="object-cover object-center"

@@ -5,6 +5,7 @@ import Script from 'next/script'
 import { GA_TRACKING_ID, METADATA_BASE_URL } from '@/constants/constants'
 import { auth } from '@/services/auth'
 import { Metadata } from 'next'
+import { getSiteConfig } from '../../lib/seo'
 
 
 const noto = Noto_Serif({
@@ -20,33 +21,40 @@ const notoNepali = Noto_Serif_Devanagari({
   variable: '--font-noto-nepali',
 })
 
-export const metadata: Metadata = {
-  title: 'Sujan Kumal | Software Engineer',
-  description: "Welcome to Sujan Kumal's Site. Experienced Software Engineer | Innovative Problem Solver | Passionate About Technology",
-  metadataBase: new URL(METADATA_BASE_URL),
-  robots: {
-    index: true,
-    follow: true,
-  },
-  openGraph: {
-    images: ['/bird-1024x576-20.png'],
-    type: 'website',
-    url: 'https://sujankumal.com.np/',
-    siteName: 'Sujan Kumal | Software Engineer',
-    title: 'Sujan Kumal | Software Engineer',
-    description: "Welcome to Sujan Kumal's Site. Experienced Software Engineer | Innovative Problem Solver | Passionate About Technology",
-  },
-  twitter: {
-    card: 'summary',
-    creator: '@sujan_03_',
-    site: '@sujan_03_',
-    images: ['/bird-1024x576-20.png'],
-    title: 'Sujan Kumal | Software Engineer',
-    description: "Welcome to Sujan Kumal's Site. Experienced Software Engineer | Innovative Problem Solver | Passionate About Technology",
-  },
-  icons: {
-    icon: '/bird-32x32-20.gif',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const dynamicConfig = await getSiteConfig();
+  const title = `Admin | ${dynamicConfig.name} | Software Engineer`;
+  const description = dynamicConfig.description;
+  const siteUrl = dynamicConfig.url;
+
+  return {
+    title,
+    description,
+    metadataBase: new URL(METADATA_BASE_URL || siteUrl),
+    robots: {
+      index: true,
+      follow: true,
+    },
+    openGraph: {
+      images: ['/bird-1024x576-20.png'],
+      type: 'website',
+      url: siteUrl,
+      siteName: title,
+      title,
+      description,
+    },
+    twitter: {
+      card: 'summary',
+      creator: dynamicConfig.social.twitter,
+      site: dynamicConfig.social.twitter,
+      images: ['/bird-1024x576-20.png'],
+      title,
+      description,
+    },
+    icons: {
+      icon: '/bird-32x32-20.gif',
+    },
+  };
 }
 
 export default async function AdminLayout({
@@ -55,6 +63,7 @@ export default async function AdminLayout({
   children: React.ReactNode,
 }) {
   const session = await auth();
+  const dynamicConfig = await getSiteConfig();
 
   return (
     <html lang="en">
@@ -72,14 +81,15 @@ export default async function AdminLayout({
         {JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Person",
-          "name": "Sujan Kumal",
+          "name": dynamicConfig.name,
           "jobTitle": "Software Engineer",
-          "url": "https://sujankumal.com.np/",
+          "url": dynamicConfig.url,
           "sameAs": [
-            "https://twitter.com/sujan_03_",
-            "https://www.linkedin.com/in/sujankumal/"
-          ],
-          "description": "Experienced Software Engineer | Innovative Problem Solver | Passionate About Technology"
+            dynamicConfig.social.twitter,
+            dynamicConfig.social.linkedin,
+            dynamicConfig.social.github
+          ].filter(Boolean),
+          "description": dynamicConfig.description
         })}
       </Script>
       <body className={`${noto.variable} ${notoNepali.variable} antialiased`}>

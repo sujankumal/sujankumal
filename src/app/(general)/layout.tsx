@@ -6,7 +6,7 @@ import Header from '@/components/Header/Header'
 import Script from 'next/script'
 import { GA_TRACKING_ID } from '@/constants/constants'
 import FAB from '@/components/FAB'
-import { generateMetadata as generateSEOMetadata } from '../../lib/seo'
+import { generateMetadataAsync as generateSEOMetadata, getSiteConfig } from '../../lib/seo'
 import { WebSiteJsonLd, PersonJsonLd } from '../../components/seo/JsonLd'
 import PageLoader from '@/components/PageLoader'
 
@@ -23,16 +23,19 @@ const notoNepali = Noto_Serif_Devanagari({
   variable: '--font-noto-nepali',
 })
 
-export const metadata: Metadata = generateSEOMetadata({
-  title: "Software Engineer",
-  description: "Welcome to Sujan Kumal's Site. Experienced Software Engineer | Innovative Problem Solver | Passionate About Technology",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  return generateSEOMetadata({
+    title: "Software Engineer",
+    description: "Welcome to my site. Experienced Software Engineer | Innovative Problem Solver | Passionate About Technology",
+  });
+}
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const dynamicConfig = await getSiteConfig();
   return (
     <html lang="en">
       <head>
@@ -46,10 +49,10 @@ export default function RootLayout({
         <meta name="msapplication-config" content="/browserconfig.xml" />
 
         {/* PWA Meta Tags */}
-        <meta name="application-name" content="Sujan Kumal" />
+        <meta name="application-name" content={dynamicConfig.name} />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Sujan Kumal" />
+        <meta name="apple-mobile-web-app-title" content={dynamicConfig.name} />
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="msapplication-tap-highlight" content="no" />
@@ -66,20 +69,20 @@ export default function RootLayout({
       </Script>
       {/* Structured Data */}
       <WebSiteJsonLd
-        name="Sujan Kumal"
-        url="https://sujankumal.com.np"
-        description="Personal website and blog of Sujan Kumal - Software Developer, Writer, and Tech Enthusiast"
-        searchUrl="https://sujankumal.com.np/search?q={search_term_string}"
+        name={dynamicConfig.name}
+        url={dynamicConfig.url}
+        description={dynamicConfig.description}
+        searchUrl={`${dynamicConfig.url}/search?q={search_term_string}`}
       />
       <PersonJsonLd
-        name="Sujan Kumal"
-        url="https://sujankumal.com.np"
+        name={dynamicConfig.name}
+        url={dynamicConfig.url}
         jobTitle="Software Engineer"
         sameAs={[
-          "https://www.linkedin.com/in/sujankumal/",
-          "https://github.com/sujankumal",
-          "https://twitter.com/sujan_03_"
-        ]}
+          dynamicConfig.social.linkedin,
+          dynamicConfig.social.github,
+          dynamicConfig.social.twitter
+        ].filter(Boolean)}
       />
       <body className={`${noto.variable} ${notoNepali.variable} antialiased`}>
         <Header />

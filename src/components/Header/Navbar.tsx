@@ -4,6 +4,7 @@ import { Search, Menu, MenuOpen, Cottage } from "@mui/icons-material";
 import Link from "next/link";
 import Searchbar from "../Searchbar";
 import SearchDialog from "../SearchDialog";
+import { usePathname } from "next/navigation";
 
 const menu = [
   { name: "About", url: "/about" },
@@ -20,6 +21,34 @@ const Navbar = () => {
 
   const [isNavFixed, setisNavFixed] = useState(false);
   const elementRef = useRef<HTMLDivElement>(null);
+  const searchWrapperRef = useRef<HTMLDivElement>(null);
+
+  // Track path and query changes to auto-close search menu on link click
+  const pathname = usePathname();
+
+  useEffect(() => {
+    // Closes search dropdown completely when user navigates away or query changes
+    setSearch(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (
+        searchWrapperRef.current &&
+        !searchWrapperRef.current.contains(event.target as Node)
+      ) {
+        setSearch(false);
+      }
+    };
+
+    if (search) {
+      document.addEventListener("mousedown", handleOutsideClick);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, [search]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -28,7 +57,7 @@ const Navbar = () => {
       const element = elementRef.current;
       let scrolledDistanceY = window.scrollY;
       if (element) {
-        if (elementDistanceFromTop == 0) {
+        if (elementDistanceFromTop === 0) {
           elementDistanceFromTop = element.offsetTop;
         }
         if (scrolledDistanceY >= elementDistanceFromTop) {
@@ -68,11 +97,7 @@ const Navbar = () => {
                 className="p-2 text-orange-600 rounded-md outline-none"
                 onClick={() => setNavbar(!navbar)}
               >
-                {navbar ? (
-                  <MenuOpen />
-                ) : (
-                  <Menu />
-                )}
+                {navbar ? (<MenuOpen />) : (<Menu />)}
               </button>
             </div>
           </div>
@@ -89,22 +114,24 @@ const Navbar = () => {
               ))}
             </ul>
           </div>
-          <div className="float-left bg-orange-600 p-3 text-white">
-            <button onClick={() => {
+          <div className="float-left bg-orange-600 text-white">
+            <button className="p-3" onClick={() => {
               setSearch(!search);
             }}>
               <Search />
             </button>
           </div>
         </div>
-        <div className={(search) ? "border-t-2 w-max absolute right-3 border-orange-600 m-2 rounded-md" : "hidden"}>
-          <Searchbar
-          // onSubmit={(searchTerm:string)=>{
-          // console.log("Searched For:", searchTerm); 
-          // }} inputProps={{}} 
-          />
-          <SearchDialog />
-        </div>
+        {search && (
+          <div
+            ref={searchWrapperRef}
+            className="border-t-2 w-max absolute right-3 border-orange-600 m-2 rounded-md bg-gray-900 z-50 shadow-xl">
+            <Suspense fallback={<div className="p-4 text-white text-sm">Loading Search...</div>}>
+              <Searchbar />
+              <SearchDialog />
+            </Suspense>
+          </div>
+        )}
 
       </nav>
     </Suspense>

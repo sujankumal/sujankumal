@@ -34,6 +34,7 @@ model Updates {
   title         String
   update        String
   date          DateTime?
+  @@index([date])
   @@map(name:"updates")
 }
 
@@ -42,6 +43,7 @@ model Social {
   name          String
   username      String
   embed         Boolean @default(false)
+  @@index([name])
   @@map(name: "socials") 
 }
 
@@ -68,6 +70,11 @@ model Post {
   published               Boolean @default(false)
   author                  User?   @relation(fields: [authorId], references: [id])
   authorId                Int?
+  @@index([url])
+  @@index([published])
+  @@index([date])
+  @@index([authorId])
+  @@index([year, month])
   @@map(name: "posts")
 }
 
@@ -78,6 +85,7 @@ model Content {
   sequence      Int?
   post          Post? @relation(fields: [postId], references: [id])
   postId        Int? //is Foreign Key
+  @@index([postId])
   @@map(name: "content")
 }
 

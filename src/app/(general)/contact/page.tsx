@@ -1,7 +1,10 @@
 import MousePhobia from "@/components/MousePhobia";
 import Sidebar from "@/components/Sidebar";
+import { fetchSite } from "@/services/data_access";
 
 export default async function Contact() {
+    const site = await fetchSite();
+    const contactEmail = site?.contact_email || "support@sujankumal.com.np";
     
     return (
         <main className="grid md:grid-cols-4 min-h-screen justify-center">
@@ -9,7 +12,7 @@ export default async function Contact() {
                 <MousePhobia comp={
                         <div className="bg-gray-800 text-white h-fit p-2 rounded-lg text-sm">
                             <span>Feel free to connect with me at </span> 
-                            <a className="hover:text-orange-600 underline text-gray-300" href="mailto:support@sujankumal.com.np">support@sujankumal.com.np</a>
+                            <a className="hover:text-orange-600 underline text-gray-300" href={`mailto:${contactEmail}`}>{contactEmail}</a>
                         </div>
                 }/>
             </div>

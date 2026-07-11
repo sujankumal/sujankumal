@@ -4,29 +4,35 @@ import { fetchAbout } from "@/services/data_access";
 import { PostType } from "@/types/post";
 import { Metadata } from "next";
 import { ArticleJsonLd, BreadcrumbJsonLd } from "../../../components/seo/JsonLd";
+import { getSiteConfig } from "../../../lib/seo";
 import Image from "next/image";
 
 export async function generateMetadata(): Promise<Metadata> {
     const about_: Array<PostType> = await fetchAbout();
     const main_image: string = about_.slice(-1)[0]?.main_image || "";
+    const dynamicConfig = await getSiteConfig();
+
+    const title = `About | ${dynamicConfig.name} | Software Engineer`;
+    const description = dynamicConfig.description;
+
     return {
-        title: 'About | Sujan Kumal | Software Engineer',
-        description: "I'm Sujan Kumal, a software engineer with a strong passion for creating innovative solutions and exploring the world of technology. Here's a little bit about me:",
+        title,
+        description,
         openGraph: {
             images: [`/images/${main_image}`],
             type: 'website',
-            url: 'https://sujankumal.com.np/',
-            siteName: 'Sujan Kumal | Software Engineer',
-            title: 'About | Sujan Kumal | Software Engineer',
-            description: "I'm Sujan Kumal, a software engineer with a strong passion for creating innovative solutions and exploring the world of technology. Here's a little bit about me:",
+            url: dynamicConfig.url,
+            siteName: title,
+            title,
+            description,
         },
         twitter: {
             card: 'summary',
-            creator: '@sujan_03_',
-            site: '@sujan_03_',
+            creator: dynamicConfig.social.twitter,
+            site: dynamicConfig.social.twitter,
             images: [`/images/${main_image}`],
-            title: 'About | Sujan Kumal | Software Engineer',
-            description: "I'm Sujan Kumal, a software engineer with a strong passion for creating innovative solutions and exploring the world of technology. Here's a little bit about me:",
+            title,
+            description,
         },
         robots: {
             index: true,
@@ -35,6 +41,7 @@ export async function generateMetadata(): Promise<Metadata> {
     }
 }
 async function About() {
+    const dynamicConfig = await getSiteConfig();
 
     const posts: Array<PostType> = await fetchAbout();
     const mds = posts.slice(-1)[0]?.content?.map((content, index) => {
@@ -49,28 +56,28 @@ async function About() {
                 headline={about.title}
                 description={about.description}
                 author={{
-                    name: String(about.author?.name || "Sujan Kumal"),
-                    url: "https://sujankumal.com.np"
+                    name: String(about.author?.name || dynamicConfig.name),
+                    url: dynamicConfig.url
                 }}
                 datePublished={about.date?.toISOString()}
                 dateModified={about.date?.toISOString()}
-                url={`https://sujankumal.com.np/${about.url}`}
+                url={`${dynamicConfig.url}/${about.url}`}
                 image={about.main_image ? [(() => {
                     try {
                         new URL(about.main_image);
                         return about.main_image;
-                    } catch { return `https://sujankumal.com.np/images/${about.main_image}`; }
+                    } catch { return `${dynamicConfig.url}/images/${about.main_image}`; }
                 })(),
                 ] : undefined}
                 publisher={{
-                    name: "Sujan Kumal",
-                    url: "https://sujankumal.com.np"
+                    name: dynamicConfig.name,
+                    url: dynamicConfig.url
                 }}
             />
             <BreadcrumbJsonLd
                 items={[
-                    { name: "Home", url: "https://sujankumal.com.np" },
-                    { name: about.title, url: `https://sujankumal.com.np/${about.url}` }
+                    { name: "Home", url: dynamicConfig.url },
+                    { name: about.title, url: `${dynamicConfig.url}/${about.url}` }
                 ]}
             />
 

@@ -9,5 +9,8 @@ export interface SiteType {
     description:string,
     detail:string,
     copyright:string,
-    year:number 
+    year:number,
+    privacy_policy?: string | null,
+    contact_email?: string | null,
+    contact_phone?: string | null
 }

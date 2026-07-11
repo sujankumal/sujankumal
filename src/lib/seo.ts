@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import prisma from '../../prisma/prisma';
 
 // Base site configuration
 export const siteConfig = {
@@ -17,6 +18,43 @@ export const siteConfig = {
   },
   keywords: ["Sujan Kumal", "Software Developer", "Blog", "Technology", "Programming", "Web Development"],
 };
+
+export async function getSiteConfig() {
+  try {
+    const site = await prisma.site.findFirst({
+      orderBy: { id: 'desc' }
+    });
+    
+    const socials = await prisma.social.findMany();
+    const twitterSocial = socials.find(s => s.name.toLowerCase() === 'twitter');
+    const githubSocial = socials.find(s => s.name.toLowerCase() === 'github');
+    const linkedinSocial = socials.find(s => s.name.toLowerCase() === 'linkedin');
+
+    const name = site?.name || "Sujan Kumal";
+    const url = "https://sujankumal.com.np";
+    const description = site?.description || "Personal website and blog";
+
+    return {
+      name,
+      url,
+      description,
+      author: {
+        name,
+        email: site?.contact_email || "support@sujankumal.com.np",
+        url,
+      },
+      social: {
+        twitter: twitterSocial ? `@${twitterSocial.username}` : "@sujan_03_",
+        github: githubSocial ? `https://github.com/${githubSocial.username}` : "https://github.com/sujankumal",
+        linkedin: linkedinSocial ? `https://linkedin.com/in/${linkedinSocial.username}` : "https://linkedin.com/in/sujankumal",
+      },
+      keywords: [name, "Software Developer", "Blog", "Technology", "Programming", "Web Development"],
+    };
+  } catch (error) {
+    console.error("Error fetching site config from DB, using fallback:", error);
+    return siteConfig;
+  }
+}
 
 // JSON-LD Schema Types
 export interface WebSiteSchema {
@@ -254,6 +292,179 @@ export function generateMetadata({
       title: fullTitle,
       description: fullDescription,
       creator: siteConfig.social.twitter,
+      images: [imageUrl],
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
+  };
+}
+
+export async function generateWebSiteSchemaAsync(): Promise<WebSiteSchema> {
+  const dynamicConfig = await getSiteConfig();
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: dynamicConfig.name,
+    url: dynamicConfig.url,
+    description: dynamicConfig.description,
+    author: {
+      "@type": "Person",
+      name: dynamicConfig.author.name,
+      url: dynamicConfig.author.url,
+      email: dynamicConfig.author.email,
+    },
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${dynamicConfig.url}/search?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
+}
+
+export async function generatePersonSchemaAsync(): Promise<PersonSchema> {
+  const dynamicConfig = await getSiteConfig();
+  return {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: dynamicConfig.author.name,
+    url: dynamicConfig.author.url,
+    email: dynamicConfig.author.email,
+    jobTitle: "Software Developer",
+    sameAs: [
+      dynamicConfig.social.github,
+      dynamicConfig.social.linkedin,
+      dynamicConfig.social.twitter,
+    ].filter(Boolean),
+  };
+}
+
+export async function generateArticleSchemaAsync(article: {
+  title: string;
+  description?: string;
+  publishedAt: string;
+  updatedAt?: string;
+  slug: string;
+  image?: string;
+}): Promise<ArticleSchema> {
+  const dynamicConfig = await getSiteConfig();
+  const url = `${dynamicConfig.url}/articles/${article.slug}`;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: article.title,
+    description: article.description,
+    author: {
+      "@type": "Person",
+      name: dynamicConfig.author.name,
+      url: dynamicConfig.author.url,
+    },
+    datePublished: article.publishedAt,
+    dateModified: article.updatedAt || article.publishedAt,
+    url,
+    image: article.image ? [`${dynamicConfig.url}/images/${article.image}`] : undefined,
+    publisher: {
+      "@type": "Person",
+      name: dynamicConfig.author.name,
+      url: dynamicConfig.author.url,
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": url,
+    },
+  };
+}
+
+export async function generateMetadataAsync({
+  title,
+  description,
+  path = "",
+  image,
+  type = "website",
+  publishedTime,
+  modifiedTime,
+}: {
+  title?: string;
+  description?: string;
+  path?: string;
+  image?: string;
+  type?: "website" | "article";
+  publishedTime?: string;
+  modifiedTime?: string;
+}): Promise<Metadata> {
+  const dynamicConfig = await getSiteConfig();
+  const url = `${dynamicConfig.url}${path}`;
+  const fullTitle = title ? `${title} | ${dynamicConfig.name}` : dynamicConfig.name;
+  const fullDescription = description || dynamicConfig.description;
+  const imageUrl = image ? `${dynamicConfig.url}/images/${image}` : `${dynamicConfig.url}/bird-1024x576-20.png`;
+
+  return {
+    title: fullTitle,
+    description: fullDescription,
+    keywords: dynamicConfig.keywords,
+    authors: [{ name: dynamicConfig.author.name, url: dynamicConfig.author.url }],
+    creator: dynamicConfig.author.name,
+    publisher: dynamicConfig.author.name,
+    metadataBase: new URL(dynamicConfig.url),
+    alternates: {
+      canonical: url,
+    },
+    icons: {
+      icon: [
+        { url: '/favicon.ico', sizes: 'any' },
+        { url: '/bird-32x32-20.gif', sizes: '32x32', type: 'image/gif' },
+        { url: '/bird-100x100-20.gif', sizes: '100x100', type: 'image/gif' },
+      ],
+      apple: [
+        { url: '/bird-100x100-20.gif', sizes: '100x100', type: 'image/gif' },
+        { url: '/bird-800x800-20.gif', sizes: '800x800', type: 'image/gif' },
+      ],
+      other: [
+        {
+          rel: 'mask-icon',
+          url: '/bird-32x32-20.gif',
+          color: '#000000',
+        },
+      ],
+    },
+    manifest: '/site.webmanifest',
+    openGraph: {
+      type,
+      title: fullTitle,
+      description: fullDescription,
+      url,
+      siteName: dynamicConfig.name,
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: fullTitle,
+        },
+      ],
+      ...(type === "article" && publishedTime && {
+        publishedTime,
+        modifiedTime: modifiedTime || publishedTime,
+        authors: [dynamicConfig.author.name],
+      }),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: fullTitle,
+      description: fullDescription,
+      creator: dynamicConfig.social.twitter,
       images: [imageUrl],
     },
     robots: {
