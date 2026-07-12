@@ -4,25 +4,16 @@ import { useState, useCallback } from "react";
 import { AdminCRUDTable } from "./AdminCRUDTable";
 import { TableSection } from "../../app/(administration)/admin/AdminTables";
 import { ErrorBoundary } from "./ErrorBoundary";
+import { adminEntities } from "@/config/entities";
 
 interface LazyAdminTableProps {
-  title: string;
-  entity: string;
-  fields: string[];
-  markdownFields?: string[];
-  imageFields?: string[];
-  searchableFields?: string[];
+  entity: keyof typeof adminEntities;
   isCRUD?: boolean;
   description?: string;
 }
 
 export function LazyAdminTable({
-  title,
   entity,
-  fields,
-  markdownFields = [],
-  imageFields = [],
-  searchableFields = [],
   isCRUD = true,
   description,
 }: LazyAdminTableProps) {
@@ -30,6 +21,7 @@ export function LazyAdminTable({
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const config = adminEntities[entity];
 
   const loadData = useCallback(async () => {
     if (isLoaded || isLoading) return;
@@ -67,7 +59,7 @@ export function LazyAdminTable({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <p className="text-sm text-red-600 font-medium">Error loading {title}</p>
+          <p className="text-sm text-red-600 font-medium">Error loading {config.title}</p>
           <p className="text-xs text-gray-500 mt-1">{error}</p>
           <button
             onClick={() => {
@@ -90,24 +82,15 @@ export function LazyAdminTable({
     if (isCRUD) {
       return (
         <AdminCRUDTable
-          title={title}
           entity={entity}
-          fields={fields}
-          markdownFields={markdownFields}
-          imageFields={imageFields}
-          searchableFields={searchableFields}
-          initialData={[]} // Let it load its own data
         />
       );
     } else {
       return (
         <div className="p-6">
           <TableSection
-            title={title}
             items={data}
-            fields={fields}
-            markdownFields={markdownFields}
-            imageFields={imageFields}
+            columns={config.columns}
           />
         </div>
       );
@@ -121,7 +104,7 @@ export function LazyAdminTable({
         <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{config.title}</h3>
               {description && (
                 <p className="text-sm text-gray-600 mt-1">{description}</p>
               )}
@@ -145,13 +128,13 @@ export function LazyAdminTable({
             <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
               <div className="text-center">
                 <div className="w-8 h-8 border-2 border-gray-300 border-t-orange-600 rounded-full animate-spin mx-auto mb-2"></div>
-                <p className="text-sm text-gray-600">Loading {title.toLowerCase()}...</p>
+                <p className="text-sm text-gray-600">Loading {config.title.toLowerCase()}...</p>
               </div>
             </div>
           )}
-          
+
           {renderContent()}
-          
+
           {!isLoaded && !isLoading && (
             <div className="p-12 text-center">
               <div className="text-gray-400 mb-4">
@@ -159,12 +142,12 @@ export function LazyAdminTable({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
               </div>
-              <p className="text-gray-600 mb-4">Click to load {title.toLowerCase()}</p>
+              <p className="text-gray-600 mb-4">Click to load {config.title.toLowerCase()}</p>
               <button
                 onClick={loadData}
                 className="px-4 py-2 bg-orange-600 text-white text-sm font-medium rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors"
               >
-                Load {title}
+                Load {config.title}
               </button>
             </div>
           )}

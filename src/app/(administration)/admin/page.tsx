@@ -59,58 +59,31 @@ async function Admin() {
                 >
                     <CollapsibleSection
                         title="Posts"
-                        entity="post"
+                        entity="posts"
                         defaultExpanded={false}
                     >
-                        <LazyAdminTable
-                            title="Posts"
-                            entity="post"
-                            fields={["id", "title", "description", "main_image", "date", "published", "author"]}
-                            markdownFields={["description"]}
-                            imageFields={["main_image"]}
-                            searchableFields={["title", "description"]}
-                            isCRUD={true}
-                        />
+                        <LazyAdminTable entity="posts" />
                     </CollapsibleSection>
 
                     <CollapsibleSection
                         title="Categories"
-                        entity="category"
+                        entity="categories"
                     >
-                        <LazyAdminTable
-                            title="Categories"
-                            entity="category"
-                            fields={["id", "name"]}
-                            searchableFields={["name"]}
-                            isCRUD={true}
-                        />
+                        <LazyAdminTable entity="categories" />
                     </CollapsibleSection>
 
                     <CollapsibleSection
                         title="Content Blocks"
                         entity="content"
                     >
-                        <LazyAdminTable
-                            title="Content"
-                            entity="content"
-                            fields={["id", "type", "content", "sequence", "postId", "post"]}
-                            markdownFields={["content"]}
-                            searchableFields={["type", "content"]}
-                            isCRUD={true}
-                        />
+                        <LazyAdminTable entity="content" />
                     </CollapsibleSection>
 
                     <CollapsibleSection
                         title="Categories On Posts"
-                        entity="categoriesOnPosts"
+                        entity="categoriesonposts"
                     >
-                        <LazyAdminTable
-                            title="Categories On Posts"
-                            entity="categoriesOnPosts"
-                            fields={["id", "postId", "categoryId", "post", "category"]}
-                            searchableFields={[]}
-                            isCRUD={true}
-                        />
+                        <LazyAdminTable entity="categoriesonposts" />
                     </CollapsibleSection>
                 </CollapsibleSectionGroup>
 
@@ -123,29 +96,14 @@ async function Admin() {
                         title="Users"
                         entity="user"
                     >
-                        <LazyAdminTable
-                            title="Users"
-                            entity="user"
-                            fields={["id", "name", "email", "verified", "image"]}
-                            imageFields={["image"]}
-                            searchableFields={["name", "email"]}
-                            isCRUD={true}
-                        />
+                        <LazyAdminTable entity="users" />
                     </CollapsibleSection>
 
                     <CollapsibleSection
                         title="Profiles"
                         entity="profile"
                     >
-                        <LazyAdminTable
-                            title="Profiles"
-                            entity="profile"
-                            fields={["id", "authorId", "status", "image", "about", "phone", "email", "author"]}
-                            markdownFields={["about"]}
-                            imageFields={["image"]}
-                            searchableFields={["email", "phone"]}
-                            isCRUD={true}
-                        />
+                        <LazyAdminTable entity="profiles" />
                     </CollapsibleSection>
                 </CollapsibleSectionGroup>
 
@@ -158,56 +116,28 @@ async function Admin() {
                         title="Site Settings"
                         entity="site"
                     >
-                        <LazyAdminTable
-                            title="Site"
-                            entity="site"
-                            fields={["id", "header_image", "title", "name", "motto", "greeting", "description", "year", "contact_email"]}
-                            markdownFields={["description", "detail", "privacy_policy"]}
-                            imageFields={["header_image"]}
-                            searchableFields={["title", "name", "motto", "greeting"]}
-                            isCRUD={true}
-                        />
+                        <LazyAdminTable entity="sites" />
                     </CollapsibleSection>
 
                     <CollapsibleSection
                         title="Projects"
                         entity="project"
                     >
-                        <LazyAdminTable
-                            title="Projects"
-                            entity="project"
-                            fields={["id", "title", "description", "link"]}
-                            markdownFields={["description"]}
-                            searchableFields={["title", "description"]}
-                            isCRUD={true}
-                        />
+                        <LazyAdminTable entity="projects" />
                     </CollapsibleSection>
 
                     <CollapsibleSection
                         title="Social Links"
                         entity="social"
                     >
-                        <LazyAdminTable
-                            title="Socials"
-                            entity="social"
-                            fields={["id", "name", "username", "embed"]}
-                            searchableFields={["name", "username"]}
-                            isCRUD={true}
-                        />
+                        <LazyAdminTable entity="socials" />
                     </CollapsibleSection>
 
                     <CollapsibleSection
                         title="Updates"
                         entity="updates"
                     >
-                        <LazyAdminTable
-                            title="Updates"
-                            entity="updates"
-                            fields={["id", "title", "update", "date"]}
-                            markdownFields={["update"]}
-                            searchableFields={["title", "update"]}
-                            isCRUD={true}
-                        />
+                        <LazyAdminTable entity="updates" />
                     </CollapsibleSection>
                 </CollapsibleSectionGroup>
 
@@ -220,36 +150,21 @@ async function Admin() {
                         title="Accounts"
                         entity="account"
                     >
-                        <LazyAdminTable
-                            title="Accounts"
-                            entity="account"
-                            fields={["id", "userId", "type", "provider", "providerAccountId"]}
-                            isCRUD={false}
-                        />
+                        <LazyAdminTable entity="accounts" isCRUD={false} />
                     </CollapsibleSection>
 
                     <CollapsibleSection
                         title="Sessions"
                         entity="session"
                     >
-                        <LazyAdminTable
-                            title="Sessions"
-                            entity="session"
-                            fields={["id", "sessionToken", "userId", "expires"]}
-                            isCRUD={false}
-                        />
+                        <LazyAdminTable entity="sessions" isCRUD={false} />
                     </CollapsibleSection>
 
                     <CollapsibleSection
                         title="Verification Tokens"
                         entity="verificationToken"
                     >
-                        <LazyAdminTable
-                            title="Verification Tokens"
-                            entity="verificationToken"
-                            fields={["identifier", "token", "expires"]}
-                            isCRUD={false}
-                        />
+                        <LazyAdminTable entity="verificationtokens" isCRUD={false} />
                     </CollapsibleSection>
                 </CollapsibleSectionGroup>
             </div>

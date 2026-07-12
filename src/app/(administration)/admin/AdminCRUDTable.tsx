@@ -1,10 +1,11 @@
 "use client";
 
 import { AdminCRUDTable } from "../../../components/admin/AdminCRUDTable";
+import { AdminEntities } from "../../../config/entities";
 
 interface AdminCRUDTableWrapperProps {
   title: string;
-  entity: string;
+  entity: keyof AdminEntities;
   fields: string[];
   markdownFields?: string[];
   imageFields?: string[];

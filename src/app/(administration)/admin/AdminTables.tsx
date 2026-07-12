@@ -3,6 +3,12 @@ import { useState } from "react";
 import { ImageIcon } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import Image from "next/image";
+import { AdminColumn } from "@/config/types";
+
+interface TableSectionProps {
+  columns: AdminColumn[];
+  items: any[];
+}
 
 // Image cell component with consistent URL formatting
 function ImageCell({ value, field }: { value: string; field: string }) {
@@ -72,57 +78,52 @@ function ImageCell({ value, field }: { value: string; field: string }) {
   );
 }
 
-export function TableSection({ title, items, fields, markdownFields = [], imageFields = [] }: {
-  title: string;
-  items: any[];
-  fields: string[];
-  markdownFields?: string[];
-  imageFields?: string[];
-}) {
+export function TableSection({ columns, items }: TableSectionProps) {
   return (
     <section className="mb-12">
-      <h2 className="text-2xl font-bold mb-4 text-orange-700">{title}</h2>
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white rounded shadow">
           <thead>
             <tr>
-              {fields.map((field) => (
-                <th key={field} className="px-4 py-2 text-left text-sm font-semibold text-gray-700">{field}</th>
+              {columns.map((column) => (
+                <th key={column.field} className="px-4 py-2 text-left text-sm font-semibold text-gray-700">{column.label}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {items.map((item, idx) => (
-              <tr key={item.id ?? idx} className="border-b">
-                {fields.map((field) => (
-                  <td key={field} className="px-4 py-2 text-sm">
-                    {markdownFields.includes(field) && item[field] ? (
-                      <div className="max-w-xs prose prose-xs prose-orange line-clamp-3">
-                        <ReactMarkdown>
-                          {item[field]}
-                        </ReactMarkdown>
-                      </div>
-                    ) : imageFields.includes(field) && item[field] && typeof item[field] === 'string' && item[field].trim() !== '' ? (
-                      <ImageCell value={item[field]} field={field} />
-                    ) : typeof item[field] === 'boolean' ? (
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        item[field] ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                      }`}>
-                        {item[field] ? "Yes" : "No"}
-                      </span>
-                    ) : item[field] instanceof Date ? (
-                      new Date(item[field]).toLocaleDateString()
-                    ) : typeof item[field] === 'string' && item[field].length > 50 ? (
-                      <span title={item[field]} className="truncate block max-w-xs">
-                        {item[field].substring(0, 50)}...
-                      </span>
-                    ) : (
-                      String(item[field] ?? "")
-                    )}
-                  </td>
-                ))}
-              </tr>
-            ))}
+            {items.map((item, idx) => {
+              const rowKey = item.id ?? (item.identifier && item.token ? `${item.identifier}-${item.token}` : idx);
+              return (
+                <tr key={rowKey} className="border-b hover:bg-gray-50 transition-colors">
+                  {columns.map((column) => (
+                    <td key={column.field} className="px-4 py-2 text-sm">
+                      {column.renderer === 'markdown' ? (
+                        <div className="max-w-xs prose prose-xs prose-orange line-clamp-3">
+                          <ReactMarkdown>
+                            {item[column.field]}
+                          </ReactMarkdown>
+                        </div>
+                      ) : column.renderer === 'image' && item[column.field] && typeof item[column.field] === 'string' && item[column.field].trim() !== '' ? (
+                        <ImageCell value={item[column.field]} field={column.field} />
+                      ) : typeof item[column.field] === 'boolean' ? (
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${item[column.field] ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                          }`}>
+                          {item[column.field] ? "Yes" : "No"}
+                        </span>
+                      ) : item[column.field] instanceof Date ? (
+                        new Date(item[column.field]).toLocaleDateString()
+                      ) : typeof item[column.field] === 'string' && item[column.field].length > 50 ? (
+                        <span title={item[column.field]} className="truncate block max-w-xs">
+                          {item[column.field].substring(0, 50)}...
+                        </span>
+                      ) : (
+                        String(item[column.field] ?? "")
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </div>

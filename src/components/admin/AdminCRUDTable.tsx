@@ -7,20 +7,16 @@ import Image from "next/image";
 import { Modal } from "./Modal";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { Pagination } from "./Pagination";
-import { LoadingSpinner, LoadingOverlay } from "./LoadingSpinner";
+import { LoadingOverlay } from "./LoadingSpinner";
 import { EntityForm } from "./forms/EntityForm";
 import { ToastContainer, useToast } from "./Toast";
 import { AdvancedFilters } from "./AdvancedFilters";
 import { BulkActions, SelectableRow } from "./BulkActions";
 import { useWarningBanner } from "./WarningBanner";
+import { adminEntities } from "@/config/entities";
 
 interface AdminCRUDTableProps {
-  title: string;
-  entity: string;
-  fields: string[];
-  markdownFields?: string[];
-  imageFields?: string[];
-  searchableFields?: string[];
+  entity: keyof typeof adminEntities;
   initialData?: any[];
 }
 
@@ -32,14 +28,14 @@ interface PaginationData {
 }
 
 export function AdminCRUDTable({
-  title,
   entity,
-  fields,
-  markdownFields = [],
-  imageFields = [],
-  searchableFields = [],
   initialData = [],
 }: AdminCRUDTableProps) {
+  const config = adminEntities[entity];
+
+  if (!config) {
+    throw new Error(`No admin configuration found for entity "${entity}"`);
+  }
   const [items, setItems] = useState<any[]>(initialData);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -325,20 +321,19 @@ export function AdminCRUDTable({
     );
   };
 
-  const renderCellContent = (item: any, field: string) => {
+  const renderCellContent = (item: any, column: any) => {
+    const { field, type, display } = column;
     const value = item[field];
 
-    if (markdownFields.includes(field) && value) {
+    if (type === "markdown" && value) {
       return (
         <div className="max-w-xs prose prose-xs prose-orange max-w-none line-clamp-3">
-          <ReactMarkdown>
-            {value}
-          </ReactMarkdown>
+          <ReactMarkdown>{value}</ReactMarkdown>
         </div>
       );
     }
 
-    if (imageFields.includes(field) && value && typeof value === "string" && value.trim() !== "") {
+    if (type === "image" && value) {
       return <ImageCell value={value} field={field} />;
     }
 
@@ -357,60 +352,67 @@ export function AdminCRUDTable({
     }
 
     // Handle special relationship fields
-    if (field === "author" && value) {
+    if (type === "relation" && value) {
+
+      const displayValue =
+        value?.[display ?? "name"] ??
+        value?.title ??
+        value?.name ??
+        value?.email ??
+        value?.id;
+
       return (
         <div className="flex items-center space-x-2">
-          <span className="text-sm text-gray-900">{value.name}</span>
-          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">{value.email}</span>
+          <span>{displayValue}</span>
         </div>
       );
     }
 
-    if (field === "post" && value) {
-      return (
-        <div className="flex items-center space-x-2">
-          <span className="text-sm text-gray-900">{value.title}</span>
-          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">ID: {value.id}</span>
-        </div>
-      );
-    }
-
-    if (field === "category" && value) {
-      return (
-        <div className="flex items-center space-x-2">
-          <span className="text-sm text-gray-900">{value.name}</span>
-          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">ID: {value.id}</span>
-        </div>
-      );
-    }
-
-    if (field === "categories" && Array.isArray(value)) {
+    if (type === "manyToMany" && Array.isArray(value)) {
       return (
         <div className="flex flex-wrap gap-1">
-          {value.slice(0, 3).map((cat: any, idx: number) => (
-            <span key={idx} className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">
-              {cat.category?.name || cat.name}
-            </span>
-          ))}
+          {value.slice(0, 3).map((item: any, index: number) => {
+
+            const displayValue =
+              item.category?.[display ?? "name"] ??
+              item[display ?? "name"] ??
+              item.title ??
+              item.name;
+
+            return (
+              <span
+                key={index}
+                className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full"
+              >
+                {displayValue}
+              </span>
+            );
+          })}
+
           {value.length > 3 && (
-            <span className="text-xs text-gray-500">+{value.length - 3} more</span>
+            <span className="text-xs text-gray-500">
+              +{value.length - 3} more
+            </span>
           )}
         </div>
       );
     }
 
-    if (typeof value === "boolean") {
+    if (value === "boolean") {
       return (
-        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-          value ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-        }`}>
+        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${value ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+          }`}>
           {value ? "Yes" : "No"}
         </span>
       );
     }
 
-    if (value instanceof Date) {
+    if (type === "date" && value) {
       return new Date(value).toLocaleDateString();
+    }
+
+    if (type === "number") {
+      return value ?? "";
     }
 
     if (typeof value === "string" && value.length > 50) {
@@ -428,28 +430,28 @@ export function AdminCRUDTable({
     if (sortBy !== field) {
       return <ArrowUpDown className="h-4 w-4 text-gray-400" />;
     }
-    return sortOrder === "asc" ? 
-      <ArrowUp className="h-4 w-4 text-orange-600" /> : 
+    return sortOrder === "asc" ?
+      <ArrowUp className="h-4 w-4 text-orange-600" /> :
       <ArrowDown className="h-4 w-4 text-orange-600" />;
   };
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 relative">
       <LoadingOverlay isLoading={loading} />
-      
+
       {/* Header */}
       <div className="px-6 py-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+          <h2 className="text-xl font-semibold text-gray-900">{config.title}</h2>
           <button
             onClick={handleCreate}
             className="inline-flex items-center px-4 py-2 bg-orange-600 text-white text-sm font-medium rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
           >
             <Plus className="h-4 w-4 mr-2" />
-            Add {title}
+            Add {config.title}
           </button>
         </div>
-        
+
         {/* Search */}
         <div className="mt-4 relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -457,7 +459,7 @@ export function AdminCRUDTable({
           </div>
           <input
             type="text"
-            placeholder={`Search ${title.toLowerCase()}...`}
+            placeholder={`Search ${config.title.toLowerCase()}...`}
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
             className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-orange-500 focus:border-orange-500"
@@ -498,15 +500,15 @@ export function AdminCRUDTable({
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {/* Bulk select header handled by BulkActions */}
               </th>
-              {fields.map((field) => (
+              {config.columns.map((column) => (
                 <th
-                  key={field}
+                  key={column.field}
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                  onClick={() => handleSort(field)}
+                  onClick={() => handleSort(column.field)}
                 >
                   <div className="flex items-center space-x-1">
-                    <span>{field.replace(/_/g, " ")}</span>
-                    {getSortIcon(field)}
+                    <span>{column.field.replace(/_/g, " ")}</span>
+                    {getSortIcon(column.field)}
                   </div>
                 </th>
               ))}
@@ -525,9 +527,9 @@ export function AdminCRUDTable({
                   isSelected={isSelected}
                   onSelect={(selected) => handleSelectItem(item, selected)}
                 >
-                  {fields.map((field) => (
-                    <td key={field} className="px-2 py-2 whitespace-nowrap text-sm text-gray-900">
-                      {renderCellContent(item, field)}
+                  {config.columns.map((column) => (
+                    <td key={column.field} className="px-2 py-2 whitespace-nowrap text-sm text-gray-900">
+                      {renderCellContent(item, column)}
                     </td>
                   ))}
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -559,7 +561,7 @@ export function AdminCRUDTable({
       {/* Empty State */}
       {!loading && items.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-500">No {title.toLowerCase()} found.</p>
+          <p className="text-gray-500">No {config.title.toLowerCase()} found.</p>
         </div>
       )}
 
@@ -578,7 +580,7 @@ export function AdminCRUDTable({
       <Modal
         isOpen={showCreateModal}
         onClose={handleFormCancel}
-        title={`Create ${title}`}
+        title={`Create ${config.title}`}
         size="lg"
       >
         <EntityForm
@@ -593,7 +595,7 @@ export function AdminCRUDTable({
       <Modal
         isOpen={showEditModal}
         onClose={handleFormCancel}
-        title={`Edit ${title}`}
+        title={`Edit ${config.title}`}
         size="lg"
       >
         <EntityForm

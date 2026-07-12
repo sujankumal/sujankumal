@@ -15,35 +15,35 @@ interface CollapsibleSectionProps {
 }
 
 const entityIcons: Record<string, ReactNode> = {
-  post: <FileText className="h-5 w-5" />,
-  category: <Layers className="h-5 w-5" />,
-  user: <Users className="h-5 w-5" />,
-  profile: <Users className="h-5 w-5" />,
-  project: <Database className="h-5 w-5" />,
-  social: <Link className="h-5 w-5" />,
+  posts: <FileText className="h-5 w-5" />,
+  categories: <Layers className="h-5 w-5" />,
+  users: <Users className="h-5 w-5" />,
+  profiles: <Users className="h-5 w-5" />,
+  projects: <Database className="h-5 w-5" />,
+  socials: <Link className="h-5 w-5" />,
   updates: <MessageSquare className="h-5 w-5" />,
   site: <Settings className="h-5 w-5" />,
   content: <FileText className="h-5 w-5" />,
-  categoriesOnPosts: <Layers className="h-5 w-5" />,
-  account: <Users className="h-5 w-5" />,
-  session: <Calendar className="h-5 w-5" />,
-  verificationToken: <Calendar className="h-5 w-5" />,
+  categoriesonposts: <Layers className="h-5 w-5" />,
+  accounts: <Users className="h-5 w-5" />,
+  sessions: <Calendar className="h-5 w-5" />,
+  verificationtokens: <Calendar className="h-5 w-5" />,
 };
 
 const entityDescriptions: Record<string, string> = {
-  post: "Manage blog posts, articles, and content with images and categories",
-  category: "Organize content into categories and manage taxonomies",
-  user: "Manage user accounts, authentication, and permissions",
-  profile: "User profile information, bio, contact details, and settings",
-  project: "Portfolio projects, work samples, and project descriptions",
-  social: "Social media links, profiles, and external connections",
+  posts: "Manage blog posts, articles, and content with images and categories",
+  categories: "Organize content into categories and manage taxonomies",
+  users: "Manage user accounts, authentication, and permissions",
+  profiles: "User profile information, bio, contact details, and settings",
+  projects: "Portfolio projects, work samples, and project descriptions",
+  socials: "Social media links, profiles, and external connections",
   updates: "Site announcements, news, and update notifications",
   site: "Global site settings, configuration, and metadata",
   content: "Individual content blocks and components within posts",
-  categoriesOnPosts: "Relationships between posts and their assigned categories",
-  account: "OAuth accounts and authentication provider connections",
-  session: "Active user sessions and authentication tokens",
-  verificationToken: "Email verification and password reset tokens",
+  categoriesonposts: "Relationships between posts and their assigned categories",
+  accounts: "OAuth accounts and authentication provider connections",
+  sessions: "Active user sessions and authentication tokens",
+  verificationtokens: "Email verification and password reset tokens",
 };
 
 export function CollapsibleSection({
@@ -86,7 +86,7 @@ export function CollapsibleSection({
             </div>
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-2">
           {isLoading && (
             <div className="w-4 h-4 border-2 border-gray-300 border-t-orange-600 rounded-full animate-spin"></div>
