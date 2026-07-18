@@ -51,7 +51,7 @@ const Searchbar = () => {
       }
       replace(`${pathname}?${params.toString()}`, { scroll: false });
     }
-  }, [debouncedSearchTerm, pathname, replace]);
+  }, [searchParams, debouncedSearchTerm, pathname, replace]);
 
   return (
     <Paper

@@ -43,7 +43,7 @@ export default function QRScanPage() {
       if (!ctx) throw new Error("Unable to get canvas context");
       ctx.drawImage(img, 0, 0, w, h);
 
-      
+
       // Fallback: try dynamic import of jsQR if available
       try {
         // Import only when needed to keep initial bundle small
@@ -51,7 +51,7 @@ export default function QRScanPage() {
         const { default: jsQR } = await import("jsqr");
         const imageData = ctx.getImageData(0, 0, w, h);
         const code = jsQR(imageData.data, imageData.width, imageData.height);
-        console.log('jsQR result:', code);
+
         if (code && code.data) {
           setResult(code.data);
           setScanning(false);
@@ -59,25 +59,23 @@ export default function QRScanPage() {
           return;
         }
       } catch (e) {
-        console.debug("jsQR import/detect failed", e);
-        
+
         // Try browser BarcodeDetector first (fast, native)
         const win = window as any;
         if (win.BarcodeDetector) {
-            try {
+          try {
             const detector = new win.BarcodeDetector({ formats: ["qr_code"] });
             // detect expects an ImageBitmapSource — canvas works
             const barcodes = await detector.detect(canvas as any);
             if (barcodes && barcodes.length > 0) {
-                setResult(barcodes[0].rawValue || "");
-                setScanning(false);
-                URL.revokeObjectURL(url);
-                return;
+              setResult(barcodes[0].rawValue || "");
+              setScanning(false);
+              URL.revokeObjectURL(url);
+              return;
             }
-            } catch (e) {
+          } catch (e) {
             // fall through to jsQR fallback
-            console.debug("BarcodeDetector failed, falling back", e);
-            }
+          }
         }
       }
 

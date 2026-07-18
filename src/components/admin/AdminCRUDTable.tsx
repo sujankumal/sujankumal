@@ -14,6 +14,7 @@ import { AdvancedFilters } from "./AdvancedFilters";
 import { BulkActions, SelectableRow } from "./BulkActions";
 import { useWarningBanner } from "./WarningBanner";
 import { adminEntities } from "@/config/entities";
+import { formatImageUrl } from "@/lib/image";
 
 interface AdminCRUDTableProps {
   entity: keyof typeof adminEntities;
@@ -40,8 +41,17 @@ export function AdminCRUDTable({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortBy, setSortBy] = useState("id");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const defaultSort = config.defaultSort ?? {
+    field: "id",
+    order: "desc",
+  };
+
+  const [sortBy, setSortBy] = useState(defaultSort.field);
+
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">(
+    defaultSort.order
+  );
+
   const [pagination, setPagination] = useState<PaginationData>({
     page: 1,
     limit: 10,
@@ -172,7 +182,7 @@ export function AdminCRUDTable({
       const isEdit = !!selectedItem;
       const url = `/api/admin/${entity}`;
       const method = isEdit ? "PUT" : "POST";
-      const body = isEdit ? { ...formData, id: selectedItem.id } : formData;
+      const body = isEdit ? { ...formData, ...selectedItem } : formData;
 
       const response = await fetch(url, {
         method,
@@ -257,32 +267,6 @@ export function AdminCRUDTable({
     const [imageError, setImageError] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Validate and format image URL to match your existing pattern
-    const formatImageUrl = (url: string): string => {
-      if (!url || typeof url !== 'string') return '';
-
-      const trimmedUrl = url.trim();
-      if (!trimmedUrl) return '';
-
-      // If it's already an absolute URL, return as is
-      if (trimmedUrl.startsWith('http://') || trimmedUrl.startsWith('https://')) {
-        return trimmedUrl;
-      }
-
-      // If it already starts with /images/, return as is
-      if (trimmedUrl.startsWith('/images/')) {
-        return trimmedUrl;
-      }
-
-      // If it starts with /, return as is (for other absolute paths)
-      if (trimmedUrl.startsWith('/')) {
-        return trimmedUrl;
-      }
-
-      // Otherwise, prepend with /images/ to match your existing pattern
-      return `/images/${trimmedUrl}`;
-    };
-
     const imageSrc = formatImageUrl(value);
 
     // If no valid image URL, show placeholder
@@ -322,10 +306,10 @@ export function AdminCRUDTable({
   };
 
   const renderCellContent = (item: any, column: any) => {
-    const { field, type, display } = column;
+    const { field, renderer, display } = column;
     const value = item[field];
 
-    if (type === "markdown" && value) {
+    if (renderer === "markdown" && value) {
       return (
         <div className="max-w-xs prose prose-xs prose-orange max-w-none line-clamp-3">
           <ReactMarkdown>{value}</ReactMarkdown>
@@ -333,7 +317,7 @@ export function AdminCRUDTable({
       );
     }
 
-    if (type === "image" && value) {
+    if (renderer === "image" && value) {
       return <ImageCell value={value} field={field} />;
     }
 
@@ -352,10 +336,12 @@ export function AdminCRUDTable({
     }
 
     // Handle special relationship fields
-    if (type === "relation" && value) {
+    if (renderer === "relation" && value) {
 
       const displayValue =
         value?.[display ?? "name"] ??
+        value?.[display ?? "post"] ??
+        value?.[display ?? "category"] ??
         value?.title ??
         value?.name ??
         value?.email ??
@@ -368,27 +354,25 @@ export function AdminCRUDTable({
       );
     }
 
-    if (type === "manyToMany" && Array.isArray(value)) {
-      return (
+    if (renderer === "manyToMany" && Array.isArray(value)) {
+      const manyToManyContent = (
         <div className="flex flex-wrap gap-1">
-          {value.slice(0, 3).map((item: any, index: number) => {
-
+          {value.slice(0, 3).map((item: any, idx: number) => {
             const displayValue =
               item.category?.[display ?? "name"] ??
               item[display ?? "name"] ??
               item.title ??
               item.name;
-
             return (
               <span
-                key={index}
+                key={`${item.id || idx}-${column.field}`}
+
                 className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full"
               >
                 {displayValue}
               </span>
             );
           })}
-
           {value.length > 3 && (
             <span className="text-xs text-gray-500">
               +{value.length - 3} more
@@ -396,22 +380,23 @@ export function AdminCRUDTable({
           )}
         </div>
       );
+      return manyToManyContent;
     }
 
-    if (value === "boolean") {
+    if (typeof value === "boolean") {
       return (
-        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${value ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-          }`}>
+        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${value ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
           {value ? "Yes" : "No"}
         </span>
       );
     }
 
-    if (type === "date" && value) {
+
+    if (renderer === "date" && value) {
       return new Date(value).toLocaleDateString();
     }
 
-    if (type === "number") {
+    if (renderer === "number") {
       return value ?? "";
     }
 
@@ -421,6 +406,11 @@ export function AdminCRUDTable({
           {value.substring(0, 50)}...
         </span>
       );
+    }
+
+    // Guard against rendering objects as [object Object]
+    if (value !== null && typeof value === "object") {
+      return JSON.stringify(value);
     }
 
     return String(value ?? "");
@@ -507,7 +497,7 @@ export function AdminCRUDTable({
                   onClick={() => handleSort(column.field)}
                 >
                   <div className="flex items-center space-x-1">
-                    <span>{column.field.replace(/_/g, " ")}</span>
+                    <span>{column.label}</span>
                     {getSortIcon(column.field)}
                   </div>
                 </th>
@@ -519,16 +509,17 @@ export function AdminCRUDTable({
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {items.map((item, idx) => {
-              const isSelected = selectedItems.some(selected => selected.id === item.id);
+              const rowKey = config.primaryKey ?? "id";
+              const isSelected = selectedItems.some(selected => selected[rowKey] === item[rowKey]);
               return (
                 <SelectableRow
-                  key={item.id ?? idx}
+                  key={item[rowKey] ?? idx}
                   item={item}
                   isSelected={isSelected}
                   onSelect={(selected) => handleSelectItem(item, selected)}
                 >
                   {config.columns.map((column) => (
-                    <td key={column.field} className="px-2 py-2 whitespace-nowrap text-sm text-gray-900">
+                    <td key={`${item[rowKey]}-${column.field}`} className="px-2 py-2 whitespace-nowrap text-sm text-gray-900">
                       {renderCellContent(item, column)}
                     </td>
                   ))}

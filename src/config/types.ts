@@ -50,6 +50,7 @@ export type ColumnRenderer =
     | "markdown"
     | "image"
     | "relation"
+    | "manyToMany"
     | "tags";
 
 export interface AdminColumn {
@@ -70,14 +71,23 @@ export interface AdminEntity {
     form: AdminFormField[];
     searchable?: (search: string) => Record<string, any>;
     include?: Record<string, any>;
+    primaryKey?: string;
     defaultSort?: {
         field: string;
         order: "asc" | "desc";
     };
+    sortableFields?: string[];
     beforeCreate?: (data: any) => any | Promise<any>;
-    beforeUpdate?: (data: any) => any | Promise<any>;
-    beforeDelete?: (id: number | string) => Promise<void> | void;
     afterCreate?: (created: any) => Promise<void> | void;
+
+    beforeUpdate?: (data: any) => any | Promise<any>;
     afterUpdate?: (updated: any) => Promise<void> | void;
+
+    beforeDelete?: (id: number | string) => Promise<void> | void;
     afterDelete?: (id: number | string) => Promise<void> | void;
+
+    resolveWhere?: (
+        input: Record<string, any>,
+        prisma: typeof import("@/../prisma/prisma").default
+    ) => Promise<Record<string, any>> | Record<string, any>;
 }

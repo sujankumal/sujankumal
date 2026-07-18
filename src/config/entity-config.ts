@@ -7,7 +7,7 @@ export function isAdminEntity(entity: string): entity is AdminEntityKey {
 }
 
 export function getEntityConfig(entity: string) {
-    console.log("entity config", entity);
+
     if (!isAdminEntity(entity)) {
         return null;
     }

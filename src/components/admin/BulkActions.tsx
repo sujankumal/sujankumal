@@ -42,8 +42,6 @@ export function BulkActions({
     try {
       await onBulkDelete(selectedItems);
       setShowDeleteDialog(false);
-    } catch (error) {
-      console.error("Bulk delete failed:", error);
     } finally {
       setIsLoading(false);
     }
@@ -62,13 +60,13 @@ export function BulkActions({
   const generateCSV = (items: any[]) => {
     if (items.length === 0) return "";
 
-    const headers = Object.keys(items[0]).filter(key => 
+    const headers = Object.keys(items[0]).filter(key =>
       typeof items[0][key] !== "object" || items[0][key] === null
     );
-    
+
     const csvRows = [
       headers.join(","),
-      ...items.map(item => 
+      ...items.map(item =>
         headers.map(header => {
           const value = item[header];
           // Escape commas and quotes in CSV
@@ -116,7 +114,7 @@ export function BulkActions({
               <Square className="h-5 w-5 text-gray-400" />
             )}
             <span>
-              {selectedItems.length > 0 
+              {selectedItems.length > 0
                 ? `${selectedItems.length} selected`
                 : "Select all"
               }

@@ -27,14 +27,9 @@ if (!getApps().length) {
         storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
       });
 
-      console.log('Firebase Admin SDK initialized');
-    } else {
-      console.warn(
-        'No Firebase service account provided. Admin SDK not initialized.',
-      );
     }
   } catch (error) {
-    console.error('Failed to initialize Firebase Admin:', error);
+
   }
 } else {
   app = getApp();

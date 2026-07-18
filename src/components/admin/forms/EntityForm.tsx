@@ -49,7 +49,7 @@ export function EntityForm({ entity, initialData, onSubmit, onCancel, isLoading 
             setRelationData(data);
           }
         } catch (error) {
-          console.error("Failed to fetch relation data:", error);
+
         } finally {
           setLoadingRelations(false);
         }
@@ -63,9 +63,23 @@ export function EntityForm({ entity, initialData, onSubmit, onCancel, isLoading 
     if (initialData) {
       const processedData = { ...initialData };
       config?.form.forEach(field => {
-        if (field.control === "date" && processedData[field.control]) {
-          const date = new Date(processedData[field.control]);
-          processedData[field.control] = date.toISOString().slice(0, 16);
+        if (field.control === "date" && processedData[field.name]) {
+          const date = new Date(processedData[field.name]);
+          processedData[field.name] = date.toISOString().slice(0, 16);
+        }
+        if (
+          field.control === "relation" &&
+          field.relation
+        ) {
+          const relationName = field.name.replace(/Id$/, "");
+
+          if (
+            processedData[field.name] == null &&
+            processedData[relationName]
+          ) {
+            processedData[field.name] =
+              processedData[relationName].id;
+          }
         }
       });
 
@@ -75,11 +89,11 @@ export function EntityForm({ entity, initialData, onSubmit, onCancel, isLoading 
       const defaultData: any = {};
       config?.form.forEach(field => {
         if (field.control === "boolean") {
-          defaultData[field.control] = false;
+          defaultData[field.name] = false;
         } else if (field.control === "date") {
-          defaultData[field.control] = new Date().toISOString().slice(0, 16);
+          defaultData[field.name] = new Date().toISOString().slice(0, 16);
         } else if (field.control === "number") {
-          defaultData[field.control] = new Date().getFullYear();
+          defaultData[field.name] = new Date().getFullYear();
         }
       });
       setFormData(defaultData);
@@ -99,24 +113,24 @@ export function EntityForm({ entity, initialData, onSubmit, onCancel, isLoading 
     const newErrors: Record<string, string> = {};
 
     config?.form.forEach(field => {
-      if (field.required && (!formData[field.control] || formData[field.control] === "")) {
-        newErrors[field.control] = `${field.label} is required`;
+      if (field.required && (!formData[field.name] || formData[field.name] === "")) {
+        newErrors[field.name] = `${field.label} is required`;
       }
 
       // Email validation
-      if (field.control === "email" && formData[field.control]) {
+      if (field.control === "email" && formData[field.name]) {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(formData[field.control])) {
-          newErrors[field.control] = "Please enter a valid email address";
+        if (!emailRegex.test(formData[field.name])) {
+          newErrors[field.name] = "Please enter a valid email address";
         }
       }
 
       // URL validation for image fields
-      if ((field.control.includes("image") || field.control === "url") && formData[field.control]) {
+      if ((field.control === "image" || field.control === "url") && formData[field.name]) {
         try {
-          // new URL(formData[field.control]);
+          // new URL(formData[field.name]);
         } catch {
-          newErrors[field.control] = "Please enter a valid URL";
+          newErrors[field.name] = "Please enter a valid URL";
         }
       }
     });
@@ -135,7 +149,7 @@ export function EntityForm({ entity, initialData, onSubmit, onCancel, isLoading 
     try {
       await onSubmit(formData);
     } catch (error) {
-      console.error("Form submission error:", error);
+
     }
   };
 
@@ -173,13 +187,13 @@ export function EntityForm({ entity, initialData, onSubmit, onCancel, isLoading 
 
       {config.form.map((field) => (
         <FormField
-          key={field.control}
+          key={field.name}
           label={field.label}
-          name={field.control}
+          name={field.name}
           type={field.control}
-          value={formData[field.control]}
-          onChange={(value) => handleFieldChange(field.control, value)}
-          error={errors[field.control]}
+          value={formData[field.name]}
+          onChange={(value) => handleFieldChange(field.name, value)}
+          error={errors[field.name]}
           required={field.required}
           placeholder={field.placeholder}
           options={getFieldOptions(field)}

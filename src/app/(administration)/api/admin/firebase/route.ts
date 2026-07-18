@@ -65,7 +65,6 @@ export async function GET(request: NextRequest) {
   if (authError) return authError;
 
   if (!adminDatabase) {
-    console.log(adminDatabase);
     return NextResponse.json({ error: "Firebase Realtime Database Admin SDK not initialized." }, { status: 500 });
   }
 
@@ -82,7 +81,6 @@ export async function GET(request: NextRequest) {
       data: snap.val(),
     });
   } catch (error) {
-    console.error("Firebase Admin GET Error:", error);
     return NextResponse.json({ error: error instanceof Error ? error.message : "Internal server error" }, { status: 500 });
   }
 }
@@ -108,7 +106,6 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ success: true, path, message: "Data set successfully" });
   } catch (error) {
-    console.error("Firebase Admin PUT Error:", error);
     return NextResponse.json({ error: error instanceof Error ? error.message : "Internal server error" }, { status: 500 });
   }
 }
@@ -140,7 +137,6 @@ export async function POST(request: NextRequest) {
       message: "Data pushed successfully",
     });
   } catch (error) {
-    console.error("Firebase Admin POST Error:", error);
     return NextResponse.json({ error: error instanceof Error ? error.message : "Internal server error" }, { status: 500 });
   }
 }
@@ -170,7 +166,6 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ success: true, path, message: "Data updated successfully" });
   } catch (error) {
-    console.error("Firebase Admin PATCH Error:", error);
     return NextResponse.json({ error: error instanceof Error ? error.message : "Internal server error" }, { status: 500 });
   }
 }
@@ -201,7 +196,6 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true, path, message: "Data deleted successfully" });
   } catch (error) {
-    console.error("Firebase Admin DELETE Error:", error);
     return NextResponse.json({ error: error instanceof Error ? error.message : "Internal server error" }, { status: 500 });
   }
 }

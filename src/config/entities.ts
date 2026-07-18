@@ -35,6 +35,7 @@ export type AdminEntities = Record<EntityName, AdminEntity>;
 
 export const adminEntities: AdminEntities = {
     sites: {
+        primaryKey: "id",
         title: "Sites",
         schema: siteSchema,
         searchable: (search: string) => ({
@@ -73,6 +74,7 @@ export const adminEntities: AdminEntities = {
     },
 
     updates: {
+        primaryKey: "id",
         title: "Updates",
         schema: updateSchema,
         searchable: (search: string) => ({
@@ -94,6 +96,7 @@ export const adminEntities: AdminEntities = {
     },
 
     socials: {
+        primaryKey: "id",
         title: "Social Links",
         schema: socialSchema,
         searchable: (search: string) => ({
@@ -115,6 +118,7 @@ export const adminEntities: AdminEntities = {
     },
 
     projects: {
+        primaryKey: "id",
         title: "Projects",
         schema: projectSchema,
         searchable: (search: string) => ({
@@ -142,6 +146,7 @@ export const adminEntities: AdminEntities = {
     },
 
     posts: {
+        primaryKey: "id",
         title: "Posts",
         schema: postSchema,
         searchable: (search: string) => ({
@@ -181,7 +186,7 @@ export const adminEntities: AdminEntities = {
             { field: "author", label: "Author", renderer: "relation", display: "name" },
             { field: "published", label: "Published", renderer: "boolean" },
             { field: "date", label: "Date", renderer: "date", sortable: true },
-            { field: "categories", label: "Categories", renderer: "relation", display: "name" },
+            { field: "categories", label: "Categories", renderer: "manyToMany", display: "name" },
         ],
         form: [
             { name: "title", label: "Title", control: "text", required: true },
@@ -227,8 +232,17 @@ export const adminEntities: AdminEntities = {
     },
 
     content: {
+        primaryKey: "id",
         title: "Post Content Blocks",
         schema: contentSchema,
+        include: {
+            post: {
+                select: {
+                    id: true,
+                    title: true,
+                },
+            }
+        },
         searchable: (search: string) => ({
             OR: [
                 { type: { contains: search, mode: "insensitive" } },
@@ -261,6 +275,7 @@ export const adminEntities: AdminEntities = {
     },
 
     categories: {
+        primaryKey: "id",
         title: "Categories",
         schema: categorySchema,
         searchable: (search: string) => ({
@@ -275,8 +290,41 @@ export const adminEntities: AdminEntities = {
     },
 
     categoriesonposts: {
+        primaryKey: undefined,
         title: "Category Post Joins",
         schema: categoryOnPostSchema,
+        resolveWhere: async ({ id }, prisma) => {
+            const row = await prisma.categoriesOnPosts.findFirst({
+                where: {
+                    id: Number(id),
+                },
+            });
+
+            if (!row) {
+                throw new Error("NOT_FOUND");
+            }
+
+            return {
+                postId_categoryId: {
+                    postId: row.postId,
+                    categoryId: row.categoryId,
+                },
+            };
+        },
+        include: {
+            post: {
+                select: {
+                    id: true,
+                    title: true,
+                },
+            },
+            category: {
+                select: {
+                    id: true,
+                    name: true,
+                },
+            },
+        },
         searchable: (search: string) => ({
             OR: [
                 { post: { title: { contains: search, mode: "insensitive" } } },
@@ -316,6 +364,7 @@ export const adminEntities: AdminEntities = {
     },
 
     users: {
+        primaryKey: "id",
         title: "Users",
         schema: userSchema,
         searchable: (search: string) => ({
@@ -355,8 +404,18 @@ export const adminEntities: AdminEntities = {
     },
 
     profiles: {
+        primaryKey: "id",
         title: "User Profiles",
         schema: profileSchema,
+        include: {
+            author: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                }
+            }
+        },
         searchable: (search: string) => ({
             OR: [
                 { status: { contains: search, mode: "insensitive" } },
@@ -394,6 +453,7 @@ export const adminEntities: AdminEntities = {
     },
 
     accounts: {
+        primaryKey: "id",
         title: "OAuth Accounts",
         schema: accountSchema,
         searchable: (search: string) => ({
@@ -437,6 +497,7 @@ export const adminEntities: AdminEntities = {
     },
 
     sessions: {
+        primaryKey: "id",
         title: "User Sessions",
         schema: sessionSchema,
         searchable: (search: string) => ({
@@ -470,8 +531,29 @@ export const adminEntities: AdminEntities = {
     },
 
     verificationtokens: {
+        primaryKey: undefined,
         title: "Verification Tokens",
         schema: verificationTokenSchema,
+        resolveWhere: ({ identifier, token }) => {
+            if (!identifier || !token) {
+                throw new Error("Identifier and token are required");
+            }
+            return {
+                identifier_token: {
+                    identifier,
+                    token,
+                },
+            };
+        },
+        defaultSort: {
+            field: "expires",
+            order: "desc",
+        },
+        sortableFields: [
+            "identifier",
+            "token",
+            "expires",
+        ],
         searchable: (search: string) => ({
             OR: [
                 { identifier: { contains: search, mode: "insensitive" } },

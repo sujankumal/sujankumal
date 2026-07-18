@@ -51,13 +51,13 @@ export function Modal({ isOpen, onClose, title, children, size = "md" }: ModalPr
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-screen items-center justify-center p-4">
+      <div className="flex min-h-full items-center justify-center p-4">
         {/* Backdrop */}
         <div
           className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
           onClick={onClose}
         />
-        
+
         {/* Modal */}
         <div className={`relative w-full ${sizeClasses[size]} transform rounded-lg bg-white shadow-xl transition-all`}>
           {/* Header */}
@@ -70,7 +70,7 @@ export function Modal({ isOpen, onClose, title, children, size = "md" }: ModalPr
               <X className="h-5 w-5" />
             </button>
           </div>
-          
+
           {/* Content */}
           <div className="px-6 py-4">
             {children}

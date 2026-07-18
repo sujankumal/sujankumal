@@ -18,7 +18,7 @@ export function Header() {
     try {
       await signOut();
     } catch (error) {
-      console.error('Error signing out:', error);
+
     } finally {
       setSigningOut(false);
     }
@@ -62,11 +62,10 @@ export function Header() {
             <div className="flex items-center space-x-2">
               <button
                 onClick={toggleAvailability}
-                className={`flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                  isAvailable
+                className={`flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium transition-colors ${isAvailable
                     ? 'bg-green-100 text-green-800 hover:bg-green-200'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
+                  }`}
               >
                 {isAvailable ? (
                   <FaToggleOn className="text-green-600" />

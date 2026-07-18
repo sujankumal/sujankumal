@@ -24,7 +24,7 @@ export async function getSiteConfig() {
     const site = await prisma.site.findFirst({
       orderBy: { id: 'desc' }
     });
-    
+
     const socials = await prisma.social.findMany();
     const twitterSocial = socials.find(s => s.name.toLowerCase() === 'twitter');
     const githubSocial = socials.find(s => s.name.toLowerCase() === 'github');
@@ -51,7 +51,6 @@ export async function getSiteConfig() {
       keywords: [name, "Software Developer", "Blog", "Technology", "Programming", "Web Development"],
     };
   } catch (error) {
-    console.error("Error fetching site config from DB, using fallback:", error);
     return siteConfig;
   }
 }

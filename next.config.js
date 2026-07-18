@@ -30,6 +30,12 @@ const nextConfig = {
                 port: '',
                 pathname: '/**',
             },
+            {
+                protocol: 'https',
+                hostname: 'sujankumal.com.np',
+                port: '',
+                pathname: '/**',
+            }
             // Add more domains as needed
         ],
     },

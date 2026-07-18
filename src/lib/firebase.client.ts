@@ -62,7 +62,6 @@ async function initAppFromConfig(config: any) {
     try { analytics = getAnalytics(app); } catch (e) { analytics = null; }
   } catch (e) {
     // initialization failed; keep instances null and warn
-    console.warn('firebase.client: initAppFromConfig failed', e);
   }
 }
 
@@ -93,7 +92,6 @@ export async function ensureClientInitialized() {
       await initAppFromConfig(cfg);
     } catch (e) {
       // ignore - client will operate without Firebase
-      console.warn('firebase.client: failed to fetch runtime config', e);
     }
   })();
 

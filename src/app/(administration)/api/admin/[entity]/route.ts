@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { revalidateEntityTags } from "@/services/revalidate";
 import { getEntityConfig, normalizeData } from "@/config/entity-config";
 import { getEntityModel } from "@/config/entity-server";
+import { resolveEntity } from "@/services/entity-resolver";
 
 // Helper function to check admin authorization
 async function checkAdminAuth() {
@@ -52,39 +53,59 @@ export async function GET(
   try {
     const { entity } = await context.params;
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "10");
-    const search = searchParams.get("search") || "";
-    const config = getEntityConfig(entity);
+    const page = Math.max(
+      1,
+      Number.parseInt(searchParams.get("page") ?? "1", 10) || 1
+    );
 
-    if (!config) {
-      return NextResponse.json(
-        { error: "Invalid entity" },
-        { status: 400 }
-      );
-    }
+    const limit = Math.min(
+      100, // max allowed
+      Math.max(
+        1,
+        Number.parseInt(searchParams.get("limit") ?? "10", 10) || 10
+      )
+    );
+    const search = searchParams.get("search") || "";
+    const resolved = await resolveEntity(entity);
+
+    if (resolved instanceof NextResponse)
+      return resolved;
+
+    const { config, model } = resolved;
+
     const defaultSort = config?.defaultSort ?? {
       field: "id",
       order: "desc",
     };
+    const sortableFields = config?.sortableFields ?? [
+      "id",
+      "title",
+      "createdAt",
+    ];
+    const requestedSortBy = searchParams.get("sortBy");
 
-    let sortBy = searchParams.get("sortBy") ?? defaultSort.field;
+    const sortBy =
+      requestedSortBy &&
+        config?.sortableFields?.includes(requestedSortBy)
+        ? requestedSortBy
+        : defaultSort.field;
 
-    const sortOrder = searchParams.get("sortOrder") ?? defaultSort.order;
+    const requestedSortOrder = searchParams.get("sortOrder");
+
+    const sortOrder =
+      requestedSortOrder === "asc" || requestedSortOrder === "desc"
+        ? requestedSortOrder
+        : defaultSort.order;
 
     const skip = (page - 1) * limit;
 
-    let orderBy: any = { [sortBy]: sortOrder };
+    const orderBy: Record<string, "asc" | "desc"> = {
+      [sortBy]: sortOrder,
+    };
 
     const whereClause = config.searchable
       ? config.searchable(search)
       : {};
-
-    // Get the appropriate Prisma model
-    const model = await getEntityModel(entity);
-    if (!model) {
-      return NextResponse.json({ error: "Invalid entity" }, { status: 400 });
-    }
 
     const includeClause = config?.include ?? {};
 
@@ -109,7 +130,6 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("GET error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -128,31 +148,14 @@ export async function POST(
   try {
     const { entity } = await context.params;
     const body = await request.json();
+    const resolved = await resolveEntity(entity);
 
-    const config = getEntityConfig(entity);
+    if (resolved instanceof NextResponse)
+      return resolved;
 
-    if (!config) {
-      return NextResponse.json(
-        { error: "Invalid entity" },
-        { status: 400 }
-      );
-    }
+    const { config, model } = resolved;
 
-    // Preprocess data to handle empty strings as null for optional fields
-    const preprocessedBody = { ...body };
-    Object.keys(preprocessedBody).forEach(key => {
-      if (preprocessedBody[key] === "" || preprocessedBody[key] === null) {
-        preprocessedBody[key] = null;
-      }
-    });
-
-    const validatedData = config.schema.parse(preprocessedBody);
-
-    // Get the appropriate Prisma model
-    const model = await getEntityModel(entity);
-    if (!model) {
-      return NextResponse.json({ error: "Invalid entity" }, { status: 400 });
-    }
+    const validatedData = config.schema.parse(normalizeData(body));
 
     // Handle special cases for creation
     let createData = validatedData;
@@ -174,7 +177,6 @@ export async function POST(
 
     return NextResponse.json(newItem, { status: 201 });
   } catch (error) {
-    console.error("POST error:", error);
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: "Validation error", details: error.issues }, { status: 400 });
     }
@@ -198,28 +200,16 @@ export async function PUT(
     const body = await request.json();
     const { id, ...updateData } = body;
 
-    if (!id && entity !== "verificationtokens") {
-      return NextResponse.json({ error: "ID is required for update" }, { status: 400 });
-    }
+    const resolved = await resolveEntity(entity);
 
-    const config = getEntityConfig(entity);
+    if (resolved instanceof NextResponse)
+      return resolved;
 
-    if (!config) {
-      return NextResponse.json(
-        { error: "Invalid entity" },
-        { status: 400 }
-      );
-    }
+    const { config, model } = resolved;
 
     const validatedData = config.schema.parse(
       normalizeData(updateData)
     );
-
-    // Get the appropriate Prisma model
-    const model = await getEntityModel(entity);
-    if (!model) {
-      return NextResponse.json({ error: "Invalid entity" }, { status: 400 });
-    }
 
     // Handle special cases for updates
     let finalUpdateData = validatedData;
@@ -229,43 +219,32 @@ export async function PUT(
         await config.beforeUpdate(finalUpdateData);
     }
 
-    const parsedId = (entity === "accounts" || entity === "sessions") ? id : parseInt(id);
+    // let where;
 
-    let updatedItem;
-    if (entity === "categoriesonposts") {
-      const existingItem = await prisma.categoriesOnPosts.findFirst({
-        where: { id: parseInt(id) },
-      });
-      if (!existingItem) {
-        return NextResponse.json({ error: "Item not found" }, { status: 404 });
-      }
-      updatedItem = await prisma.categoriesOnPosts.update({
-        where: {
-          postId_categoryId: {
-            postId: existingItem.postId,
-            categoryId: existingItem.categoryId,
-          },
-        },
-        data: finalUpdateData,
-      });
-    } else if (entity === "verificationtokens") {
-      // Custom handler for compound tracking values
-      updatedItem = await prisma.verificationToken.update({
-        where: {
-          identifier_token: {
-            identifier: body.identifier,
-            token: body.token,
-          },
-        },
-        data: finalUpdateData,
-      });
-    } else {
-      updatedItem = await model.update({
-        where: { id: parsedId },
-        data: finalUpdateData,
-        include: config.include,
-      });
-    }
+    // if (config.resolveWhere) {
+    //   where = await config.resolveWhere(body, prisma);
+    // } else {
+    //   if (!id) {
+    //     return NextResponse.json(
+    //       { error: "ID is required for update" },
+    //       { status: 400 }
+    //     );
+    //   }
+
+    //   where = {
+    //     id: Number(id),
+    //   };
+    // }
+    const where = config.resolveWhere
+      ? await config.resolveWhere(body, prisma)
+      : {
+        [config.primaryKey ?? "id"]: body[config.primaryKey ?? "id"],
+      };
+    const updatedItem = await model.update({
+      where,
+      data: finalUpdateData,
+      include: config.include,
+    });
     if (config.afterUpdate) {
       await config.afterUpdate(updatedItem);
     }
@@ -274,7 +253,6 @@ export async function PUT(
 
     return NextResponse.json(updatedItem);
   } catch (error) {
-    console.error("PUT error:", error);
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: "Validation error", details: error.issues }, { status: 400 });
     }
@@ -296,41 +274,45 @@ export async function DELETE(
   try {
     const { entity } = await context.params;
     const { searchParams } = new URL(request.url);
-    const id = searchParams.get("id");
+    // const id = searchParams.get("id");
 
-    if (!id && entity !== "verificationtokens") {
-      return NextResponse.json({ error: "ID is required for deletion" }, { status: 400 });
-    }
+    const resolved = await resolveEntity(entity);
 
-    const config = getEntityConfig(entity);
+    if (resolved instanceof NextResponse)
+      return resolved;
 
-    const model = await getEntityModel(entity);
-    if (!config || !model) {
-      return NextResponse.json({ error: "Invalid entity metadata" }, { status: 400 });
-    }
+    const { config, model } = resolved;
 
-    const parsedId = (entity === "accounts" || entity === "sessions") ? id : parseInt(id!);
+    // const where = config.resolveWhere
+    //   ? await config.resolveWhere(
+    //     {
+    //       id,
+    //       identifier: searchParams.get("identifier"),
+    //       token: searchParams.get("token"),
+    //     },
+    //     prisma
+    //   )
+    //   : (() => {
+    //     if (!id) {
+    //       return NextResponse.json(
+    //         { error: "ID is required for deletion" },
+    //         { status: 400 }
+    //       );
+    //     }
+    //     return { id: Number(id) };
+    //   })();
+    const input = Object.fromEntries(searchParams.entries());
 
-    // Check if item exists
-    let existingItem;
-    if (entity === "categoriesonposts") {
-      existingItem = await prisma.categoriesOnPosts.findFirst({
-        where: { id: parseInt(id!) },
-      });
-    } else if (entity === "verificationtokens") {
-      const identifier = searchParams.get("identifier");
-      const token = searchParams.get("token");
-      if (!identifier || !token) {
-        return NextResponse.json({ error: "Composite keys required" }, { status: 400 });
-      }
-      existingItem = await prisma.verificationToken.findUnique({
-        where: { identifier_token: { identifier, token } },
-      });
-    } else {
-      existingItem = await model.findUnique({
-        where: { id: parsedId },
-      });
-    }
+    const where = config.resolveWhere
+      ? await config.resolveWhere(input, prisma)
+      : {
+        [config.primaryKey ?? "id"]:
+          input[config.primaryKey ?? "id"],
+      };
+
+    const existingItem = await model.findUnique({
+      where,
+    });
 
     if (!existingItem) {
       return NextResponse.json({ error: "Item not found" }, { status: 404 });
@@ -338,39 +320,18 @@ export async function DELETE(
     if (config.beforeDelete) {
       await config.beforeDelete(existingItem);
     }
-    if (entity === "categoriesonposts") {
-      await prisma.categoriesOnPosts.delete({
-        where: {
-          postId_categoryId: {
-            postId: existingItem.postId,
-            categoryId: existingItem.categoryId,
-          },
-        },
-      });
-    } else if (entity === "verificationtokens") {
-      await prisma.verificationToken.delete({
-        where: {
-          identifier_token: {
-            identifier: existingItem.identifier,
-            token: existingItem.token,
-          },
-        },
-      });
-    } else {
-      await model.delete({
-        where: { id: parsedId },
-      });
-    }
+    await model.delete({
+      where,
+    });
 
     if (config.afterDelete) {
       await config.afterDelete(existingItem);
     }
     // Purge cache tags for the deleted entity
-    revalidateEntityTags(entity, id || 0);
+    revalidateEntityTags(entity, where[config.primaryKey ?? "id"]);
 
     return NextResponse.json({ message: "Item deleted successfully" });
   } catch (error) {
-    console.error("DELETE error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
