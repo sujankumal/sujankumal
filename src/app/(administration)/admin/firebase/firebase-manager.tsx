@@ -364,8 +364,8 @@ export default function FirebaseManager() {
     const valueType = isObject ? "object" : typeof value;
 
     return (
-      <tr key={key} className="hover:bg-zinc-50 border-b border-zinc-150 transition-colors">
-        <td className="px-4 py-3 font-semibold text-zinc-800">
+      <tr key={key} className="hover:bg-zinc-50 border-b border-zinc-150 text-sm transition-colors">
+        <td className="px-2 py-1 text-zinc-800">
           <div className="flex items-center gap-2">
             {isObject ? (
               <Folder className="h-4 w-4 text-orange-500 fill-orange-100" />
@@ -375,7 +375,7 @@ export default function FirebaseManager() {
             <span className="font-mono text-sm">{key}</span>
           </div>
         </td>
-        <td className="px-4 py-3">
+        <td className="px-2 py-1">
           <span className={`px-2 py-0.5 rounded-full text-xs font-semibold uppercase ${isObject ? "bg-orange-100 text-orange-800" :
             valueType === "boolean" ? "bg-blue-100 text-blue-800" :
               valueType === "number" ? "bg-emerald-100 text-emerald-800" : "bg-purple-100 text-purple-800"
@@ -383,7 +383,7 @@ export default function FirebaseManager() {
             {valueType}
           </span>
         </td>
-        <td className="px-4 py-3 max-w-md truncate">
+        <td className="px-2 py-1 max-w-md truncate">
           {isObject ? (
             <button
               onClick={() => handleNavigate(currentPath === "/" ? `/${key}` : `${currentPath}/${key}`)}
@@ -398,7 +398,7 @@ export default function FirebaseManager() {
             </span>
           )}
         </td>
-        <td className="px-4 py-3 text-right">
+        <td className="px-2 py-1 text-right">
           <div className="flex justify-end gap-2">
             {isObject && (
               <button
@@ -437,37 +437,37 @@ export default function FirebaseManager() {
 
   return (
     <main className="min-h-screen bg-zinc-50 text-zinc-950 font-sans pb-12">
-      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
 
         {/* Header Block */}
         <header className="flex flex-col gap-3 border-b border-zinc-200 pb-5 md:flex-row md:items-center md:justify-between">
           <div>
-            <div className="flex items-center gap-2 text-sm font-semibold text-orange-600">
+            <div className="flex items-center gap-2 text-sm text-orange-600">
               <span>Admin Database Manager</span>
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
             </div>
-            <h1 className="text-3xl font-semibold tracking-normal mt-1 flex items-center gap-2">
+            <h3 className="text-xl font-semibold tracking-normal mt-1 flex items-center gap-2">
               Firebase Realtime Database
-            </h1>
+            </h3>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex justify-end items-center gap-3 text-xs">
             {/* Read-Only Safety Switch */}
             <button
               onClick={() => setIsReadOnly(!isReadOnly)}
-              className={`inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-all duration-300 shadow-sm border ${isReadOnly
+              className={`inline-flex items-center justify-center gap-2 rounded-md px-2 py-1 text-xs transition-all duration-300 shadow-sm border ${isReadOnly
                 ? "bg-zinc-900 border-zinc-900 text-white hover:bg-zinc-800"
                 : "bg-orange-500 border-orange-500 text-white hover:bg-orange-600 animate-pulse-subtle"
                 }`}
             >
               {isReadOnly ? (
                 <>
-                  <Lock className="h-4 w-4" />
+                  <Lock className="h-3 w-3" />
                   <span>Read-Only Mode</span>
                 </>
               ) : (
                 <>
-                  <Unlock className="h-4 w-4" />
+                  <Unlock className="h-3 w-3" />
                   <span>Editing Mode Active</span>
                 </>
               )}
@@ -475,7 +475,7 @@ export default function FirebaseManager() {
 
             <a
               href="/admin"
-              className="inline-flex w-fit items-center justify-center rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium hover:bg-zinc-100 transition-colors"
+              className="inline-flex w-fit items-center justify-center rounded-md border border-zinc-300 px-2 py-1 text-xs font-medium hover:bg-zinc-100 transition-colors"
             >
               Dashboard
             </a>
@@ -510,16 +510,16 @@ export default function FirebaseManager() {
         )}
 
         {/* Quick Paths & Navigation Form */}
-        <section className="grid gap-6 md:grid-cols-[260px_1fr]">
-          <div className="flex flex-col gap-4">
+        <section className="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-6 items-start w-full min-w-0">
+          <div className="flex flex-col gap-4 min-w-0">
             <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
-              <h2 className="text-sm font-bold text-zinc-500 uppercase tracking-wider mb-3">Quick Paths</h2>
+              <h2 className="text-sm text-zinc-500 uppercase tracking-wider mb-3">Quick Paths</h2>
               <div className="flex flex-col gap-1">
                 {quickPaths.map((qp) => (
                   <button
                     key={qp.path}
                     onClick={() => handleNavigate(qp.path)}
-                    className={`text-left px-3 py-2 text-xs font-semibold rounded transition-colors ${currentPath === qp.path
+                    className={`text-left px-3 py-2 text-xs rounded transition-colors ${currentPath === qp.path
                       ? "bg-orange-50 text-orange-700"
                       : "text-zinc-700 hover:bg-zinc-50"
                       }`}
@@ -532,29 +532,31 @@ export default function FirebaseManager() {
           </div>
 
           {/* Navigation & Actions */}
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 min-w-0 w-full">
             <div className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleNavigate(pathInput);
-                }}
-                className="flex-1 flex gap-2"
-              >
-                <input
-                  type="text"
-                  value={pathInput}
-                  onChange={(e) => setPathInput(e.target.value)}
-                  placeholder="Enter path, e.g. /users"
-                  className="h-10 flex-1 rounded-md border border-zinc-300 px-3 text-sm font-mono outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
-                />
-                <button
-                  type="submit"
-                  className="inline-flex h-10 items-center justify-center rounded-md bg-zinc-900 text-white px-4 text-sm font-medium hover:bg-zinc-800 transition-colors"
+              <div>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleNavigate(pathInput);
+                  }}
+                  className="relative flex-1 flex items-center"
                 >
-                  Go
-                </button>
-              </form>
+                  <input
+                    type="text"
+                    value={pathInput}
+                    onChange={(e) => setPathInput(e.target.value)}
+                    placeholder="Enter path, e.g. /users"
+                    className="h-10 w-full rounded-md border border-zinc-300 pl-3 pr-[60px] text-xs font-mono outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+                  />
+                  <button
+                    type="submit"
+                    className="absolute right-1 h-8 px-4 text-xs font-bold bg-zinc-900 text-white rounded hover:bg-zinc-800 transition-colors"
+                  >
+                    Go
+                  </button>
+                </form>
+              </div>
 
               <div className="flex items-center gap-2 shrink-0">
                 <button
@@ -585,7 +587,7 @@ export default function FirebaseManager() {
             <div className="flex border-b border-zinc-200">
               <button
                 onClick={() => setViewMode("tree")}
-                className={`py-2.5 px-4 text-sm font-semibold border-b-2 flex items-center gap-1.5 transition-colors ${viewMode === "tree"
+                className={`py-2.5 px-4 text-sm border-b-2 flex items-center gap-1.5 transition-colors ${viewMode === "tree"
                   ? "border-orange-600 text-orange-600"
                   : "border-transparent text-zinc-500 hover:text-zinc-800"
                   }`}
@@ -595,7 +597,7 @@ export default function FirebaseManager() {
               </button>
               <button
                 onClick={() => setViewMode("raw")}
-                className={`py-2.5 px-4 text-sm font-semibold border-b-2 flex items-center gap-1.5 transition-colors ${viewMode === "raw"
+                className={`py-2.5 px-4 text-sm border-b-2 flex items-center gap-1.5 transition-colors ${viewMode === "raw"
                   ? "border-orange-600 text-orange-600"
                   : "border-transparent text-zinc-500 hover:text-zinc-800"
                   }`}

@@ -72,7 +72,7 @@ export function Modal({ isOpen, onClose, title, children, size = "md" }: ModalPr
           </div>
 
           {/* Content */}
-          <div className="px-6 py-4">
+          <div className="px-6 py-4 overflow-auto">
             {children}
           </div>
         </div>

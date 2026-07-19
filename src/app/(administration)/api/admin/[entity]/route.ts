@@ -4,8 +4,7 @@ import prisma from "../../../../../../prisma/prisma";
 import { z } from "zod";
 import { headers } from "next/headers";
 import { revalidateEntityTags } from "@/services/revalidate";
-import { getEntityConfig, normalizeData } from "@/config/entity-config";
-import { getEntityModel } from "@/config/entity-server";
+import { normalizeData } from "@/config/entity-config";
 import { resolveEntity } from "@/services/entity-resolver";
 
 // Helper function to check admin authorization
@@ -71,7 +70,7 @@ export async function GET(
     if (resolved instanceof NextResponse)
       return resolved;
 
-    const { config, model } = resolved;
+    const { config, model, serverConfig } = resolved;
 
     const defaultSort = config?.defaultSort ?? {
       field: "id",
@@ -119,9 +118,12 @@ export async function GET(
       }),
       model.count({ where: whereClause }),
     ]);
+    const processedData = serverConfig?.afterRead
+      ? await serverConfig.afterRead(items)
+      : items;
 
     return NextResponse.json({
-      items,
+      items: processedData,
       pagination: {
         page,
         limit,
@@ -153,7 +155,7 @@ export async function POST(
     if (resolved instanceof NextResponse)
       return resolved;
 
-    const { config, model } = resolved;
+    const { config, model, serverConfig } = resolved;
 
     const validatedData = config.schema.parse(normalizeData(body));
 
@@ -161,6 +163,10 @@ export async function POST(
     let createData = validatedData;
     if (config.beforeCreate) {
       createData = await config.beforeCreate(createData);
+    }
+
+    if (serverConfig?.beforeCreate) {
+      createData = await serverConfig.beforeCreate(createData);
     }
 
     const newItem = await model.create({
@@ -178,7 +184,15 @@ export async function POST(
     return NextResponse.json(newItem, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: "Validation error", details: error.issues }, { status: 400 });
+      return NextResponse.json({
+        error: "Validation error",
+        details: Object.fromEntries(
+          error.issues.map((issue) => [
+            issue.path.join("."),
+            issue.message,
+          ])
+        ),
+      }, { status: 400 });
     }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
@@ -205,11 +219,34 @@ export async function PUT(
     if (resolved instanceof NextResponse)
       return resolved;
 
-    const { config, model } = resolved;
+    const { config, model, serverConfig } = resolved;
 
-    const validatedData = config.schema.parse(
-      normalizeData(updateData)
-    );
+    let validatedData;
+    try {
+      validatedData = config.schema.parse(
+        normalizeData(updateData)
+      )
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return NextResponse.json(
+          {
+            error: "Validation error",
+            fields: Object.fromEntries(
+              error.issues.map(issue => [
+                issue.path.join("."),
+                issue.message,
+              ])
+            ),
+          },
+          { status: 400 }
+        );
+      }
+
+      return NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 }
+      );
+    }
 
     // Handle special cases for updates
     let finalUpdateData = validatedData;
@@ -219,22 +256,10 @@ export async function PUT(
         await config.beforeUpdate(finalUpdateData);
     }
 
-    // let where;
+    if (serverConfig?.beforeUpdate) {
+      finalUpdateData = await serverConfig.beforeUpdate(finalUpdateData);
+    }
 
-    // if (config.resolveWhere) {
-    //   where = await config.resolveWhere(body, prisma);
-    // } else {
-    //   if (!id) {
-    //     return NextResponse.json(
-    //       { error: "ID is required for update" },
-    //       { status: 400 }
-    //     );
-    //   }
-
-    //   where = {
-    //     id: Number(id),
-    //   };
-    // }
     const where = config.resolveWhere
       ? await config.resolveWhere(body, prisma)
       : {
@@ -254,7 +279,15 @@ export async function PUT(
     return NextResponse.json(updatedItem);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: "Validation error", details: error.issues }, { status: 400 });
+      return NextResponse.json({
+        error: "Validation error",
+        details: Object.fromEntries(
+          error.issues.map((issue) => [
+            issue.path.join("."),
+            issue.message,
+          ])
+        ),
+      }, { status: 400 });
     }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }

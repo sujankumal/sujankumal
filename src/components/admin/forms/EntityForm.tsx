@@ -9,7 +9,7 @@ import { getEntityConfig } from "@/config/entity-config";
 interface EntityFormProps {
   entity: string;
   initialData?: any;
-  onSubmit: (data: any) => Promise<void>;
+  onSubmit: (data: any) => Promise<Record<string, string> | null>;
   onCancel: () => void;
   isLoading?: boolean;
 }
@@ -24,6 +24,10 @@ export function EntityForm({ entity, initialData, onSubmit, onCancel, isLoading 
   const [loadingRelations, setLoadingRelations] = useState(false);
 
   const config = getEntityConfig(entity);
+
+  const setServerErrors = (serverErrors: Record<string, string>) => {
+    setErrors(serverErrors);
+  };
 
   // Fetch relation data for dropdowns
   useEffect(() => {
@@ -139,17 +143,23 @@ export function EntityForm({ entity, initialData, onSubmit, onCancel, isLoading 
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
 
     if (!validateForm()) {
       return;
     }
 
-    try {
-      await onSubmit(formData);
-    } catch (error) {
+    const submitData = { ...formData };
 
+    if (!submitData.password) {
+      delete submitData.password;
+    }
+
+    const serverErrors = await onSubmit(submitData);
+
+    if (serverErrors) {
+      setServerErrors(serverErrors);
     }
   };
 

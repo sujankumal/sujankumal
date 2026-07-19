@@ -182,7 +182,7 @@ export function AdminCRUDTable({
       const isEdit = !!selectedItem;
       const url = `/api/admin/${entity}`;
       const method = isEdit ? "PUT" : "POST";
-      const body = isEdit ? { ...formData, ...selectedItem } : formData;
+      const body = isEdit ? { ...selectedItem, ...formData } : formData;
 
       const response = await fetch(url, {
         method,
@@ -192,9 +192,14 @@ export function AdminCRUDTable({
         body: JSON.stringify(body),
       });
 
+      const result = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to save item");
+        if (result.fields) {
+          return result.fields;
+        }
+
+        throw new Error(result.error);
       }
 
       await fetchData();
@@ -461,7 +466,7 @@ export function AdminCRUDTable({
       <AdvancedFilters
         entity={entity}
         onFiltersChange={handleFiltersChange}
-        className="mx-6 mb-4"
+        className="mx-6 my-2"
       />
 
       {/* Bulk Actions */}

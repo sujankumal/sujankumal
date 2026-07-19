@@ -6,6 +6,7 @@ import { GA_TRACKING_ID, METADATA_BASE_URL } from '@/constants/constants'
 import { auth } from '@/services/auth'
 import { Metadata } from 'next'
 import { getSiteConfig } from '../../lib/seo'
+import AdminShell from '@/components/admin/AdminShell'
 
 
 const noto = Noto_Serif({
@@ -94,7 +95,9 @@ export default async function AdminLayout({
       </Script>
       <body className={`${noto.variable} ${notoNepali.variable} antialiased`}>
         <SessionProvider session={session}>
-          {children}
+          <AdminShell session={session}>
+            {children}
+          </AdminShell>
         </SessionProvider>
       </body>
     </html>

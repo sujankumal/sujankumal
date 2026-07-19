@@ -102,9 +102,9 @@ export const authConfig = {
       }
       return token;
     },
-    async session({ session, user }) {
-      if (session?.user && user?.verified !== undefined) {
-        session.user.verified = user.verified;
+    async session({ session, token }) {
+      if (session?.user) {
+        session.user.verified = token.verified as boolean;
       }
       return session;
     }

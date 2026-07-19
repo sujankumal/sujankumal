@@ -171,36 +171,36 @@ export default function ShortUrlsManager() {
 
   return (
     <main className="min-h-screen bg-zinc-50 text-zinc-950">
-      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
         <header className="flex flex-col gap-3 border-b border-zinc-200 pb-5 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-sm font-medium text-orange-600">Admin</p>
-            <h1 className="text-3xl font-semibold tracking-normal">Short URLs</h1>
+            <p className="text-sm text-orange-600">Admin</p>
+            <h1 className="text-xl tracking-normal">Short URLs</h1>
           </div>
           <a
             href="/admin"
             className="inline-flex w-fit items-center justify-center rounded-md border border-zinc-300 px-3 py-2 text-sm font-medium hover:bg-zinc-100"
           >
-            Dashboard
+            Admin
           </a>
         </header>
 
-        <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <section className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_360px] w-full min-w-0">
           <div className="rounded-md border border-zinc-200 bg-white">
-            <div className="flex flex-col gap-3 border-b border-zinc-200 p-4 md:flex-row md:items-center md:justify-between">
-              <form onSubmit={handleSearch} className="flex w-full gap-2 md:max-w-md">
+            <div className="flex flex-col gap-3 border-b border-zinc-200 p-4 md:flex-row md:items-center md:justify-between min-w-0">
+              <form onSubmit={handleSearch} className="relative flex-1 flex items-center">
                 <label className="relative flex-1">
                   <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-zinc-400" />
                   <input
                     value={prefix}
                     onChange={(event) => setPrefix(event.target.value)}
                     placeholder="Filter by code prefix"
-                    className="h-10 w-full rounded-md border border-zinc-300 pl-9 pr-3 text-sm outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+                    className="h-10 w-full rounded-md border border-zinc-300 pl-9 pr-3 text-xs outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
                   />
                 </label>
                 <button
                   type="submit"
-                  className="inline-flex h-10 items-center justify-center rounded-md bg-zinc-950 px-3 text-sm font-medium text-white hover:bg-zinc-800"
+                  className="absolute right-1 h-8 items-center justify-center rounded-md bg-zinc-950 px-3 text-xs text-white hover:bg-zinc-800"
                 >
                   Apply
                 </button>
@@ -213,15 +213,15 @@ export default function ShortUrlsManager() {
                   className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-zinc-300 hover:bg-zinc-100"
                   title="Refresh"
                 >
-                  <RefreshCw className="h-4 w-4" />
+                  <RefreshCw className="h-3 w-3" />
                 </button>
                 <button
                   type="button"
                   onClick={handleDeleteSelected}
                   disabled={selected.length === 0 || isDeleting}
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-red-600 px-3 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-zinc-300"
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-red-600 px-3 text-xs font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-zinc-300"
                 >
-                  {isDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                  {isDeleting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
                   Delete
                 </button>
               </div>
@@ -247,7 +247,7 @@ export default function ShortUrlsManager() {
                     <th className="w-36 px-4 py-3">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-100">
+                <tbody className="divide-y divide-zinc-100 text-xs">
                   {isLoading ? (
                     <tr>
                       <td colSpan={4} className="px-4 py-12 text-center text-zinc-500">
@@ -270,7 +270,7 @@ export default function ShortUrlsManager() {
                           </button>
                         </td>
                         <td className="px-4 py-3">
-                          <div className="font-mono text-sm font-semibold">{item.code}</div>
+                          <div className="text-xs font-semibold">{item.code}</div>
                           {item.createdAt ? (
                             <div className="mt-1 text-xs text-zinc-500">{new Date(item.createdAt).toLocaleDateString()}</div>
                           ) : null}
@@ -328,7 +328,7 @@ export default function ShortUrlsManager() {
                   type="button"
                   onClick={goPrevious}
                   disabled={cursorStack.length === 0 || isLoading}
-                  className="rounded-md border border-zinc-300 px-3 py-2 font-medium hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-md border border-zinc-300 px-3 py-2 hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Previous
                 </button>
@@ -336,7 +336,7 @@ export default function ShortUrlsManager() {
                   type="button"
                   onClick={goNext}
                   disabled={!nextCursor || isLoading}
-                  className="rounded-md border border-zinc-300 px-3 py-2 font-medium hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-md border border-zinc-300 px-3 py-2 hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Next
                 </button>

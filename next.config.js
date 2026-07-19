@@ -35,6 +35,12 @@ const nextConfig = {
                 hostname: 'sujankumal.com.np',
                 port: '',
                 pathname: '/**',
+            },
+            {
+                protocol: 'https',
+                hostname: 'drive.usercontent.google.com',
+                port: '',
+                pathname: '/**',
             }
             // Add more domains as needed
         ],

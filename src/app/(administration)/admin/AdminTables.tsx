@@ -86,7 +86,7 @@ export function TableSection({ columns, items }: TableSectionProps) {
           <thead>
             <tr>
               {columns.map((column) => (
-                <th key={column.field} className="px-4 py-2 text-left text-sm font-semibold text-gray-700">{column.label}</th>
+                <th key={column.field} className="px-4 py-2 text-left text-sm text-gray-700">{column.label}</th>
               ))}
             </tr>
           </thead>
@@ -96,7 +96,7 @@ export function TableSection({ columns, items }: TableSectionProps) {
               return (
                 <tr key={rowKey} className="border-b hover:bg-gray-50 transition-colors">
                   {columns.map((column) => (
-                    <td key={column.field} className="px-4 py-2 text-sm">
+                    <td key={column.field} className="px-4 py-2 text-xs">
                       {column.renderer === 'markdown' ? (
                         <div className="max-w-xs prose prose-xs prose-orange line-clamp-3">
                           <ReactMarkdown>
@@ -106,7 +106,7 @@ export function TableSection({ columns, items }: TableSectionProps) {
                       ) : column.renderer === 'image' && item[column.field] && typeof item[column.field] === 'string' && item[column.field].trim() !== '' ? (
                         <ImageCell value={item[column.field]} field={column.field} />
                       ) : typeof item[column.field] === 'boolean' ? (
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${item[column.field] ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                        <span className={`inline-flex px-2 py-1 text-xs rounded-full ${item[column.field] ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                           }`}>
                           {item[column.field] ? "Yes" : "No"}
                         </span>

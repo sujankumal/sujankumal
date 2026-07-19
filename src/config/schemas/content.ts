@@ -1,8 +1,16 @@
 import { z } from "zod";
 
 export const contentSchema = z.object({
-    type: z.string().min(1, "Type is required"),
-    content: z.string().min(1, "Content is required"),
+    type: z.enum([
+        "md",
+        "text",
+        "heading",
+        "image",
+        "quote",
+        "gallery",
+        "video",
+    ]),
+    content: z.string().min(100, "Content is too short").max(10000, "Content is too long"),
     sequence: z.coerce.number().min(0, "Sequence must be 0 or greater"),
     postId: z.coerce.number().min(1, "Post ID is required"),
 });

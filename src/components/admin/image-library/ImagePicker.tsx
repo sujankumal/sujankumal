@@ -177,36 +177,37 @@ export function ImagePicker({
                             sessionStorage.removeItem(CACHE_TIME);
                             loadImages(true);
                         }}
-                        className="flex items-center gap-2 rounded border px-3 py-2 text-sm hover:bg-gray-100"
+                        className="flex items-center gap-2 rounded border px-2 py-1 text-sm hover:bg-gray-100"
                     >
-                        <RefreshCw className="h-4 w-4" />
+                        <RefreshCw className="h-3 w-3" />
                         Refresh
                     </button>
                 </div>
-                <div className="flex gap-3">
-
-                    <input
-                        className="flex-1 border rounded px-3 py-2"
-                        placeholder="Search images..."
-                        value={search}
-                        onChange={e => setSearch(e.target.value)}
-                    />
-
-                    <select
-                        className="border rounded px-3 py-2"
-                        value={selectedFolder}
-                        onChange={e => setSelectedFolder(e.target.value)}
-                    >
-                        {folders.map(folder => (
-                            <option
-                                key={folder}
-                                value={folder}
-                            >
-                                {folder || "Root"}
-                            </option>
-                        ))}
-                    </select>
-
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <div className="flex-1">
+                        <input
+                            className="w-full border rounded px-2 py-1"
+                            placeholder="Search images..."
+                            value={search}
+                            onChange={e => setSearch(e.target.value)}
+                        />
+                    </div>
+                    <div className="w-full sm:w-auto">
+                        <select
+                            className="w-full sm:w-auto border rounded px-2 py-1 text-sm"
+                            value={selectedFolder}
+                            onChange={e => setSelectedFolder(e.target.value)}
+                        >
+                            {folders.map(folder => (
+                                <option
+                                    key={folder}
+                                    value={folder}
+                                >
+                                    {folder || "Root"}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
 
                 {!loading && filteredImages.length === 0 && (
@@ -214,13 +215,13 @@ export function ImagePicker({
                         No images found.
                     </div>
                 )}
-                <div className="grid grid-cols-[220px_1fr] gap-4 h-full">
+                <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-4 h-full">
 
                     {/* LEFT SIDEBAR */}
 
                     <div className="border rounded-lg overflow-hidden flex flex-col">
 
-                        <div className="px-4 py-3 border-b font-medium bg-gray-50">
+                        <div className="px-2 py-1 border-b text-sm bg-gray-50">
                             Folders
                         </div>
 
@@ -238,9 +239,9 @@ export function ImagePicker({
                                         key={folder}
                                         type="button"
                                         onClick={() => setSelectedFolder(folder)}
-                                        className={`w-full text-left px-4 py-2 text-sm flex justify-between hover:bg-gray-100 transition
+                                        className={`w-full text-left px-2 py-1 text-sm flex justify-between hover:bg-gray-100 transition
                                             ${selectedFolder === folder
-                                                ? "bg-orange-50 text-orange-700 font-medium"
+                                                ? "bg-orange-50 text-orange-700"
                                                 : ""
                                             }`}
                                     >
@@ -264,10 +265,10 @@ export function ImagePicker({
 
                     {/* RIGHT */}
 
-                    <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-4 text-sm">
 
                         <input
-                            className="border rounded px-3 py-2"
+                            className="border rounded px-2 py-1 text-sm"
                             placeholder="Search images..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
@@ -288,7 +289,7 @@ export function ImagePicker({
                             >
                                 <div style={{ height: topSpacer }} />
 
-                                <div className="grid grid-cols-5 gap-4 overflow-y-auto">
+                                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4 overflow-y-auto">
 
                                     {filteredImages.map((image) => (
 
@@ -315,7 +316,7 @@ export function ImagePicker({
 
                                             </div>
 
-                                            <div className="p-2">
+                                            <div className="p-1">
 
                                                 <div className="truncate text-xs">
                                                     {image.name}
@@ -335,10 +336,10 @@ export function ImagePicker({
 
                 </div>
 
-                <div className="flex justify-end gap-3 border-t pt-4">
+                <div className="flex justify-end gap-3 border-t pt-4 text-sm">
 
                     <button
-                        className="px-4 py-2 border rounded"
+                        className="px-2 py-1 border rounded"
                         onClick={onClose}
                     >
                         Cancel
@@ -346,7 +347,7 @@ export function ImagePicker({
 
                     <button
                         disabled={!selected}
-                        className="px-4 py-2 rounded bg-orange-600 text-white disabled:opacity-50"
+                        className="px-2 py-1 rounded bg-orange-600 text-white disabled:opacity-50"
                         onClick={() => {
                             onSelect(selected);
                             onClose();

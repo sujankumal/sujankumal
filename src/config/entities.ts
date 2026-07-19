@@ -396,11 +396,25 @@ export const adminEntities: AdminEntities = {
         form: [
             { name: "name", label: "Full Name", control: "text" },
             { name: "email", label: "Email Address", control: "text" },
-            { name: "password", label: "Password Hash/String", control: "text" },
+            {
+                name: "password",
+                label: "New Password",
+                control: "text",
+                required: false,
+                placeholder: "Leave blank to keep current password"
+            },
             { name: "verified", label: "Verified Account", control: "boolean" },
             { name: "image", label: "Avatar URL", control: "image" },
             { name: "emailVerified", label: "Email Verified At", control: "date" },
         ],
+
+        beforeCreate: async (data) => {
+            return data;
+        },
+
+        beforeUpdate: async (data) => {
+            return data;
+        },
     },
 
     profiles: {
