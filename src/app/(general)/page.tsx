@@ -5,17 +5,15 @@ import { PostType } from '@/types/post';
 import { SiteType } from '@/types/site';
 import { Metadata } from 'next';
 import { BlogJsonLd } from '../../components/seo/JsonLd';
+import { generateMetadataAsync } from '@/lib/seo';
 
-
-export async function generateMetadata():Promise<Metadata>{
-  const site:SiteType = await fetchSite();
-  return {
+export async function generateMetadata(): Promise<Metadata> {
+  const site: SiteType = await fetchSite();
+  return generateMetadataAsync({
     title: site.title,
-    robots: {
-      index: true,
-      follow: true,
-    },
-  }
+    description: site.description,
+    path: '/',
+  });
 }
 
 export default async function Home() {

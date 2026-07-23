@@ -4,41 +4,18 @@ import { fetchAbout } from "@/services/data_access";
 import { PostType } from "@/types/post";
 import { Metadata } from "next";
 import { ArticleJsonLd, BreadcrumbJsonLd } from "../../../components/seo/JsonLd";
-import { getSiteConfig } from "../../../lib/seo";
+import { generateMetadataAsync, getSiteConfig } from "@/lib/seo";
 import Image from "next/image";
 
 export async function generateMetadata(): Promise<Metadata> {
     const about_: Array<PostType> = await fetchAbout();
     const main_image: string = about_.slice(-1)[0]?.main_image || "";
-    const dynamicConfig = await getSiteConfig();
 
-    const title = `About | ${dynamicConfig.name} | Software Engineer`;
-    const description = dynamicConfig.description;
-
-    return {
-        title,
-        description,
-        openGraph: {
-            images: [`/images/${main_image}`],
-            type: 'website',
-            url: dynamicConfig.url,
-            siteName: title,
-            title,
-            description,
-        },
-        twitter: {
-            card: 'summary',
-            creator: dynamicConfig.social.twitter,
-            site: dynamicConfig.social.twitter,
-            images: [`/images/${main_image}`],
-            title,
-            description,
-        },
-        robots: {
-            index: true,
-            follow: true,
-        },
-    }
+    return generateMetadataAsync({
+        title: "About",
+        path: "/about",
+        image: main_image,
+    });
 }
 async function About() {
     const dynamicConfig = await getSiteConfig();

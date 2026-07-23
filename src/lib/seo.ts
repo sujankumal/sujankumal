@@ -213,6 +213,13 @@ export function generateBreadcrumbSchema(breadcrumbs: Array<{ name: string; url:
   };
 }
 
+function resolveImageUrl(image?: string, baseUrl: string = siteConfig.url): string {
+  if (!image) return `${baseUrl}/bird-1024x576-20.png`;
+  if (image.startsWith('http://') || image.startsWith('https://')) return image;
+  if (image.startsWith('/')) return `${baseUrl}${image}`;
+  return `${baseUrl}/images/${image}`;
+}
+
 // Generate base metadata
 export function generateMetadata({
   title,
@@ -231,10 +238,11 @@ export function generateMetadata({
   publishedTime?: string;
   modifiedTime?: string;
 }): Metadata {
-  const url = `${siteConfig.url}${path}`;
+  const formattedPath = path ? (path.startsWith('/') ? path : `/${path}`) : '';
+  const url = `${siteConfig.url}${formattedPath}`;
   const fullTitle = title ? `${title} | ${siteConfig.name}` : siteConfig.name;
   const fullDescription = description || siteConfig.description;
-  const imageUrl = image ? `${siteConfig.url}/images/${image}` : `${siteConfig.url}/bird-1024x576-20.png`;
+  const imageUrl = resolveImageUrl(image, siteConfig.url);
 
   return {
     title: fullTitle,
@@ -291,6 +299,7 @@ export function generateMetadata({
       title: fullTitle,
       description: fullDescription,
       creator: siteConfig.social.twitter,
+      site: siteConfig.social.twitter,
       images: [imageUrl],
     },
     robots: {
@@ -404,10 +413,11 @@ export async function generateMetadataAsync({
   modifiedTime?: string;
 }): Promise<Metadata> {
   const dynamicConfig = await getSiteConfig();
-  const url = `${dynamicConfig.url}${path}`;
+  const formattedPath = path ? (path.startsWith('/') ? path : `/${path}`) : '';
+  const url = `${dynamicConfig.url}${formattedPath}`;
   const fullTitle = title ? `${title} | ${dynamicConfig.name}` : dynamicConfig.name;
   const fullDescription = description || dynamicConfig.description;
-  const imageUrl = image ? `${dynamicConfig.url}/images/${image}` : `${dynamicConfig.url}/bird-1024x576-20.png`;
+  const imageUrl = resolveImageUrl(image, dynamicConfig.url);
 
   return {
     title: fullTitle,
@@ -464,6 +474,7 @@ export async function generateMetadataAsync({
       title: fullTitle,
       description: fullDescription,
       creator: dynamicConfig.social.twitter,
+      site: dynamicConfig.social.twitter,
       images: [imageUrl],
     },
     robots: {

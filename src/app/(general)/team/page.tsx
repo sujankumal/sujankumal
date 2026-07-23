@@ -2,37 +2,14 @@ import Sidebar from "@/components/Sidebar";
 import { Metadata } from "next";
 import Image from "next/image";
 import prisma from "@/../prisma/prisma";
-import { getSiteConfig } from "@/lib/seo";
+import { generateMetadataAsync } from "@/lib/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
-    const dynamicConfig = await getSiteConfig();
-    const title = `Our Team | ${dynamicConfig.name} | Software Engineer`;
-    const description = "Meet our dedicated team, the driving force behind our success and innovation.";
-
-    return {
-        title,
-        description,
-        openGraph: {
-            images: ['/bird-1024x576-20.png'],
-            type: 'website',
-            url: dynamicConfig.url,
-            siteName: title,
-            title,
-            description,
-        },
-        twitter: {
-            card: 'summary',
-            creator: dynamicConfig.social.twitter,
-            site: dynamicConfig.social.twitter,
-            images: ['/bird-1024x576-20.png'],
-            title,
-            description,
-        },
-        robots: {
-            index: true,
-            follow: true,
-        },
-    };
+    return generateMetadataAsync({
+        title: "Our Team",
+        description: "Meet our dedicated team, the driving force behind our success and innovation.",
+        path: "/team",
+    });
 }
 
 async function Team() {

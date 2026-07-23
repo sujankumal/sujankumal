@@ -5,6 +5,7 @@ import Sidebar from "@/components/Sidebar";
 import UserLinkButton from "@/components/User/UserLinkButton";
 import { fetchTechPostsUrl, fetchPostBySlug } from "@/services/data_access";
 import { Metadata, ResolvingMetadata } from "next";
+import { generateMetadataAsync } from "@/lib/seo";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 
@@ -96,7 +97,7 @@ export async function generateStaticParams() {
   }
 
 
-export async function generateMetadata({params}:{params: Promise<{url:string}>}, parent: ResolvingMetadata): Promise<Metadata>{
+export async function generateMetadata({params}:{params: Promise<{url:string}>}): Promise<Metadata>{
     const url = (await params).url;
     const decodedUrl = decodeURIComponent(url);
     const article = await fetchPostBySlug(decodedUrl);
@@ -104,29 +105,12 @@ export async function generateMetadata({params}:{params: Promise<{url:string}>},
         return {};
     }
 
-    return  {
+    return generateMetadataAsync({
         title: `Technologies | ${article.title}`,
         description: article.description,
-        openGraph:{
-          images:[`/images/${article.main_image}`],
-          type:'website',
-          url:'https://sujankumal.com.np/',
-          siteName:'Sujan Kumal | Software Engineer',
-          title: `Technologies | ${article.title}`,
-          description: article.description,
-        },
-        twitter:{
-          card:'summary',
-          creator:'@sujan_03_',
-          site:'@sujan_03_',
-          images:[`/images/${article.main_image}`],
-          title: `Technologies | ${article.title}`,
-          description: article.description,
-        },
-        robots: {
-            index: true,
-            follow: true,
-        },
-        
-      }
+        path: `/technologies/${article.url}`,
+        image: article.main_image,
+        type: "article",
+        publishedTime: article.date?.toISOString(),
+    });
 }

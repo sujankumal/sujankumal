@@ -7,6 +7,7 @@ import { fetchPostBySlug, fetchPostUrlArray } from "@/services/data_access";
 import { Metadata } from "next";
 import Image from "next/image";
 import { ArticleJsonLd, BreadcrumbJsonLd } from "../../../../components/seo/JsonLd";
+import { generateMetadataAsync } from "@/lib/seo";
 import { notFound } from "next/navigation";
 
 async function Article({ params }: { params: Promise<{ url: string }> }) {
@@ -147,29 +148,12 @@ export async function generateMetadata({ params }: { params: Promise<{ url: stri
         return {};
     }
 
-    return {
+    return generateMetadataAsync({
         title: `Articles | ${article.title}`,
         description: article.description,
-        openGraph: {
-            images: [`/images/${article.main_image}`],
-            type: 'website',
-            url: 'https://sujankumal.com.np/',
-            siteName: 'Sujan Kumal | Software Engineer',
-            title: `Articles | ${article.title}`,
-            description: article.description,
-        },
-        twitter: {
-            card: 'summary',
-            creator: '@sujan_03_',
-            site: '@sujan_03_',
-            images: [`/images/${article.main_image}`],
-            title: `Articles | ${article.title}`,
-            description: article.description,
-        },
-        robots: {
-            index: true,
-            follow: true,
-        },
-
-    }
+        path: `/articles/${article.url}`,
+        image: article.main_image,
+        type: "article",
+        publishedTime: article.date?.toISOString(),
+    });
 }

@@ -27,6 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return generateSEOMetadata({
     title: "Software Engineer",
     description: "Welcome to my site. Experienced Software Engineer | Innovative Problem Solver | Passionate About Technology",
+    path: "/",
   });
 }
 

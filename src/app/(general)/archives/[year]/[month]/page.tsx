@@ -8,6 +8,7 @@ import { MONTHS } from "@/constants/constants";
 import { fetchArchivesByYearAndMonth, fetchPostCountYearMonthArray } from "@/services/data_access";
 import { PostType } from "@/types/post";
 import { Metadata, ResolvingMetadata } from "next";
+import { generateMetadataAsync } from "@/lib/seo";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -82,7 +83,7 @@ export async function generateStaticParams() {
     return paths;
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ year: number, month: number }> }, parent: ResolvingMetadata): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ year: number, month: number }> }): Promise<Metadata> {
     const { year, month } = await params;
     const parsedYear = Number(year);
     const parsedMonth = Number(month);
@@ -90,28 +91,9 @@ export async function generateMetadata({ params }: { params: Promise<{ year: num
         return {};
     }
 
-    return {
+    return generateMetadataAsync({
         title: `Archives | ${MONTHS[parsedMonth - 1]} ${parsedYear}`,
         description: `This page provides concise summaries of key topics and links to related archives of ${MONTHS[parsedMonth - 1]} ${parsedYear} for further exploration.`,
-        openGraph: {
-            images: ['/bird-1024x576-20.png'],
-            type: 'website',
-            url: 'https://sujankumal.com.np/',
-            siteName: 'Sujan Kumal | Software Engineer',
-            title: `Archives | ${MONTHS[parsedMonth - 1]} ${parsedYear}`,
-            description: `This page provides concise summaries of key topics and links to related archives of ${MONTHS[parsedMonth - 1]} ${parsedYear} for further exploration.`,
-        },
-        twitter: {
-            card: 'summary',
-            creator: '@sujan_03_',
-            site: '@sujan_03_',
-            images: ['/bird-1024x576-20.png'],
-            title: `Archives | ${MONTHS[parsedMonth - 1]} ${parsedYear}`,
-            description: `This page provides concise summaries of key topics and links to related archives of ${MONTHS[parsedMonth - 1]} ${parsedYear} for further exploration.`,
-        },
-        robots: {
-            index: true,
-            follow: true,
-        },
-    }
+        path: `/archives/${parsedYear}/${parsedMonth}`,
+    });
 }

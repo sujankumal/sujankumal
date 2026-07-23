@@ -7,6 +7,7 @@ import { fetchCategoryNameArray, fetchPostsByCategoryID, fetchCategoryByName } f
 import { CatergoryType } from "@/types/category";
 import { PostType } from "@/types/post";
 import { Metadata, ResolvingMetadata } from "next";
+import { generateMetadataAsync } from "@/lib/seo";
 import Link from "next/link";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
@@ -83,8 +84,7 @@ export async function generateStaticParams() {
   return paths;
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ name: string }> }, parent: ResolvingMetadata): Promise<Metadata> {
-  // const {id} = await params;
+export async function generateMetadata({ params }: { params: Promise<{ name: string }> }): Promise<Metadata> {
   const { name } = await params;
 
   const category: CatergoryType = await fetchCategoryByName(name);
@@ -92,28 +92,9 @@ export async function generateMetadata({ params }: { params: Promise<{ name: str
     return {};
   }
 
-  return {
+  return generateMetadataAsync({
     title: `Category | ${category.name}`,
     description: `This page provides concise summaries of key topics and links to related category of ${category.name} for further exploration.`,
-    openGraph: {
-      images: ['/bird-1024x576-20.png'],
-      type: 'website',
-      url: 'https://sujankumal.com.np/',
-      siteName: 'Sujan Kumal | Software Engineer',
-      title: `Category | ${category.name}`,
-      description: `This page provides concise summaries of key topics and links to related category of ${category.name} for further exploration.`,
-    },
-    twitter: {
-      card: 'summary',
-      creator: '@sujan_03_',
-      site: '@sujan_03_',
-      images: ['/bird-1024x576-20.png'],
-      title: `Category | ${category.name}`,
-      description: `This page provides concise summaries of key topics and links to related category of ${category.name} for further exploration.`,
-    },
-    robots: {
-      index: true,
-      follow: true,
-    },
-  }
+    path: `/categories/${category.name}`,
+  });
 }

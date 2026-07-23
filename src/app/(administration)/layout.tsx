@@ -5,9 +5,8 @@ import Script from 'next/script'
 import { GA_TRACKING_ID, METADATA_BASE_URL } from '@/constants/constants'
 import { auth } from '@/services/auth'
 import { Metadata } from 'next'
-import { getSiteConfig } from '../../lib/seo'
+import { generateMetadataAsync, getSiteConfig } from '../../lib/seo'
 import AdminShell from '@/components/admin/AdminShell'
-
 
 const noto = Noto_Serif({
   weight: ['300', '400', '500', '600', '700'],
@@ -23,39 +22,10 @@ const notoNepali = Noto_Serif_Devanagari({
 })
 
 export async function generateMetadata(): Promise<Metadata> {
-  const dynamicConfig = await getSiteConfig();
-  const title = `Admin | ${dynamicConfig.name} | Software Engineer`;
-  const description = dynamicConfig.description;
-  const siteUrl = dynamicConfig.url;
-
-  return {
-    title,
-    description,
-    metadataBase: new URL(METADATA_BASE_URL || siteUrl),
-    robots: {
-      index: true,
-      follow: true,
-    },
-    openGraph: {
-      images: ['/bird-1024x576-20.png'],
-      type: 'website',
-      url: siteUrl,
-      siteName: title,
-      title,
-      description,
-    },
-    twitter: {
-      card: 'summary',
-      creator: dynamicConfig.social.twitter,
-      site: dynamicConfig.social.twitter,
-      images: ['/bird-1024x576-20.png'],
-      title,
-      description,
-    },
-    icons: {
-      icon: '/bird-32x32-20.gif',
-    },
-  };
+  return generateMetadataAsync({
+    title: "Admin",
+    path: "/admin",
+  });
 }
 
 export default async function AdminLayout({
