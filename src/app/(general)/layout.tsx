@@ -40,11 +40,6 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Favicon and App Icons */}
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="icon" href="/bird-32x32-20.gif" sizes="32x32" type="image/gif" />
-        <link rel="apple-touch-icon" href="/bird-100x100-20.gif" />
-        <link rel="manifest" href="/site.webmanifest" />
         <meta name="theme-color" content="#ea580c" />
         <meta name="msapplication-TileColor" content="#ea580c" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
