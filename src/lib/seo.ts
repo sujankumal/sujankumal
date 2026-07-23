@@ -214,7 +214,7 @@ export function generateBreadcrumbSchema(breadcrumbs: Array<{ name: string; url:
 }
 
 function resolveImageUrl(image?: string, baseUrl: string = siteConfig.url): string {
-  if (!image) return `${baseUrl}/bird-1024x576-20.png`;
+  if (!image) return `${baseUrl}/og-image.png`;
   if (image.startsWith('http://') || image.startsWith('https://')) return image;
   if (image.startsWith('/')) return `${baseUrl}${image}`;
   return `${baseUrl}/images/${image}`;
