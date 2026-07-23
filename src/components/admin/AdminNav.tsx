@@ -59,7 +59,7 @@ export default function AdminNav({ session, sites }: { session: any, sites: Site
                                         <User size={18} className="text-zinc-400" />
                                     </div>
                                 ) : (
-                                    <img
+                                    <Image
                                         src={session.user.image}
                                         className="w-8 h-8 rounded-full"
                                         alt="User"

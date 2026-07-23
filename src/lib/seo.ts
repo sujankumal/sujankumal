@@ -30,7 +30,7 @@ export async function getSiteConfig() {
     const githubSocial = socials.find(s => s.name.toLowerCase() === 'github');
     const linkedinSocial = socials.find(s => s.name.toLowerCase() === 'linkedin');
 
-    const name = site?.name || "Sujan Kumal";
+    const name = site?.name + "";
     const url = "https://sujankumal.com.np";
     const description = site?.description || "Personal website and blog";
 
