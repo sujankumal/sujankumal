@@ -9,31 +9,35 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/bird-32x32-20.gif",
+      "src": "/bird-32x32-20.png",
       "sizes": "32x32",
-      "type": "image/gif",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/bird-100x100-20.gif",
+      "src": "/bird-100x100-20.png",
       "sizes": "100x100",
-      "type": "image/gif",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/bird-800x800-20.gif",
+      "src": "/bird-800x800-20.png",
       "sizes": "800x800",
-      "type": "image/gif",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/bird-1024x576-20.gif",
+      "src": "/bird-1024x576-20.png",
       "sizes": "1024x576",
-      "type": "image/gif",
+      "type": "image/png",
       "purpose": "any"
     }
   ],
-  "categories": ["technology", "blog", "portfolio"],
+  "categories": [
+    "technology",
+    "blog",
+    "portfolio"
+  ],
   "lang": "en",
   "dir": "ltr",
   "scope": "/",

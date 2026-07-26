@@ -1,27 +1,26 @@
-import Footer from '@/components/Footer'
-import '../globals.css'
-import type { Metadata } from 'next'
-import { Noto_Serif, Noto_Serif_Devanagari } from 'next/font/google'
-import Header from '@/components/Header/Header'
-import Script from 'next/script'
-import { GA_TRACKING_ID } from '@/constants/constants'
-import FAB from '@/components/FAB'
-import { generateMetadataAsync as generateSEOMetadata, getSiteConfig } from '../../lib/seo'
-import { WebSiteJsonLd, PersonJsonLd } from '../../components/seo/JsonLd'
-import PageLoader from '@/components/PageLoader'
+import Footer from '@/components/Footer';
+import '../globals.css';
+import type { Metadata } from 'next';
+import { Noto_Serif, Noto_Serif_Devanagari } from 'next/font/google';
+import Header from '@/components/Header/Header';
+import FAB from '@/components/FAB';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
+import { generateMetadata as generateSEOMetadata, getSiteConfig } from '@/lib/seo';
+import { WebSiteJsonLd, PersonJsonLd } from '@/components/seo/JsonLd';
+import PageLoader from '@/components/PageLoader';
 
 const noto = Noto_Serif({
   weight: ['300', '400', '500', '600', '700'],
   subsets: ['latin'],
   variable: '--font-noto-english',
-})
+});
 
 const notoNepali = Noto_Serif_Devanagari({
   weight: ['300', '400', '500', '600', '700'],
   subsets: ['devanagari'],
   style: ['normal'],
   variable: '--font-noto-nepali',
-})
+});
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateSEOMetadata({
@@ -34,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   const dynamicConfig = await getSiteConfig();
   return (
@@ -54,15 +53,8 @@ export default async function RootLayout({
         <meta name="msapplication-tap-highlight" content="no" />
       </head>
 
-      {/* <!-- Google tag (gtag.js) --> */}
-      <Script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`}></Script>
-      <Script id='gtag-script'>
-        {`window.dataLayer = window.dataLayer || [];
-        function gtag(){window.dataLayer.push(arguments);}
-        gtag('js', new Date());
+      <GoogleAnalytics />
 
-        gtag('config', '${GA_TRACKING_ID}');`}
-      </Script>
       {/* Structured Data */}
       <WebSiteJsonLd
         name={dynamicConfig.name}
@@ -77,7 +69,7 @@ export default async function RootLayout({
         sameAs={[
           dynamicConfig.social.linkedin,
           dynamicConfig.social.github,
-          dynamicConfig.social.twitter
+          dynamicConfig.social.twitter,
         ].filter(Boolean)}
       />
       <body className={`${noto.variable} ${notoNepali.variable} antialiased`}>
@@ -87,6 +79,6 @@ export default async function RootLayout({
         <Footer />
         <FAB />
       </body>
-    </html >
-  )
+    </html>
+  );
 }

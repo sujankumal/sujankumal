@@ -1,8 +1,28 @@
 import { Metadata } from 'next';
 import prisma from '../../prisma/prisma';
 
-// Base site configuration
-export const siteConfig = {
+// ─── Shared Config Type ───────────────────────────────────────────────────────
+
+export interface SiteConfigType {
+  name: string;
+  url: string;
+  description: string;
+  author: {
+    name: string;
+    email: string;
+    url: string;
+  };
+  social: {
+    twitter: string;
+    github: string;
+    linkedin: string;
+  };
+  keywords: string[];
+}
+
+// ─── Static Fallback Config ───────────────────────────────────────────────────
+
+export const siteConfig: SiteConfigType = {
   name: "Sujan Kumal",
   url: "https://sujankumal.com.np",
   description: "Personal website and blog of Sujan Kumal - Software Developer, Writer, and Tech Enthusiast",
@@ -19,20 +39,20 @@ export const siteConfig = {
   keywords: ["Sujan Kumal", "Software Developer", "Blog", "Technology", "Programming", "Web Development"],
 };
 
-export async function getSiteConfig() {
-  try {
-    const site = await prisma.site.findFirst({
-      orderBy: { id: 'desc' }
-    });
+// ─── Dynamic Config (from DB) ─────────────────────────────────────────────────
 
+export async function getSiteConfig(): Promise<SiteConfigType> {
+  try {
+    const site = await prisma.site.findFirst({ orderBy: { id: 'desc' } });
     const socials = await prisma.social.findMany();
+
     const twitterSocial = socials.find(s => s.name.toLowerCase() === 'twitter');
     const githubSocial = socials.find(s => s.name.toLowerCase() === 'github');
     const linkedinSocial = socials.find(s => s.name.toLowerCase() === 'linkedin');
 
     const name = site?.name + "";
-    const url = "https://sujankumal.com.np";
-    const description = site?.description || "Personal website and blog";
+    const url = siteConfig.url;
+    const description = site?.description || siteConfig.description;
 
     return {
       name,
@@ -40,22 +60,49 @@ export async function getSiteConfig() {
       description,
       author: {
         name,
-        email: site?.contact_email || "support@sujankumal.com.np",
+        email: site?.contact_email || siteConfig.author.email,
         url,
       },
       social: {
-        twitter: twitterSocial ? `@${twitterSocial.username}` : "@sujan_03_",
-        github: githubSocial ? `https://github.com/${githubSocial.username}` : "https://github.com/sujankumal",
-        linkedin: linkedinSocial ? `https://linkedin.com/in/${linkedinSocial.username}` : "https://linkedin.com/in/sujankumal",
+        twitter: twitterSocial ? `@${twitterSocial.username}` : siteConfig.social.twitter,
+        github: githubSocial ? `https://github.com/${githubSocial.username}` : siteConfig.social.github,
+        linkedin: linkedinSocial ? `https://linkedin.com/in/${linkedinSocial.username}` : siteConfig.social.linkedin,
       },
       keywords: [name, "Software Developer", "Blog", "Technology", "Programming", "Web Development"],
     };
-  } catch (error) {
+  } catch {
     return siteConfig;
   }
 }
 
-// JSON-LD Schema Types
+// ─── Shared Metadata Constants ────────────────────────────────────────────────
+
+export const ICON_CONFIG = {
+  icon: [
+    { url: '/favicon.ico' },
+    { url: '/bird-32x32-20.png', sizes: '32x32', type: 'image/png' },
+    { url: '/bird-100x100-20.png', sizes: '100x100', type: 'image/png' },
+  ],
+  apple: [
+    { url: '/bird-100x100-20.png', sizes: '100x100', type: 'image/png' },
+    { url: '/bird-800x800-20.png', sizes: '800x800', type: 'image/png' },
+  ]
+};
+
+export const ROBOTS_CONFIG = {
+  index: true,
+  follow: true,
+  googleBot: {
+    index: true,
+    follow: true,
+    'max-video-preview': -1,
+    'max-image-preview': 'large' as const,
+    'max-snippet': -1,
+  },
+} as const;
+
+// ─── JSON-LD Schema Types ─────────────────────────────────────────────────────
+
 export interface WebSiteSchema {
   "@context": "https://schema.org";
   "@type": "WebSite";
@@ -120,58 +167,75 @@ export interface BreadcrumbSchema {
   }>;
 }
 
-// Generate base website schema
-export function generateWebSiteSchema(): WebSiteSchema {
+// ─── Image URL Helper ─────────────────────────────────────────────────────────
+
+export function resolveImageUrl(image?: string, baseUrl: string = siteConfig.url): string {
+  if (!image) return `${baseUrl}/og-image.png`;
+  if (image.startsWith('http://') || image.startsWith('https://')) return image;
+  if (image.startsWith('/')) return `${baseUrl}${image}`;
+  return `${baseUrl}/images/${image}`;
+}
+
+// ─── Schema Generators (async, config-injectable) ─────────────────────────────
+
+/** Generate WebSite JSON-LD schema. Pass a pre-fetched config to avoid an extra DB call. */
+export async function generateWebSiteSchema(config?: SiteConfigType): Promise<WebSiteSchema> {
+  const cfg = config ?? await getSiteConfig();
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: siteConfig.name,
-    url: siteConfig.url,
-    description: siteConfig.description,
+    name: cfg.name,
+    url: cfg.url,
+    description: cfg.description,
     author: {
       "@type": "Person",
-      name: siteConfig.author.name,
-      url: siteConfig.author.url,
-      email: siteConfig.author.email,
+      name: cfg.author.name,
+      url: cfg.author.url,
+      email: cfg.author.email,
     },
     potentialAction: {
       "@type": "SearchAction",
       target: {
         "@type": "EntryPoint",
-        urlTemplate: `${siteConfig.url}/search?q={search_term_string}`,
+        urlTemplate: `${cfg.url}/search?q={search_term_string}`,
       },
       "query-input": "required name=search_term_string",
     },
   };
 }
 
-// Generate person schema
-export function generatePersonSchema(): PersonSchema {
+/** Generate Person JSON-LD schema. Pass a pre-fetched config to avoid an extra DB call. */
+export async function generatePersonSchema(config?: SiteConfigType): Promise<PersonSchema> {
+  const cfg = config ?? await getSiteConfig();
   return {
     "@context": "https://schema.org",
     "@type": "Person",
-    name: siteConfig.author.name,
-    url: siteConfig.author.url,
-    email: siteConfig.author.email,
+    name: cfg.author.name,
+    url: cfg.author.url,
+    email: cfg.author.email,
     jobTitle: "Software Developer",
     sameAs: [
-      siteConfig.social.github,
-      siteConfig.social.linkedin,
-      siteConfig.social.twitter,
+      cfg.social.github,
+      cfg.social.linkedin,
+      cfg.social.twitter,
     ].filter(Boolean),
   };
 }
 
-// Generate article schema
-export function generateArticleSchema(article: {
-  title: string;
-  description?: string;
-  publishedAt: string;
-  updatedAt?: string;
-  slug: string;
-  image?: string;
-}): ArticleSchema {
-  const url = `${siteConfig.url}/articles/${article.slug}`;
+/** Generate Article JSON-LD schema. Pass a pre-fetched config to avoid an extra DB call. */
+export async function generateArticleSchema(
+  article: {
+    title: string;
+    description?: string;
+    publishedAt: string;
+    updatedAt?: string;
+    slug: string;
+    image?: string;
+  },
+  config?: SiteConfigType,
+): Promise<ArticleSchema> {
+  const cfg = config ?? await getSiteConfig();
+  const url = `${cfg.url}/articles/${article.slug}`;
 
   return {
     "@context": "https://schema.org",
@@ -180,17 +244,17 @@ export function generateArticleSchema(article: {
     description: article.description,
     author: {
       "@type": "Person",
-      name: siteConfig.author.name,
-      url: siteConfig.author.url,
+      name: cfg.author.name,
+      url: cfg.author.url,
     },
     datePublished: article.publishedAt,
     dateModified: article.updatedAt || article.publishedAt,
     url,
-    image: article.image ? [`${siteConfig.url}/images/${article.image}`] : undefined,
+    image: article.image ? [resolveImageUrl(article.image, cfg.url)] : undefined,
     publisher: {
       "@type": "Person",
-      name: siteConfig.author.name,
-      url: siteConfig.author.url,
+      name: cfg.author.name,
+      url: cfg.author.url,
     },
     mainEntityOfPage: {
       "@type": "WebPage",
@@ -199,7 +263,7 @@ export function generateArticleSchema(article: {
   };
 }
 
-// Generate breadcrumb schema
+/** Generate breadcrumb JSON-LD schema (synchronous, no config needed). */
 export function generateBreadcrumbSchema(breadcrumbs: Array<{ name: string; url: string }>): BreadcrumbSchema {
   return {
     "@context": "https://schema.org",
@@ -213,15 +277,13 @@ export function generateBreadcrumbSchema(breadcrumbs: Array<{ name: string; url:
   };
 }
 
-function resolveImageUrl(image?: string, baseUrl: string = siteConfig.url): string {
-  if (!image) return `${baseUrl}/og-image.png`;
-  if (image.startsWith('http://') || image.startsWith('https://')) return image;
-  if (image.startsWith('/')) return `${baseUrl}${image}`;
-  return `${baseUrl}/images/${image}`;
-}
+// ─── Metadata Generator ───────────────────────────────────────────────────────
 
-// Generate base metadata
-export function generateMetadata({
+/**
+ * Generate Next.js Metadata object from site config.
+ * Optionally pass a pre-fetched `config` to avoid a redundant DB call in the same render.
+ */
+export async function generateMetadata({
   title,
   description,
   path = "",
@@ -229,6 +291,7 @@ export function generateMetadata({
   type = "website",
   publishedTime,
   modifiedTime,
+  config,
 }: {
   title?: string;
   description?: string;
@@ -237,256 +300,49 @@ export function generateMetadata({
   type?: "website" | "article";
   publishedTime?: string;
   modifiedTime?: string;
-}): Metadata {
-  const formattedPath = path ? (path.startsWith('/') ? path : `/${path}`) : '';
-  const url = `${siteConfig.url}${formattedPath}`;
-  const fullTitle = title ? `${title} | ${siteConfig.name}` : siteConfig.name;
-  const fullDescription = description || siteConfig.description;
-  const imageUrl = resolveImageUrl(image, siteConfig.url);
-
-  return {
-    title: fullTitle,
-    description: fullDescription,
-    keywords: siteConfig.keywords,
-    authors: [{ name: siteConfig.author.name, url: siteConfig.author.url }],
-    creator: siteConfig.author.name,
-    publisher: siteConfig.author.name,
-    metadataBase: new URL(siteConfig.url),
-    alternates: {
-      canonical: url,
-    },
-    icons: {
-      icon: [
-        { url: '/favicon.ico', sizes: 'any' },
-        { url: '/bird-32x32-20.gif', sizes: '32x32', type: 'image/gif' },
-        { url: '/bird-100x100-20.gif', sizes: '100x100', type: 'image/gif' },
-      ],
-      apple: [
-        { url: '/bird-100x100-20.gif', sizes: '100x100', type: 'image/gif' },
-        { url: '/bird-800x800-20.gif', sizes: '800x800', type: 'image/gif' },
-      ],
-      other: [
-        {
-          rel: 'mask-icon',
-          url: '/bird-32x32-20.gif',
-          color: '#000000',
-        },
-      ],
-    },
-    manifest: '/site.webmanifest',
-    openGraph: {
-      type,
-      title: fullTitle,
-      description: fullDescription,
-      url,
-      siteName: siteConfig.name,
-      images: [
-        {
-          url: imageUrl,
-          width: 1200,
-          height: 630,
-          alt: fullTitle,
-        },
-      ],
-      ...(type === "article" && publishedTime && {
-        publishedTime,
-        modifiedTime: modifiedTime || publishedTime,
-        authors: [siteConfig.author.name],
-      }),
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: fullTitle,
-      description: fullDescription,
-      creator: siteConfig.social.twitter,
-      site: siteConfig.social.twitter,
-      images: [imageUrl],
-    },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        "max-video-preview": -1,
-        "max-image-preview": "large",
-        "max-snippet": -1,
-      },
-    },
-  };
-}
-
-export async function generateWebSiteSchemaAsync(): Promise<WebSiteSchema> {
-  const dynamicConfig = await getSiteConfig();
-  return {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: dynamicConfig.name,
-    url: dynamicConfig.url,
-    description: dynamicConfig.description,
-    author: {
-      "@type": "Person",
-      name: dynamicConfig.author.name,
-      url: dynamicConfig.author.url,
-      email: dynamicConfig.author.email,
-    },
-    potentialAction: {
-      "@type": "SearchAction",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: `${dynamicConfig.url}/search?q={search_term_string}`,
-      },
-      "query-input": "required name=search_term_string",
-    },
-  };
-}
-
-export async function generatePersonSchemaAsync(): Promise<PersonSchema> {
-  const dynamicConfig = await getSiteConfig();
-  return {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    name: dynamicConfig.author.name,
-    url: dynamicConfig.author.url,
-    email: dynamicConfig.author.email,
-    jobTitle: "Software Developer",
-    sameAs: [
-      dynamicConfig.social.github,
-      dynamicConfig.social.linkedin,
-      dynamicConfig.social.twitter,
-    ].filter(Boolean),
-  };
-}
-
-export async function generateArticleSchemaAsync(article: {
-  title: string;
-  description?: string;
-  publishedAt: string;
-  updatedAt?: string;
-  slug: string;
-  image?: string;
-}): Promise<ArticleSchema> {
-  const dynamicConfig = await getSiteConfig();
-  const url = `${dynamicConfig.url}/articles/${article.slug}`;
-
-  return {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: article.title,
-    description: article.description,
-    author: {
-      "@type": "Person",
-      name: dynamicConfig.author.name,
-      url: dynamicConfig.author.url,
-    },
-    datePublished: article.publishedAt,
-    dateModified: article.updatedAt || article.publishedAt,
-    url,
-    image: article.image ? [`${dynamicConfig.url}/images/${article.image}`] : undefined,
-    publisher: {
-      "@type": "Person",
-      name: dynamicConfig.author.name,
-      url: dynamicConfig.author.url,
-    },
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": url,
-    },
-  };
-}
-
-export async function generateMetadataAsync({
-  title,
-  description,
-  path = "",
-  image,
-  type = "website",
-  publishedTime,
-  modifiedTime,
-}: {
-  title?: string;
-  description?: string;
-  path?: string;
-  image?: string;
-  type?: "website" | "article";
-  publishedTime?: string;
-  modifiedTime?: string;
+  config?: SiteConfigType;
 }): Promise<Metadata> {
-  const dynamicConfig = await getSiteConfig();
+  const cfg = config ?? await getSiteConfig();
   const formattedPath = path ? (path.startsWith('/') ? path : `/${path}`) : '';
-  const url = `${dynamicConfig.url}${formattedPath}`;
-  const fullTitle = title ? `${title} | ${dynamicConfig.name}` : dynamicConfig.name;
-  const fullDescription = description || dynamicConfig.description;
-  const imageUrl = resolveImageUrl(image, dynamicConfig.url);
+  const url = `${cfg.url}${formattedPath}`;
+  const fullTitle = title ? `${title} | ${cfg.name}` : cfg.name;
+  const fullDescription = description || cfg.description;
+  const imageUrl = resolveImageUrl(image, cfg.url);
 
   return {
     title: fullTitle,
     description: fullDescription,
-    keywords: dynamicConfig.keywords,
-    authors: [{ name: dynamicConfig.author.name, url: dynamicConfig.author.url }],
-    creator: dynamicConfig.author.name,
-    publisher: dynamicConfig.author.name,
-    metadataBase: new URL(dynamicConfig.url),
-    alternates: {
-      canonical: url,
-    },
-    icons: {
-      icon: [
-        { url: '/favicon.ico', sizes: 'any' },
-        { url: '/bird-32x32-20.gif', sizes: '32x32', type: 'image/gif' },
-        { url: '/bird-100x100-20.gif', sizes: '100x100', type: 'image/gif' },
-      ],
-      apple: [
-        { url: '/bird-100x100-20.gif', sizes: '100x100', type: 'image/gif' },
-        { url: '/bird-800x800-20.gif', sizes: '800x800', type: 'image/gif' },
-      ],
-      other: [
-        {
-          rel: 'mask-icon',
-          url: '/bird-32x32-20.gif',
-          color: '#000000',
-        },
-      ],
-    },
+    keywords: cfg.keywords,
+    authors: [{ name: cfg.author.name, url: cfg.author.url }],
+    creator: cfg.author.name,
+    publisher: cfg.author.name,
+    metadataBase: new URL(cfg.url),
+    alternates: { canonical: url },
+    icons: ICON_CONFIG,
     manifest: '/site.webmanifest',
     openGraph: {
       type,
       title: fullTitle,
       description: fullDescription,
       url,
-      siteName: dynamicConfig.name,
-      images: [
-        {
-          url: imageUrl,
-          width: 1200,
-          height: 630,
-          alt: fullTitle,
-        },
-      ],
+      siteName: cfg.name,
+      images: [{ url: imageUrl, width: 1200, height: 630, alt: fullTitle }],
       ...(type === "article" && publishedTime && {
         publishedTime,
         modifiedTime: modifiedTime || publishedTime,
-        authors: [dynamicConfig.author.name],
+        authors: [cfg.author.name],
       }),
     },
     twitter: {
       card: "summary_large_image",
       title: fullTitle,
       description: fullDescription,
-      creator: dynamicConfig.social.twitter,
-      site: dynamicConfig.social.twitter,
+      creator: cfg.social.twitter,
+      site: cfg.social.twitter,
       images: [imageUrl],
     },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        "max-video-preview": -1,
-        "max-image-preview": "large",
-        "max-snippet": -1,
-      },
-    },
+    robots: ROBOTS_CONFIG,
   };
 }
+
+

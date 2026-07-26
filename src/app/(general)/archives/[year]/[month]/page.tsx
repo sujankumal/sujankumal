@@ -4,96 +4,88 @@ import NotFound from "@/components/Errors/NotFound";
 import Sidebar from "@/components/Sidebar";
 import UserLinkButton from "@/components/User/UserLinkButton";
 import { MONTHS } from "@/constants/constants";
-
 import { fetchArchivesByYearAndMonth, fetchPostCountYearMonthArray } from "@/services/data_access";
 import { PostType } from "@/types/post";
-import { Metadata, ResolvingMetadata } from "next";
-import { generateMetadataAsync } from "@/lib/seo";
+import { Metadata } from "next";
+import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-async function Archives({ params }: { params: Promise<{ year: number, month: number }> }) {
-    const { year, month } = await params;
-    const parsedYear = Number(year);
-    const parsedMonth = Number(month);
-    if (isNaN(parsedYear) || isNaN(parsedMonth) || parsedMonth < 1 || parsedMonth > 12) {
-        notFound();
-    }
-    // console.log(year,month)
-    const posts = await fetchArchivesByYearAndMonth(parsedYear, parsedMonth);
+export const dynamicParams = true;
 
-    return (
-        <main className="grid md:grid-cols-4 min-h-screen justify-center">
-            <div className="mb-8 px-4 md:mx-8 md:col-span-3">
-                {
-                    (posts.length !== 0) ?
-                        posts.map((post: PostType, index) => {
-                            return <div key={index} className="mt-2 mb-5 pb-5 border-b border-dashed border-gray-300">
-                                <header className="mt-5 text-center">
-                                    <div className="block m-1 p-1">
-                                        <CategoryButton categories={post.categories} />
-                                    </div>
-                                    <div className="mb-2">
-                                        <h2>
-                                            <Link href={"/articles" + "/" + post.url} className="text-orange-600">{post.title}</Link>
-                                        </h2>
-                                    </div>
-                                </header>
-                                <div className="text-center">
-                                    <p>{post.description}</p>
-                                </div>
-                                <footer className="mt-5 text-center text-xs">
-                                    <div className="inline-flex justify-center mr-4">
-                                        <DateTime datetime={post.date} />
-                                    </div>
-                                    <div className="inline-flex">
-                                        <UserLinkButton user={post.author} />
-                                    </div>
-                                </footer>
-                            </div>
-                        }) : <NotFound />
-                }
-            </div>
-            <aside className="w-full md:col-span-1">
-                <div className="h-full px-3 py-4 overflow-y-auto dark:bg-gray-800">
-                    <Sidebar />
-                </div>
-            </aside>
-        </main>
-    );
-}
-
-export default Archives;
-
-
-export const dynamicParams = true // true | false,
-
-// Implement the required generateStaticParams function
 export async function generateStaticParams() {
-    // Generate the possible values for the parameter
-
-    const year_month = await fetchPostCountYearMonthArray();
-
-    // Generate an array of objects with the correct structure for static generation
-    const paths = year_month.map((value) => ({
-        year: value.year.toString(),
-        month: value.month.toString(),
-    }));
-    // console.log("Paths ", paths);
-    return paths;
+  const year_month = await fetchPostCountYearMonthArray();
+  return year_month.map((value) => ({
+    year: value.year.toString(),
+    month: value.month.toString(),
+  }));
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ year: number, month: number }> }): Promise<Metadata> {
-    const { year, month } = await params;
-    const parsedYear = Number(year);
-    const parsedMonth = Number(month);
-    if (isNaN(parsedYear) || isNaN(parsedMonth) || parsedMonth < 1 || parsedMonth > 12) {
-        return {};
-    }
+export async function generateMetadata({ params }: { params: Promise<{ year: number; month: number }> }): Promise<Metadata> {
+  const { year, month } = await params;
+  const parsedYear = Number(year);
+  const parsedMonth = Number(month);
+  if (isNaN(parsedYear) || isNaN(parsedMonth) || parsedMonth < 1 || parsedMonth > 12) {
+    return {};
+  }
 
-    return generateMetadataAsync({
-        title: `Archives | ${MONTHS[parsedMonth - 1]} ${parsedYear}`,
-        description: `This page provides concise summaries of key topics and links to related archives of ${MONTHS[parsedMonth - 1]} ${parsedYear} for further exploration.`,
-        path: `/archives/${parsedYear}/${parsedMonth}`,
-    });
+  return generateSEOMetadata({
+    title: `Archives | ${MONTHS[parsedMonth - 1]} ${parsedYear}`,
+    description: `This page provides concise summaries of key topics and links to related archives of ${MONTHS[parsedMonth - 1]} ${parsedYear} for further exploration.`,
+    path: `/archives/${parsedYear}/${parsedMonth}`,
+  });
+}
+
+export default async function Archives({ params }: { params: Promise<{ year: number; month: number }> }) {
+  const { year, month } = await params;
+  const parsedYear = Number(year);
+  const parsedMonth = Number(month);
+  if (isNaN(parsedYear) || isNaN(parsedMonth) || parsedMonth < 1 || parsedMonth > 12) {
+    notFound();
+  }
+
+  const posts = await fetchArchivesByYearAndMonth(parsedYear, parsedMonth);
+
+  return (
+    <main className="grid md:grid-cols-4 min-h-screen justify-center">
+      <div className="mb-8 px-4 md:mx-8 md:col-span-3">
+        {posts.length !== 0 ? (
+          posts.map((post: PostType, index) => (
+            <div key={index} className="mt-2 mb-5 pb-5 border-b border-dashed border-gray-300">
+              <header className="mt-5 text-center">
+                <div className="block m-1 p-1">
+                  <CategoryButton categories={post.categories} />
+                </div>
+                <div className="mb-2">
+                  <h2>
+                    <Link href={`/articles/${post.url}`} className="text-orange-600">
+                      {post.title}
+                    </Link>
+                  </h2>
+                </div>
+              </header>
+              <div className="text-center">
+                <p>{post.description}</p>
+              </div>
+              <footer className="mt-5 text-center text-xs">
+                <div className="inline-flex justify-center mr-4">
+                  <DateTime datetime={post.date} />
+                </div>
+                <div className="inline-flex">
+                  <UserLinkButton user={post.author} />
+                </div>
+              </footer>
+            </div>
+          ))
+        ) : (
+          <NotFound />
+        )}
+      </div>
+      <aside className="w-full md:col-span-1">
+        <div className="h-full px-3 py-4 overflow-y-auto dark:bg-gray-800">
+          <Sidebar />
+        </div>
+      </aside>
+    </main>
+  );
 }
