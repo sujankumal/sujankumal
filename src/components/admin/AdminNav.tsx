@@ -63,6 +63,8 @@ export default function AdminNav({ session, sites }: { session: any, sites: Site
                                         src={session.user.image}
                                         className="w-8 h-8 rounded-full"
                                         alt="User"
+                                        width={50}
+                                        height={50}
                                         onError={() => setImgError(true)}
                                     />
                                 )}<span className="text-sm">{session?.user?.name}</span>
