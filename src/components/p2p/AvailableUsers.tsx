@@ -35,7 +35,7 @@ export function AvailableUsers({ selectedFiles, selectedUser, onUserSelect }: Av
       await sendShareRequest(user.uid, selectedFiles, requestId, message || undefined);
 
       // Start the WebRTC connection and wait for receiver to connect
-      startFileTransfer(requestId, selectedFiles);
+      startFileTransfer(requestId, selectedFiles, user.displayName, user.uid);
 
       setMessage('');
       setShowMessageInput(false);

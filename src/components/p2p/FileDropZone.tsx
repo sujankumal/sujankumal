@@ -75,7 +75,7 @@ export function FileDropZone({ onFilesSelected, selectedFiles, onRemoveFile }: F
           </p>
           <div className="text-sm text-gray-400">
             <p>Supports multiple files and folders</p>
-            <p>Maximum file size: 1GB per file</p>
+            <p>Large files stream directly to the receiver&apos;s selected folder in Chrome or Edge</p>
           </div>
         </div>
       </div>

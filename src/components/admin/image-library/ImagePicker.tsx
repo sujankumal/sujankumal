@@ -34,11 +34,22 @@ export function ImagePicker({
     onClose,
     onSelect,
 }: ImagePickerProps) {
+    const normalizeImageSelectionValue = (path: string) => {
+        if (!path) return "";
+        const trimmed = path.trim();
+        if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+            return trimmed;
+        }
+        if (trimmed.startsWith("/images/")) {
+            return trimmed.slice("/images/".length);
+        }
+        return trimmed.replace(/^\/+/, "");
+    };
     const [images, setImages] = useState<ImageFile[]>([]);
     const [loading, setLoading] = useState(false);
 
     const [search, setSearch] = useState("");
-    const [selected, setSelected] = useState(value ?? "");
+    const [selected, setSelected] = useState(normalizeImageSelectionValue(value ?? ""));
     const [selectedFolder, setSelectedFolder] = useState(ALL_FOLDER);
     const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -62,7 +73,7 @@ export function ImagePicker({
     }, []);
 
     useEffect(() => {
-        setSelected(value ?? "");
+        setSelected(normalizeImageSelectionValue(value ?? ""));
     }, [value]);
 
     const loadImages = async (forceRefresh = false) => {
@@ -291,42 +302,41 @@ export function ImagePicker({
 
                                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4 overflow-y-auto">
 
-                                    {filteredImages.map((image) => (
+                                    {filteredImages.map((image) => {
+                                        const normalizedPath = normalizeImageSelectionValue(image.path);
 
-                                        <button
-                                            key={image.path}
-                                            type="button"
-                                            onClick={() => setSelected(image.path)}
-                                            className={`border rounded-lg overflow-hidden transition
-                                            ${selected === image.path
-                                                    ? "border-orange-500 ring-2 ring-orange-300"
-                                                    : "border-gray-200 hover:border-orange-300"
-                                                }`}
-                                        >
+                                        return (
+                                            <button
+                                                key={image.path}
+                                                type="button"
+                                                onClick={() => setSelected(normalizedPath)}
+                                                className={`border rounded-lg overflow-hidden transition ${selected === normalizedPath ? "border-orange-500 ring-2 ring-orange-300" : "border-gray-200 hover:border-orange-300"}`}
+                                            >
 
-                                            <div className="relative aspect-square">
+                                                <div className="relative aspect-square">
 
-                                                <Image
-                                                    src={image.path}
-                                                    alt={image.name}
-                                                    fill
-                                                    className="object-cover"
-                                                    sizes="160px"
-                                                />
+                                                    <Image
+                                                        src={image.path}
+                                                        alt={image.name}
+                                                        fill
+                                                        className="object-cover"
+                                                        sizes="160px"
+                                                    />
 
-                                            </div>
-
-                                            <div className="p-1">
-
-                                                <div className="truncate text-xs">
-                                                    {image.name}
                                                 </div>
 
-                                            </div>
+                                                <div className="p-1">
 
-                                        </button>
+                                                    <div className="truncate text-xs">
+                                                        {image.name}
+                                                    </div>
 
-                                    ))}
+                                                </div>
+
+                                            </button>
+
+                                        );
+                                    })}
                                     <div style={{ height: bottomSpacer }} />
                                 </div>
                             </div>

@@ -5,6 +5,7 @@ import { FormField } from "../FormField";
 import { LoadingSpinner } from "../LoadingSpinner";
 import { AdminFormField } from "@/config/types";
 import { getEntityConfig } from "@/config/entity-config";
+import { normalizeImagePath } from "@/lib/image";
 
 interface EntityFormProps {
   entity: string;
@@ -70,6 +71,9 @@ export function EntityForm({ entity, initialData, onSubmit, onCancel, isLoading 
         if (field.control === "date" && processedData[field.name]) {
           const date = new Date(processedData[field.name]);
           processedData[field.name] = date.toISOString().slice(0, 16);
+        }
+        if (field.control === "image" && processedData[field.name]) {
+          processedData[field.name] = normalizeImagePath(String(processedData[field.name]));
         }
         if (
           field.control === "relation" &&
@@ -151,6 +155,12 @@ export function EntityForm({ entity, initialData, onSubmit, onCancel, isLoading 
     }
 
     const submitData = { ...formData };
+
+    config?.form.forEach(field => {
+      if (field.control === "image" && submitData[field.name]) {
+        submitData[field.name] = normalizeImagePath(String(submitData[field.name]));
+      }
+    });
 
     if (!submitData.password) {
       delete submitData.password;
