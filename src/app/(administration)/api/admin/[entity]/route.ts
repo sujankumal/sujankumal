@@ -102,9 +102,98 @@ export async function GET(
       [sortBy]: sortOrder,
     };
 
-    const whereClause = config.searchable
+    const filtersParam = searchParams.get("filters");
+    const parsedFilterConditions: any[] = [];
+
+    const normalizeFilterValue = (rawValue: any, operator: string) => {
+      if (rawValue === "true") return true;
+      if (rawValue === "false") return false;
+
+      if (typeof rawValue === "string") {
+        const trimmed = rawValue.trim();
+        if (trimmed === "") return trimmed;
+
+        if (["gt", "gte", "lt", "lte"].includes(operator)) {
+          const dateValue = new Date(trimmed);
+          if (!Number.isNaN(dateValue.getTime())) return dateValue;
+
+          const numericValue = Number(trimmed);
+          if (!Number.isNaN(numericValue)) return numericValue;
+        }
+
+        if (operator === "equals") {
+          const numericValue = Number(trimmed);
+          if (!Number.isNaN(numericValue)) return numericValue;
+
+          const dateValue = new Date(trimmed);
+          if (!Number.isNaN(dateValue.getTime())) return dateValue;
+        }
+      }
+
+      return rawValue;
+    };
+
+    if (filtersParam) {
+      try {
+        const parsedFilters = JSON.parse(filtersParam);
+        if (Array.isArray(parsedFilters)) {
+          parsedFilters.forEach((filter) => {
+            if (
+              filter?.field &&
+              filter?.operator &&
+              filter?.value !== undefined &&
+              filter?.value !== ""
+            ) {
+              const normalizedValue = normalizeFilterValue(filter.value, filter.operator);
+              const condition: Record<string, any> = {};
+
+              switch (filter.operator) {
+                case "contains":
+                  condition[filter.field] = { contains: normalizedValue, mode: "insensitive" };
+                  break;
+                case "startsWith":
+                  condition[filter.field] = { startsWith: normalizedValue, mode: "insensitive" };
+                  break;
+                case "endsWith":
+                  condition[filter.field] = { endsWith: normalizedValue, mode: "insensitive" };
+                  break;
+                case "equals":
+                  condition[filter.field] = normalizedValue;
+                  break;
+                case "gt":
+                case "gte":
+                case "lt":
+                case "lte":
+                  condition[filter.field] = { [filter.operator]: normalizedValue };
+                  break;
+                default:
+                  break;
+              }
+
+              if (Object.keys(condition).length) {
+                parsedFilterConditions.push(condition);
+              }
+            }
+          });
+        }
+      } catch (error) {
+        // Ignore invalid filter payloads and continue with no filters.
+      }
+    }
+
+    const searchClause = search && typeof config.searchable === "function"
       ? config.searchable(search)
       : {};
+
+    const whereClause =
+      (!searchClause || Object.keys(searchClause).length === 0) && parsedFilterConditions.length === 0
+        ? {}
+        : {
+          AND: [
+            ...(searchClause && Object.keys(searchClause).length ? [searchClause] : []),
+            ...parsedFilterConditions,
+          ],
+        };
 
     const includeClause = config?.include ?? {};
 
@@ -132,6 +221,7 @@ export async function GET(
       },
     });
   } catch (error) {
+    // console.error("[admin-api:GET]", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -185,7 +275,7 @@ export async function POST(
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({
-        error: "Validation error",
+        error: `Validation error: ${error.message}`,
         details: Object.fromEntries(
           error.issues.map((issue) => [
             issue.path.join("."),
@@ -194,7 +284,10 @@ export async function POST(
         ),
       }, { status: 400 });
     }
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+
+    const message = error instanceof Error ? error.message : "Unknown error";
+    // console.error("[admin-api:POST]", error);
+    return NextResponse.json({ error: `Internal server error: ${message}` }, { status: 500 });
   }
 }
 
@@ -242,6 +335,7 @@ export async function PUT(
         );
       }
 
+      // console.error("[admin-api:PUT validation]", error);
       return NextResponse.json(
         { error: "Internal server error" },
         { status: 500 }
@@ -289,6 +383,7 @@ export async function PUT(
         ),
       }, { status: 400 });
     }
+    // console.error("[admin-api:PUT]", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -316,31 +411,17 @@ export async function DELETE(
 
     const { config, model } = resolved;
 
-    // const where = config.resolveWhere
-    //   ? await config.resolveWhere(
-    //     {
-    //       id,
-    //       identifier: searchParams.get("identifier"),
-    //       token: searchParams.get("token"),
-    //     },
-    //     prisma
-    //   )
-    //   : (() => {
-    //     if (!id) {
-    //       return NextResponse.json(
-    //         { error: "ID is required for deletion" },
-    //         { status: 400 }
-    //       );
-    //     }
-    //     return { id: Number(id) };
-    //   })();
-    const input = Object.fromEntries(searchParams.entries());
+    const input = normalizeData(Object.fromEntries(searchParams.entries()));
+    const primaryKey = config.primaryKey ?? "id";
+    const rawPrimaryValue = input[primaryKey];
+    const parsedPrimaryValue = typeof rawPrimaryValue === "string" && rawPrimaryValue !== "" && !Number.isNaN(Number(rawPrimaryValue))
+      ? Number(rawPrimaryValue)
+      : rawPrimaryValue;
 
     const where = config.resolveWhere
       ? await config.resolveWhere(input, prisma)
       : {
-        [config.primaryKey ?? "id"]:
-          input[config.primaryKey ?? "id"],
+        [primaryKey]: parsedPrimaryValue,
       };
 
     const existingItem = await model.findUnique({
@@ -351,20 +432,21 @@ export async function DELETE(
       return NextResponse.json({ error: "Item not found" }, { status: 404 });
     }
     if (config.beforeDelete) {
-      await config.beforeDelete(existingItem);
+      await config.beforeDelete(existingItem, prisma);
     }
     await model.delete({
       where,
     });
 
     if (config.afterDelete) {
-      await config.afterDelete(existingItem);
+      await config.afterDelete(existingItem, prisma);
     }
     // Purge cache tags for the deleted entity
     revalidateEntityTags(entity, where[config.primaryKey ?? "id"]);
 
     return NextResponse.json({ message: "Item deleted successfully" });
   } catch (error) {
+    // console.error("[admin-api:DELETE]", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

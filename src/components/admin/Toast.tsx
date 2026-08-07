@@ -112,7 +112,7 @@ export function useToast() {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const addToast = (toast: Omit<Toast, "id">) => {
-    const id = Math.random().toString(36).substr(2, 9);
+    const id = Math.random().toString(36).slice(2, 9); // Generate a random ID
     setToasts((prev) => [...prev, { ...toast, id }]);
   };
 

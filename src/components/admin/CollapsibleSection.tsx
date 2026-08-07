@@ -69,7 +69,7 @@ export function CollapsibleSection({
   const displayDescription = description || entityDescriptions[entity] || `Manage ${entity} data`;
 
   return (
-    <div className="ml-10 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div className="ml-10 bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden h-fit">
       {/* Header */}
       <button
         onClick={handleToggle}
@@ -143,7 +143,7 @@ export function CollapsibleSectionGroup({
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full text-left mb-4 group focus:outline-none"
       >
-        <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-orange-300 to-blue-300 rounded-lg border border-orange-200 hover:from-orange-100 hover:to-blue-100 transition-all duration-200">
+        <div className="flex items-center space-x-3 p-4 bg-linear-to-r from-orange-300 to-blue-300 rounded-lg border border-orange-200 hover:from-orange-100 hover:to-blue-100 transition-all duration-200">
           <div className="text-orange-600">
             {isExpanded ? (
               <ChevronDown className="h-6 w-6" />

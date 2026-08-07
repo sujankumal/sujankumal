@@ -78,13 +78,13 @@ export function WarningBanner({
 
   return (
     <div
-      className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ease-in-out ${
+      className={`fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ease-in-out ${
         isVisible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
       }`}
     >
       <div className={`max-w-md w-full border-2 rounded-lg p-4 ${styles.bg}`}>
         <div className="flex items-start">
-          <div className="flex-shrink-0">
+          <div className="shrink-0">
             <Icon className={`h-6 w-6 ${styles.icon}`} />
           </div>
           <div className="ml-3 flex-1">
@@ -101,7 +101,7 @@ export function WarningBanner({
               </div>
             )}
           </div>
-          <div className="ml-4 flex-shrink-0">
+          <div className="ml-4 shrink-0">
             <button
               onClick={() => {
                 setIsVisible(false);

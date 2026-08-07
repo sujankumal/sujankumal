@@ -36,13 +36,13 @@ export function EntityForm({ entity, initialData, onSubmit, onCancel, isLoading 
       if (!config) return;
 
       const relationEntities = config.form
-        .filter(field => field.control === "relation")
+        .filter(field => field.control === "relation" || field.control === "manyToMany")
         .map(field => field.relation?.entity);
       const uniqueRelations = [...new Set(relationEntities)];
 
-      // Check if entity has foreign key fields
+      // Check if entity has foreign key fields or many-to-many relation fields
       const hasRelations = config.form.some(
-        field => field.control === "relation"
+        field => field.control === "relation" || field.control === "manyToMany"
       );
 
       if (hasRelations) {
@@ -70,7 +70,7 @@ export function EntityForm({ entity, initialData, onSubmit, onCancel, isLoading 
       config?.form.forEach(field => {
         if (field.control === "date" && processedData[field.name]) {
           const date = new Date(processedData[field.name]);
-          processedData[field.name] = date.toISOString().slice(0, 16);
+          processedData[field.name] = date.toISOString().slice(0, 10);
         }
         if (field.control === "image" && processedData[field.name]) {
           processedData[field.name] = normalizeImagePath(String(processedData[field.name]));
@@ -89,6 +89,35 @@ export function EntityForm({ entity, initialData, onSubmit, onCancel, isLoading 
               processedData[relationName].id;
           }
         }
+        if (field.control === "manyToMany") {
+          const relationKey = field.relation?.entity ?? field.name.replace(/Ids$/, "");
+          const fallbackKey = field.name.replace(/Ids$/, "");
+          const relationItems = processedData[relationKey] ?? processedData[fallbackKey];
+
+          if (Array.isArray(relationItems)) {
+            processedData[field.name] = relationItems
+              .map((item: any) => item?.category?.id ?? item?.id ?? item?.categoryId)
+              .filter((id: any) => id != null);
+          }
+        }
+
+        if (
+          field.control === "repeatable" &&
+          processedData[field.name] == null
+        ) {
+          const relationName = field.name.replace(/Blocks$/, "");
+          const relationItems = processedData[relationName];
+
+          if (Array.isArray(relationItems)) {
+            processedData[field.name] = relationItems.map((item: any) => {
+              const mappedItem: Record<string, any> = {};
+              field.fields?.forEach((innerField) => {
+                mappedItem[innerField.name] = item[innerField.name];
+              });
+              return mappedItem;
+            });
+          }
+        }
       });
 
       setFormData(processedData);
@@ -99,9 +128,11 @@ export function EntityForm({ entity, initialData, onSubmit, onCancel, isLoading 
         if (field.control === "boolean") {
           defaultData[field.name] = false;
         } else if (field.control === "date") {
-          defaultData[field.name] = new Date().toISOString().slice(0, 16);
+          defaultData[field.name] = new Date().toISOString().slice(0, 10);
         } else if (field.control === "number") {
           defaultData[field.name] = new Date().getFullYear();
+        } else if (field.control === "manyToMany" || field.control === "repeatable") {
+          defaultData[field.name] = [];
         }
       });
       setFormData(defaultData);
@@ -183,8 +214,8 @@ export function EntityForm({ entity, initialData, onSubmit, onCancel, isLoading 
       return field.options;
     }
 
-    // Handle foreign key dropdowns
-    if (field.control === "relation" && field.relation && relationData[field.relation.entity]) {
+    // Handle foreign key and many-to-many relation dropdowns
+    if ((field.control === "relation" || field.control === "manyToMany") && field.relation && relationData[field.relation.entity]) {
       return relationData[field.relation.entity].map((item: any) => ({
         value: item[field.relation?.value ?? "id"],
         label: item[field.relation?.label ?? "name"],
@@ -217,6 +248,7 @@ export function EntityForm({ entity, initialData, onSubmit, onCancel, isLoading 
           required={field.required}
           placeholder={field.placeholder}
           options={getFieldOptions(field)}
+          nestedFields={field.fields}
           disabled={isLoading || loadingRelations}
         />
       ))}

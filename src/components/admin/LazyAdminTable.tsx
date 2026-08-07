@@ -104,9 +104,9 @@ export function LazyAdminTable({
         <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">{config.title}</h3>
+              <h3 className="text-sm font-semibold text-gray-900">{config.title}</h3>
               {description && (
-                <p className="text-sm text-gray-600 mt-1">{description}</p>
+                <p className="text-xs text-gray-600 mt-1">{description}</p>
               )}
             </div>
             <div className="flex items-center space-x-2">
@@ -142,10 +142,10 @@ export function LazyAdminTable({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
               </div>
-              <p className="text-gray-600 mb-4">Click to load {config.title.toLowerCase()}</p>
+              <p className="text-gray-600 mb-4 text-xs">Click to load {config.title.toLowerCase()}</p>
               <button
                 onClick={loadData}
-                className="px-4 py-2 bg-orange-600 text-white text-sm text-white rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors"
+                className="px-4 py-2 bg-orange-600 text-white text-xs rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors"
               >
                 Load {config.title}
               </button>

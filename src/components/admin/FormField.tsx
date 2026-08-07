@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode, useState } from "react";
-import { AdminFormField } from "@/config/types";
+import { AdminFormField, SelectOption } from "@/config/types";
 import Image from "next/image";
 import { ImageIcon } from "lucide-react";
 import { formatImageUrl } from "@/lib/image";
@@ -16,10 +16,12 @@ interface FormFieldProps {
   error?: string;
   required?: boolean;
   placeholder?: string;
-  options?: { value: string | number; label: string }[];
+  options?: SelectOption[];
   rows?: number;
   disabled?: boolean;
   children?: ReactNode;
+  nestedFields?: AdminFormField[];
+  className?: string;
 }
 
 export function FormField({
@@ -35,6 +37,8 @@ export function FormField({
   rows = 3,
   disabled = false,
   children,
+  nestedFields,
+  className,
 }: FormFieldProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
 
@@ -111,6 +115,7 @@ export function FormField({
         );
       case "textarea":
       case "markdown":
+        const textareaRows = type === "markdown" ? Math.max(rows, 8) : rows;
         return (
           <textarea
             id={name}
@@ -118,7 +123,7 @@ export function FormField({
             value={value || ""}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
-            rows={rows}
+            rows={textareaRows}
             disabled={disabled}
             className={baseInputClasses}
           />
@@ -130,18 +135,130 @@ export function FormField({
           <select
             id={name}
             name={name}
-            value={value || ""}
+            value={value != null ? String(value) : ""}
             onChange={(e) => onChange(e.target.value)}
             disabled={disabled}
             className={baseInputClasses}
           >
             <option value="">Select {label.toLowerCase()}</option>
-            {options.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
+            {options.map((option) => {
+              const optionValue = String(option.value);
+              return (
+                <option key={optionValue} value={optionValue}>
+                  {option.label}
+                </option>
+              );
+            })}
           </select>
+        );
+      case "manyToMany":
+        return (
+          <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {options.map((option) => {
+                const optionValue = String(option.value);
+                const selectedValues = Array.isArray(value) ? value.map(String) : [];
+                const isSelected = selectedValues.includes(optionValue);
+                return (
+                  <button
+                    type="button"
+                    key={optionValue}
+                    onClick={() => {
+                      const nextValues = isSelected
+                        ? selectedValues.filter((item) => item !== optionValue)
+                        : [...selectedValues, optionValue];
+                      onChange(nextValues.map((item) => {
+                        const parsed = Number(item);
+                        return Number.isNaN(parsed) ? item : parsed;
+                      }));
+                    }}
+                    disabled={disabled}
+                    className={`rounded-md border px-3 py-2 text-sm text-left transition focus:outline-none focus:ring-2 focus:ring-orange-500 ${isSelected ? "bg-orange-600 text-white border-orange-600" : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"}`}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
+            <input
+              type="hidden"
+              name={name}
+              value={Array.isArray(value) ? value.join(",") : ""}
+            />
+          </div>
+        );
+      case "repeatable":
+        return (
+          <div className="space-y-3">
+            {Array.isArray(value) && value.length > 0 ? (
+              value.map((item: any, itemIndex: number) => (
+                <div key={itemIndex} className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                  <div className="mb-3 flex items-center justify-between">
+                    <div className="text-sm font-semibold text-gray-700">
+                      {label} {itemIndex + 1}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const nextItems = value.filter((_: any, index: number) => index !== itemIndex);
+                        onChange(nextItems);
+                      }}
+                      disabled={disabled}
+                      className="text-sm text-red-600 hover:text-red-800"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  {nestedFields?.map((innerField) => (
+                    <FormField
+                      key={`${name}-${itemIndex}-${innerField.name}`}
+                      label={innerField.label}
+                      name={`${name}[${itemIndex}].${innerField.name}`}
+                      type={innerField.control}
+                      value={item?.[innerField.name]}
+                      onChange={(innerValue) => {
+                        const nextItems = value.map((current: any, index: number) =>
+                          index === itemIndex ? { ...current, [innerField.name]: innerValue } : current
+                        );
+                        onChange(nextItems);
+                      }}
+                      error={undefined}
+                      required={innerField.required}
+                      placeholder={innerField.placeholder}
+                      options={innerField.options || []}
+                      rows={innerField.rows}
+                      disabled={disabled}
+                      nestedFields={innerField.fields}
+                    />
+                  ))}
+                </div>
+              ))
+            ) : (
+              <div className="text-sm text-gray-500">No {label.toLowerCase()} added yet.</div>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                const newItem: any = {};
+                nestedFields?.forEach((innerField) => {
+                  if (innerField.control === "boolean") {
+                    newItem[innerField.name] = false;
+                  } else if (innerField.control === "number") {
+                    newItem[innerField.name] = 0;
+                  } else if (innerField.control === "date") {
+                    newItem[innerField.name] = new Date().toISOString().slice(0, 16);
+                  } else {
+                    newItem[innerField.name] = "";
+                  }
+                });
+                onChange([...(Array.isArray(value) ? value : []), newItem]);
+              }}
+              disabled={disabled}
+              className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            >
+              Add {label}
+            </button>
+          </div>
         );
 
       case "checkbox":
@@ -192,7 +309,7 @@ export function FormField({
   }
 
   return (
-    <div className="space-y-1">
+    <div className={className}>
       <label htmlFor={name} className="block text-sm font-medium text-gray-700">
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}

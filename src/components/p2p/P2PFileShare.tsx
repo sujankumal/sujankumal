@@ -148,7 +148,7 @@ export function P2PFileShare() {
                 </div>
                 <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
                   <div
-                    className="h-1.5 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500"
+                    className="h-1.5 rounded-full bg-linear-to-r from-indigo-500 to-purple-500 transition-all duration-500"
                     style={{ width: `${overallProgress.overallPercent}%` }}
                   />
                 </div>
@@ -199,7 +199,7 @@ export function P2PFileShare() {
                   <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                     <div
                       className={`h-2 rounded-full transition-all duration-300 ${
-                        transfer.status === 'preparing' ? 'bg-gradient-to-r from-indigo-400 to-blue-500 animate-pulse w-full' :
+                        transfer.status === 'preparing' ? 'bg-linear-to-r from-indigo-400 to-blue-500 animate-pulse w-full' :
                         transfer.status === 'finalizing' ? 'bg-violet-500 animate-pulse w-full' :
                         transfer.status === 'paused' ? 'bg-amber-400' :
                         transfer.senderId === user?.uid ? 'bg-blue-600' : 'bg-green-600'
@@ -303,7 +303,7 @@ export function P2PFileShare() {
 
       {/* Incoming share request popover */}
       {popoverRequest && (
-        <div className="fixed bottom-4 left-4 right-4 md:bottom-6 md:right-6 md:left-auto z-50 max-w-[380px] mx-auto md:mx-0">
+        <div className="fixed bottom-4 left-4 right-4 md:bottom-6 md:right-6 md:left-auto z-50 max-w-95 mx-auto md:mx-0">
           <div className="w-full bg-white border border-gray-200 rounded-2xl shadow-xl p-5">
             <div className="flex items-start gap-3">
               <div className="flex-1">

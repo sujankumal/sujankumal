@@ -10,6 +10,7 @@ export type FormControl =
     | "image"
     | "relation"
     | "manyToMany"
+    | "repeatable"
     | "select"
     | "email"
     | "url"
@@ -39,6 +40,14 @@ export interface AdminFormField {
     width?: string;
     rows?: number;
     relation?: RelationConfig;
+    fields?: AdminFormField[];
+    options?: SelectOption[];
+}
+
+export interface AdminFilterField {
+    field: string;
+    label: string;
+    type: "text" | "number" | "date" | "boolean" | "select";
     options?: SelectOption[];
 }
 
@@ -83,8 +92,15 @@ export interface AdminEntity {
     beforeUpdate?: (data: any) => any | Promise<any>;
     afterUpdate?: (updated: any) => Promise<void> | void;
 
-    beforeDelete?: (id: number | string) => Promise<void> | void;
-    afterDelete?: (id: number | string) => Promise<void> | void;
+    beforeDelete?: (
+        itemOrId: any,
+        prisma: typeof import("@/../prisma/prisma").default
+    ) => Promise<void> | void;
+    afterDelete?: (
+        itemOrId: any,
+        prisma: typeof import("@/../prisma/prisma").default
+    ) => Promise<void> | void;
+    filters?: AdminFilterField[];
 
     resolveWhere?: (
         input: Record<string, any>,

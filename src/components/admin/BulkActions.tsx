@@ -102,16 +102,16 @@ export function BulkActions({
           {/* Select All Checkbox */}
           <button
             onClick={handleSelectAll}
-            className="flex items-center space-x-2 text-sm text-gray-700 hover:text-gray-900"
+            className="flex items-center space-x-2 text-xs text-gray-700 hover:text-gray-900"
           >
             {isAllSelected ? (
-              <CheckSquare className="h-5 w-5 text-orange-600" />
+              <CheckSquare className="h-3 w-3 text-orange-600" />
             ) : isPartiallySelected ? (
-              <div className="h-5 w-5 bg-orange-600 rounded border-2 border-orange-600 flex items-center justify-center">
+              <div className="h-3 w-3 bg-orange-600 rounded border-2 border-orange-600 flex items-center justify-center">
                 <div className="h-2 w-2 bg-white rounded-sm" />
               </div>
             ) : (
-              <Square className="h-5 w-5 text-gray-400" />
+              <Square className="h-3 w-3 text-gray-400" />
             )}
             <span>
               {selectedItems.length > 0
@@ -128,7 +128,7 @@ export function BulkActions({
             {onBulkEdit && (
               <button
                 onClick={() => onBulkEdit(selectedItems)}
-                className="inline-flex items-center px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+                className="inline-flex items-center px-3 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
               >
                 <Edit className="h-4 w-4 mr-1" />
                 Edit ({selectedItems.length})
@@ -137,7 +137,7 @@ export function BulkActions({
 
             <button
               onClick={handleExport}
-              className="inline-flex items-center px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+              className="inline-flex h-10 items-center px-3 py-1 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
             >
               <Download className="h-4 w-4 mr-1" />
               Export ({selectedItems.length})
@@ -148,10 +148,10 @@ export function BulkActions({
                 onShowDeleteWarning?.(selectedItems.length);
                 setShowDeleteDialog(true);
               }}
-              className="relative inline-flex items-center px-3 py-2 text-sm font-medium text-red-700 bg-white border-2 border-red-300 rounded-md hover:bg-red-50 hover:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200"
+              className="relative h-10 inline-flex items-center px-1 py-1 text-xs font-medium text-red-700 bg-white border-2 border-red-300 rounded-md hover:bg-red-50 hover:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200"
             >
               <Trash2 className="h-4 w-4 mr-2" />
-              <span className="font-semibold">⚠️ Delete ({selectedItems.length})</span>
+              <span className="font-semibold">Delete ({selectedItems.length})</span>
               {selectedItems.length > 5 && (
                 <span className="ml-2 px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">
                   BULK
@@ -198,9 +198,9 @@ export function SelectableRow({ item, isSelected, onSelect, children }: Selectab
           className="flex items-center"
         >
           {isSelected ? (
-            <CheckSquare className="h-5 w-5 text-orange-600" />
+            <CheckSquare className="h-3 w-3 text-orange-600" />
           ) : (
-            <Square className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+            <Square className="h-3 w-3 text-gray-400 hover:text-gray-600" />
           )}
         </button>
       </td>

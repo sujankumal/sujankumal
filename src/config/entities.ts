@@ -209,25 +209,127 @@ export const adminEntities: AdminEntities = {
                 },
                 display: "name",
             },
+            {
+                name: "categoryIds",
+                label: "Categories",
+                control: "manyToMany",
+                relation: {
+                    entity: "categories",
+                    value: "id",
+                    label: "name",
+                },
+                display: "name",
+            },
+            {
+                name: "contentBlocks",
+                label: "Content Blocks",
+                control: "repeatable",
+                fields: [
+                    { name: "type", label: "Block Type", control: "text", required: true },
+                    { name: "content", label: "Content", control: "markdown", rows: 10 },
+                    { name: "sequence", label: "Order Sequence", control: "number" },
+                ],
+            },
         ],
         beforeCreate(data) {
             const date = data.date ? new Date(data.date) : new Date();
-            return {
+            const createData: any = {
                 ...data,
                 date,
                 month: date.getMonth() + 1,
                 year: date.getFullYear(),
+                categories: data.categoryIds
+                    ? {
+                        create: data.categoryIds.map((categoryId: number) => ({
+                            category: {
+                                connect: { id: categoryId },
+                            },
+                        })),
+                    }
+                    : undefined,
+                content: data.contentBlocks
+                    ? {
+                        create: data.contentBlocks.map((block: any) => ({
+                            type: block.type,
+                            content: block.content,
+                            sequence: block.sequence,
+                        })),
+                    }
+                    : undefined,
             };
+
+            if (data.authorId != null) {
+                createData.author = {
+                    connect: { id: data.authorId },
+                };
+            }
+            delete createData.authorId;
+            delete createData.categoryIds;
+            delete createData.contentBlocks;
+            return createData;
         },
         beforeUpdate(data) {
-            if (!data.date) return data;
-            const date = new Date(data.date);
-            return {
-                ...data,
-                date,
-                month: date.getMonth() + 1,
-                year: date.getFullYear(),
-            };
+            let updatedData: any = { ...data };
+
+            if (updatedData.date) {
+                const date = new Date(updatedData.date);
+                updatedData = {
+                    ...updatedData,
+                    date,
+                    month: date.getMonth() + 1,
+                    year: date.getFullYear(),
+                };
+            }
+
+            if (updatedData.authorId != null) {
+                updatedData.author = {
+                    connect: { id: updatedData.authorId },
+                };
+                delete updatedData.authorId;
+            }
+
+            if (Array.isArray(updatedData.categoryIds)) {
+                updatedData.categories = {
+                    deleteMany: {},
+                    create: updatedData.categoryIds.map((categoryId: number) => ({
+                        category: {
+                            connect: { id: categoryId },
+                        },
+                    })),
+                };
+                delete updatedData.categoryIds;
+            }
+
+            if (Array.isArray(updatedData.contentBlocks)) {
+                updatedData.content = {
+                    deleteMany: {},
+                    create: updatedData.contentBlocks.map((block: any) => ({
+                        type: block.type,
+                        content: block.content,
+                        sequence: block.sequence,
+                    })),
+                };
+                delete updatedData.contentBlocks;
+            }
+
+            return updatedData;
+        },
+        beforeDelete: async (itemOrId, prisma) => {
+            const postId = typeof itemOrId === "object" && itemOrId !== null
+                ? itemOrId.id
+                : itemOrId;
+
+            if (!postId) {
+                return;
+            }
+
+            await prisma.categoriesOnPosts.deleteMany({
+                where: { postId: Number(postId) },
+            });
+
+            await prisma.content.deleteMany({
+                where: { postId: Number(postId) },
+            });
         },
     },
 
