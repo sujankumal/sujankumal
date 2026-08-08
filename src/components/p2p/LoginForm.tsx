@@ -38,7 +38,7 @@ export function LoginForm() {
       <div className="max-w-md w-full">
         {/* Hero Section */}
         <div className="text-center mb-8">
-          <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
+          <div className="mx-auto w-16 h-16 bg-linear-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4">
             <FaShare className="text-white text-2xl" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">P2P File Share</h1>

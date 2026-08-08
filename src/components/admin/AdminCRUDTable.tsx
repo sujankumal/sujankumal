@@ -16,6 +16,47 @@ import { useWarningBanner } from "./WarningBanner";
 import { adminEntities } from "@/config/entities";
 import { formatImageUrl } from "@/lib/image";
 
+function ImageCell({ value, field }: { value: string; field: string }) {
+  const [imageError, setImageError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const imageSrc = formatImageUrl(value);
+
+  if (!imageSrc || imageError) {
+    return (
+      <div className="w-16 h-10 bg-gray-100 rounded flex items-center justify-center border border-gray-200">
+        <ImageIcon className="h-4 w-4 text-gray-400" />
+        {imageError && (
+          <span className="sr-only">Failed to load image: {value}</span>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-16 h-10 relative bg-gray-100 rounded overflow-hidden border border-gray-200">
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-4 h-4 border-2 border-gray-300 border-t-orange-600 rounded-full animate-spin"></div>
+        </div>
+      )}
+      <Image
+        src={imageSrc}
+        alt={field}
+        fill
+        className="object-cover"
+        onLoad={() => setIsLoading(false)}
+        onError={() => {
+          setImageError(true);
+          setIsLoading(false);
+        }}
+        unoptimized
+        sizes="64px"
+      />
+    </div>
+  );
+}
+
 interface AdminCRUDTableProps {
   entity: keyof typeof adminEntities;
   initialData?: any[];
@@ -88,6 +129,13 @@ export function AdminCRUDTable({
         sortOrder,
       });
 
+      if (filters.length > 0) {
+        params.set(
+          "filters",
+          JSON.stringify(filters.map(({ field, operator, value }) => ({ field, operator, value })))
+        );
+      }
+
       const response = await fetch(`/api/admin/${entity}?${params}`);
       if (!response.ok) {
         throw new Error("Failed to fetch data");
@@ -101,7 +149,7 @@ export function AdminCRUDTable({
     } finally {
       setLoading(false);
     }
-  }, [entity, pagination.page, pagination.limit, searchTerm, sortBy, sortOrder]);
+  }, [entity, filters, pagination.page, pagination.limit, searchTerm, sortBy, sortOrder]);
 
   // Effects
   useEffect(() => {
@@ -141,12 +189,6 @@ export function AdminCRUDTable({
     // Show warning banner first
     showDeleteWarning(entity, 1);
 
-    // Show warning toast as well
-    showWarning(
-      "Confirm Delete",
-      `You are about to permanently delete this ${entity}. This action cannot be undone.`
-    );
-
     setSelectedItem(item);
     setShowDeleteDialog(true);
   };
@@ -160,7 +202,7 @@ export function AdminCRUDTable({
       });
 
       if (!response.ok) {
-        throw new Error("Failed to delete item");
+        throw new Error(`Failed to delete item. ${response.statusText}`);
       }
 
       await fetchData();
@@ -168,7 +210,7 @@ export function AdminCRUDTable({
       setSelectedItem(null);
       showSuccess("Item deleted", `${entity} has been successfully deleted.`);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to delete item";
+      const errorMessage = err instanceof Error ? err.message : `Failed to delete item: ${err}`;
       setError(errorMessage);
       showError("Delete failed", errorMessage);
     }
@@ -263,52 +305,23 @@ export function AdminCRUDTable({
     }
   };
 
-  const handleFiltersChange = (newFilters: any[]) => {
-    setFilters(newFilters);
-    setPagination(prev => ({ ...prev, page: 1 }));
-  };
+  const handleFiltersChange = useCallback((newFilters: any[]) => {
+    setFilters((prevFilters) => {
+      const isSame = prevFilters.length === newFilters.length && prevFilters.every((prevFilter, index) => {
+        const nextFilter = newFilters[index];
+        return (
+          prevFilter.field === nextFilter?.field &&
+          prevFilter.operator === nextFilter?.operator &&
+          prevFilter.value === nextFilter?.value
+        );
+      });
 
-  const ImageCell = ({ value, field }: { value: string; field: string }) => {
-    const [imageError, setImageError] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
+      return isSame ? prevFilters : newFilters;
+    });
 
-    const imageSrc = formatImageUrl(value);
+    setPagination((prev) => (prev.page === 1 ? prev : { ...prev, page: 1 }));
+  }, []);
 
-    // If no valid image URL, show placeholder
-    if (!imageSrc || imageError) {
-      return (
-        <div className="w-16 h-10 bg-gray-100 rounded flex items-center justify-center border border-gray-200">
-          <ImageIcon className="h-4 w-4 text-gray-400" />
-          {imageError && (
-            <span className="sr-only">Failed to load image: {value}</span>
-          )}
-        </div>
-      );
-    }
-
-    return (
-      <div className="w-16 h-10 relative bg-gray-100 rounded overflow-hidden border border-gray-200">
-        {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-4 h-4 border-2 border-gray-300 border-t-orange-600 rounded-full animate-spin"></div>
-          </div>
-        )}
-        <Image
-          src={imageSrc}
-          alt={field}
-          fill
-          className="object-cover"
-          onLoad={() => setIsLoading(false)}
-          onError={() => {
-            setImageError(true);
-            setIsLoading(false);
-          }}
-          unoptimized
-          sizes="64px"
-        />
-      </div>
-    );
-  };
 
   const renderCellContent = (item: any, column: any) => {
     const { field, renderer, display } = column;
@@ -316,7 +329,7 @@ export function AdminCRUDTable({
 
     if (renderer === "markdown" && value) {
       return (
-        <div className="max-w-xs prose prose-xs prose-orange max-w-none line-clamp-3">
+        <div className="max-w-none prose prose-xs prose-orange line-clamp-3">
           <ReactMarkdown>{value}</ReactMarkdown>
         </div>
       );
@@ -437,10 +450,10 @@ export function AdminCRUDTable({
       {/* Header */}
       <div className="px-6 py-4 border-b border-gray-200">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-900">{config.title}</h2>
+          <h2 className="text-sm font-semibold text-gray-900">{config.title}</h2>
           <button
             onClick={handleCreate}
-            className="inline-flex items-center px-4 py-2 bg-orange-600 text-white text-sm font-medium rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+            className="inline-flex items-center px-2 py-1 bg-orange-600 text-white text-sm font-medium rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
           >
             <Plus className="h-4 w-4 mr-2" />
             Add {config.title}
@@ -457,7 +470,7 @@ export function AdminCRUDTable({
             placeholder={`Search ${config.title.toLowerCase()}...`}
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-orange-500 focus:border-orange-500"
+            className="block w-full text-xs pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-orange-500 focus:border-orange-500"
           />
         </div>
       </div>
@@ -492,13 +505,13 @@ export function AdminCRUDTable({
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {/* Bulk select header handled by BulkActions */}
               </th>
               {config.columns.map((column) => (
                 <th
                   key={column.field}
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                  className="p-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                   onClick={() => handleSort(column.field)}
                 >
                   <div className="flex items-center space-x-1">
@@ -507,7 +520,7 @@ export function AdminCRUDTable({
                   </div>
                 </th>
               ))}
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="p-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
@@ -524,11 +537,11 @@ export function AdminCRUDTable({
                   onSelect={(selected) => handleSelectItem(item, selected)}
                 >
                   {config.columns.map((column) => (
-                    <td key={`${item[rowKey]}-${column.field}`} className="px-2 py-2 whitespace-nowrap text-sm text-gray-900">
+                    <td key={`${item[rowKey]}-${column.field}`} className="px-2 py-2 whitespace-nowrap text-xs text-gray-900">
                       {renderCellContent(item, column)}
                     </td>
                   ))}
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-xs font-medium">
                     <div className="flex items-center justify-end space-x-2">
                       <button
                         onClick={() => handleEdit(item)}
@@ -539,11 +552,11 @@ export function AdminCRUDTable({
                       </button>
                       <button
                         onClick={() => handleDelete(item)}
-                        className="group relative text-red-600 hover:text-red-900 p-2 rounded-md hover:bg-red-50 border border-red-200 hover:border-red-300 transition-all duration-200"
+                        className="group relative text-red-600 hover:text-red-900 rounded-md hover:bg-red-50 transition-all duration-200"
                         title="⚠️ Delete (Permanent Action)"
                       >
                         <Trash2 className="h-4 w-4" />
-                        <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full opacity-75 group-hover:opacity-100"></span>
+                        <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full opacity-65 group-hover:opacity-100"></span>
                       </button>
                     </div>
                   </td>

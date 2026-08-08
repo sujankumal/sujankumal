@@ -1,6 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
-import SignOutButton from "@/components/auth/SignOut";
 import { fetchSite } from "@/services/data_access";
 import { SiteType } from "@/types/site";
 import { Session } from "next-auth";

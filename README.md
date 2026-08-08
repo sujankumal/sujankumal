@@ -1,73 +1,88 @@
-# Sujan Kumal - Software Engineer Portfolio
 
-Welcome to my GitHub Pages portfolio repository! This repository hosts my personal website, where you can learn more about me, my work, and projects I'm passionate about.
+# sujankumal — Blog & News site
 
-## About Me
+This repository contains the source for a blog/news website published at https://sujankumal.com.np. The site focuses on articles, posts, and short-news updates, organized with categories, tags, and archives. It is implemented as a Next.js app and includes integrations for data (Prisma), styling (Tailwind), and optional Firebase features.
 
-I'm Sujan Kumal, a software engineer with a strong passion for creating innovative solutions and exploring the world of technology. Here's a little bit about me:
+## Key technologies
 
-- 🌐 Software Engineer
-- 🚀 Full-Stack Developer
-- 💼 Tech Enthusiast
+- Next.js
+- TypeScript
+- Prisma (for data modeling and client generation)
+- Tailwind CSS
+- Firebase (optional client/server integrations under `/firebase`)
 
-## Portfolio Sections
+## Prerequisites
 
-Feel free to explore my portfolio website to learn more about my work and interests:
+- Node.js 18+ (recommended)
+- npm, yarn, or pnpm
+- A database for Prisma (see `prisma/schema.prisma`) if you run migrations or generate the client for real data
 
-- 📂 **Projects:** You can find a collection of my software projects, both personal and professional.
-- 📝 **Blog:** I occasionally write about topics related to technology and software development.
-- 📄 **Resume:** Download my latest resume to learn more about my professional background and skills.
-- 📬 **Contact:** If you'd like to get in touch with me, you can find my contact information here.
 
-## Live Site
+## Local setup
 
-Visit my live portfolio site: [Sujan Kumal - Portfolio](https://sujankumal.com.np)
+1. Install dependencies
 
-## Contributing
+```bash
+npm install
+```
 
-If you have suggestions for improvements or have found any issues with the site, please feel free to open an issue or submit a pull request. Your contributions are greatly appreciated!
+2. Create environment variables
 
-## License
+Copy `.env.example` (if present) to `.env.local` and set values for DB, Firebase, and any auth providers used by the app.
 
-This repository and the content of the portfolio are under the [Apache License Version 2.0](LICENSE). Please respect the licensing terms when using the code or content from this repository.
+3. Content
 
-Thank you for visiting my portfolio and for your interest in my work. If you have any questions or want to connect, feel free to reach out to me. Enjoy exploring!
+Content for the blog lives in the repository (markdown or source files under `public/data/markdown` and the `src/app` routes). Posts are organized by categories, tags, and date; the site supports archive pages and per-post pages.
 
-## Nextjs 
+4. Generate Prisma client (if you run migrations or use DB-backed features)
 
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+```bash
+npm run prisma:generate
+```
 
-## Getting Started
-
-First, run the development server:
+5. Run the dev server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000 to view the site.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Build & production
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+To create an optimized production build:
 
-## Learn More
+```bash
+npm run build
+```
 
-To learn more about Next.js, take a look at the following resources:
+This runs `prisma generate` then `next build`. If you use a hosting platform (Vercel, Netlify, etc.), follow their Next.js/Node deployment guides.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Tests & linting
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+If present, run tests and linters:
 
-## Deploy on Vercel
+```bash
+npm run lint
+npm test
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Adjust depending on which scripts are defined in `package.json`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## Contributing
+
+Contributions are welcome. Open an issue to discuss changes or submit a PR. Keep changes small and focused.
+
+## License
+
+This project is licensed under the Apache License 2.0 — see [LICENSE](LICENSE) for details.
+
+---
+
+If you'd like, I can also:
+
+- Add a short development checklist to the README (env vars, common prisma commands)
+- Create a `README.dev.md` with deeper local dev steps (migrations, seed data)
+- Open a PR with this change and a small changelog entry
+ 
+Tell me which of the above you'd like next.

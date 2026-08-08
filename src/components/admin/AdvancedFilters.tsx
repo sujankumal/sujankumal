@@ -1,15 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { Filter, X, Calendar, Hash, Type, ToggleLeft, ToggleRight } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Filter, Calendar, Hash, Type, ToggleLeft, ToggleRight } from "lucide-react";
 import { FormField } from "./FormField";
-
-interface FilterOption {
-  field: string;
-  label: string;
-  type: "text" | "number" | "date" | "boolean" | "select";
-  options?: Array<{ value: string | number; label: string }>;
-}
+import { getFilterFields } from "@/config/entity-config";
+import { AdminFilterField } from "@/config/types";
 
 interface ActiveFilter {
   field: string;
@@ -24,47 +19,7 @@ interface AdvancedFiltersProps {
   className?: string;
 }
 
-const entityFilterOptions: Record<string, FilterOption[]> = {
-  post: [
-    { field: "published", label: "Published", type: "boolean" },
-    { field: "date", label: "Date", type: "date" },
-    { field: "authorId", label: "Author ID", type: "number" },
-  ],
-  user: [
-    { field: "verified", label: "Verified", type: "boolean" },
-    { field: "createdAt", label: "Created Date", type: "date" },
-  ],
-  category: [
-    { field: "name", label: "Name", type: "text" },
-  ],
-  project: [
-    { field: "title", label: "Title", type: "text" },
-  ],
-  social: [
-    { field: "embed", label: "Embed", type: "boolean" },
-    { field: "name", label: "Platform", type: "text" },
-  ],
-  updates: [
-    { field: "date", label: "Date", type: "date" },
-  ],
-  site: [
-    { field: "year", label: "Year", type: "number" },
-  ],
-  profile: [
-    { field: "authorId", label: "Author ID", type: "number" },
-  ],
-  content: [
-    { field: "type", label: "Content Type", type: "text" },
-    { field: "sequence", label: "Sequence", type: "number" },
-    { field: "postId", label: "Post ID", type: "number" },
-  ],
-  categoriesOnPosts: [
-    { field: "postId", label: "Post ID", type: "number" },
-    { field: "categoryId", label: "Category ID", type: "number" },
-  ],
-};
-
-const operatorOptions = {
+const operatorOptions: Record<AdminFilterField["type"], Array<{ value: string; label: string }>> = {
   text: [
     { value: "contains", label: "Contains" },
     { value: "equals", label: "Equals" },
@@ -95,48 +50,68 @@ const operatorOptions = {
 
 export function AdvancedFilters({ entity, onFiltersChange, className = "" }: AdvancedFiltersProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([]);
   const [newFilter, setNewFilter] = useState({
     field: "",
     operator: "",
     value: "",
   });
 
-  const filterOptions = entityFilterOptions[entity] || [];
+  const filterOptions: AdminFilterField[] = useMemo(
+    () => getFilterFields(entity),
+    [entity],
+  );
+  const previousFilter = useRef<{ field: string; operator: string; value: any } | null>(null);
 
-  const addFilter = () => {
-    if (!newFilter.field || !newFilter.operator || newFilter.value === "") return;
+  useEffect(() => {
+    const isComplete = Boolean(newFilter.field && newFilter.operator && newFilter.value !== "");
+    const nextFilter = isComplete
+      ? { field: newFilter.field, operator: newFilter.operator, value: newFilter.value }
+      : null;
 
-    const fieldOption = filterOptions.find(opt => opt.field === newFilter.field);
-    if (!fieldOption) return;
+    const filterChanged = Boolean(
+      nextFilter?.field !== previousFilter.current?.field ||
+      nextFilter?.operator !== previousFilter.current?.operator ||
+      nextFilter?.value !== previousFilter.current?.value ||
+      (nextFilter === null && previousFilter.current !== null) ||
+      (nextFilter !== null && previousFilter.current === null)
+    );
 
-    const filter: ActiveFilter = {
-      field: newFilter.field,
-      operator: newFilter.operator,
-      value: newFilter.value,
-      label: `${fieldOption.label} ${operatorOptions[fieldOption.type].find(op => op.value === newFilter.operator)?.label} ${newFilter.value}`,
-    };
+    if (!filterChanged) {
+      return;
+    }
 
-    const updatedFilters = [...activeFilters, filter];
-    setActiveFilters(updatedFilters);
-    onFiltersChange(updatedFilters);
+    previousFilter.current = nextFilter;
 
-    // Reset form
-    setNewFilter({ field: "", operator: "", value: "" });
-  };
+    if (!isComplete) {
+      onFiltersChange([]);
+      return;
+    }
 
-  const removeFilter = (index: number) => {
-    const updatedFilters = activeFilters.filter((_, i) => i !== index);
-    setActiveFilters(updatedFilters);
-    onFiltersChange(updatedFilters);
-  };
+    const timer = window.setTimeout(() => {
+      const fieldOption = filterOptions.find((opt) => opt.field === newFilter.field);
+      const label = fieldOption
+        ? `${fieldOption.label} ${operatorOptions[fieldOption.type].find((op) => op.value === newFilter.operator)?.label} ${newFilter.value}`
+        : `${newFilter.field} ${newFilter.operator} ${newFilter.value}`;
+
+      onFiltersChange([
+        {
+          field: newFilter.field,
+          operator: newFilter.operator,
+          value: newFilter.value,
+          label,
+        },
+      ]);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [newFilter.field, newFilter.operator, newFilter.value, filterOptions, onFiltersChange]);
 
   const clearAllFilters = () => {
-    setActiveFilters([]);
+    setNewFilter({ field: "", operator: "", value: "" });
     onFiltersChange([]);
   };
 
-  const selectedFieldOption = filterOptions.find(opt => opt.field === newFilter.field);
+  const selectedFieldOption = filterOptions.find((opt) => opt.field === newFilter.field);
   const availableOperators = selectedFieldOption ? operatorOptions[selectedFieldOption.type] : [];
 
   const getFieldIcon = (type: string) => {
@@ -150,15 +125,15 @@ export function AdvancedFilters({ entity, onFiltersChange, className = "" }: Adv
   };
 
   return (
-    <div className={`bg-white border border-gray-200 rounded-lg ${className}`}>
+    <div className={`bg-white border border-gray-200 rounded-lg text-xs ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+      <div className="flex items-center justify-between p-2 border-b border-gray-200">
         <div className="flex items-center space-x-2">
-          <Filter className="h-5 w-5 text-gray-500" />
-          <span className="font-medium text-gray-900">Advanced Filters</span>
-          {activeFilters.length > 0 && (
-            <span className="bg-orange-100 text-orange-800 text-xs font-medium px-2 py-1 rounded-full">
-              {activeFilters.length}
+          <Filter className="h-4 w-4 text-gray-500" />
+          <span className="font-extralight text-gray-900">Advanced Filters</span>
+          {newFilter.field && newFilter.operator && newFilter.value !== "" && (
+            <span className="bg-orange-100 text-orange-800 text-xs font-medium p-1 rounded-full">
+              live
             </span>
           )}
         </div>
@@ -171,40 +146,27 @@ export function AdvancedFilters({ entity, onFiltersChange, className = "" }: Adv
       </div>
 
       {/* Active Filters */}
-      {activeFilters.length > 0 && (
-        <div className="p-4 border-b border-gray-200 bg-gray-50">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">Active Filters:</span>
-            <button
-              onClick={clearAllFilters}
-              className="text-xs text-red-600 hover:text-red-800"
-            >
-              Clear All
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {activeFilters.map((filter, index) => (
-              <div
-                key={index}
-                className="inline-flex items-center bg-orange-100 text-orange-800 text-sm px-3 py-1 rounded-full"
-              >
-                <span>{filter.label}</span>
-                <button
-                  onClick={() => removeFilter(index)}
-                  className="ml-2 text-orange-600 hover:text-orange-800"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </div>
-            ))}
-          </div>
+      <div className="p-2 border-b border-gray-200 bg-gray-50 text-xs">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-medium text-gray-700">Current Filter</span>
+          <button
+            onClick={clearAllFilters}
+            className="text-xs text-red-600 hover:text-red-800"
+          >
+            Clear
+          </button>
         </div>
-      )}
+        <div className="text-xs text-gray-600">
+          {newFilter.field && newFilter.operator && newFilter.value !== ""
+            ? `${filterOptions.find((opt) => opt.field === newFilter.field)?.label || newFilter.field} ${operatorOptions[selectedFieldOption?.type || "text"].find((op) => op.value === newFilter.operator)?.label || newFilter.operator} ${newFilter.value}`
+            : "No filter selected yet."}
+        </div>
+      </div>
 
       {/* Filter Form */}
       {isOpen && (
-        <div className="p-4 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="p-3 sm:p-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 items-end">
             <FormField
               label="Field"
               name="field"
@@ -212,6 +174,7 @@ export function AdvancedFilters({ entity, onFiltersChange, className = "" }: Adv
               value={newFilter.field}
               onChange={(value) => setNewFilter(prev => ({ ...prev, field: value, operator: "", value: "" }))}
               options={filterOptions.map(opt => ({ value: opt.field, label: opt.label }))}
+              className="transition-all duration-200"
             />
 
             {selectedFieldOption && (
@@ -224,35 +187,36 @@ export function AdvancedFilters({ entity, onFiltersChange, className = "" }: Adv
                 options={availableOperators}
               />
             )}
+            {/* Value */}
+            <div
+              className={`transition-all duration-300 ease-out ${selectedFieldOption && newFilter.operator
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 -translate-y-2 pointer-events-none h-0 overflow-hidden sm:h-auto"
+                }`}
+            >
+              {selectedFieldOption && newFilter.operator && (
+                <div className="relative">
+                  <FormField
+                    label="Value"
+                    name="value"
+                    type={selectedFieldOption.type === "boolean" ? "select" : selectedFieldOption.type}
+                    value={newFilter.value}
+                    onChange={(value) => setNewFilter(prev => ({ ...prev, value }))}
+                    options={selectedFieldOption.type === "boolean" ? [
+                      { value: "true", label: "Yes" },
+                      { value: "false", label: "No" }
+                    ] : selectedFieldOption.options}
+                  />
+                </div>
+              )}
+            </div>
 
-            {selectedFieldOption && newFilter.operator && (
-              <div className="relative">
-                <FormField
-                  label="Value"
-                  name="value"
-                  type={selectedFieldOption.type === "boolean" ? "select" : selectedFieldOption.type}
-                  value={newFilter.value}
-                  onChange={(value) => setNewFilter(prev => ({ ...prev, value }))}
-                  options={selectedFieldOption.type === "boolean" ? [
-                    { value: "true", label: "Yes" },
-                    { value: "false", label: "No" }
-                  ] : selectedFieldOption.options}
-                >
-                  <div className="absolute left-3 top-8 pointer-events-none">
-                    {getFieldIcon(selectedFieldOption.type)}
-                  </div>
-                </FormField>
-              </div>
-            )}
-
-            <div className="flex items-end">
-              <button
-                onClick={addFilter}
-                disabled={!newFilter.field || !newFilter.operator || newFilter.value === ""}
-                className="w-full px-4 py-2 bg-orange-600 text-white text-sm font-medium rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Add Filter
-              </button>
+            {/* Helper text */}
+            <div className="flex items-center sm:items-end h-full pb-1">
+              <p className="text-xs text-muted-foreground flex items-center gap-1.5 p-3">
+                <span className="inline-block w-5 h-5 rounded-full bg-blue-500 animate-pulse" />
+                <span className="ml-4">Filters apply automatically</span>
+              </p>
             </div>
           </div>
         </div>

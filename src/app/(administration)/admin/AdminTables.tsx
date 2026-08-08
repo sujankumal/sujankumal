@@ -4,6 +4,7 @@ import { ImageIcon } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import Image from "next/image";
 import { AdminColumn } from "@/config/types";
+import { formatImageUrl } from "@/lib/image";
 
 interface TableSectionProps {
   columns: AdminColumn[];
@@ -14,32 +15,6 @@ interface TableSectionProps {
 function ImageCell({ value, field }: { value: string; field: string }) {
   const [imageError, setImageError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Format image URL to match your existing pattern
-  const formatImageUrl = (url: string): string => {
-    if (!url || typeof url !== 'string') return '';
-
-    const trimmedUrl = url.trim();
-    if (!trimmedUrl) return '';
-
-    // If it's already an absolute URL, return as is
-    if (trimmedUrl.startsWith('http://') || trimmedUrl.startsWith('https://')) {
-      return trimmedUrl;
-    }
-
-    // If it already starts with /images/, return as is
-    if (trimmedUrl.startsWith('/images/')) {
-      return trimmedUrl;
-    }
-
-    // If it starts with /, return as is (for other absolute paths)
-    if (trimmedUrl.startsWith('/')) {
-      return trimmedUrl;
-    }
-
-    // Otherwise, prepend with /images/ to match your existing pattern
-    return `/images/${trimmedUrl}`;
-  };
 
   const imageSrc = formatImageUrl(value);
 

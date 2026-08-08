@@ -11,6 +11,12 @@ export const postSchema = z.object({
     year: z.number().int().min(2000).max(2100),
     published: z.boolean().default(false),
     authorId: z.coerce.number().nullable().optional(),
+    categoryIds: z.array(z.coerce.number()).optional(),
+    contentBlocks: z.array(z.object({
+        type: z.string().min(1, "Block type is required"),
+        content: z.string().nullable().optional(),
+        sequence: z.coerce.number().optional(),
+    })).optional(),
 });
 
 export type PostSchemaType = z.infer<typeof postSchema>;

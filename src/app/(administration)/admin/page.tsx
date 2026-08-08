@@ -21,14 +21,7 @@ async function Admin() {
     }
 
     return (
-        <main className="min-h-screen bg-gray-50">
-            {/* ...existing navbar code... */}
-            <nav className="bg-white border-b-2 border-gray-200 dark:bg-gray-900">
-                <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-1">
-                    {/* ...existing navbar content... */}
-                </div>
-            </nav>
-
+        <main className="min-h-screen bg-gray-50 rounded-2xl opacity-80">            
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
@@ -57,6 +50,7 @@ async function Admin() {
                     description="Manage posts, categories, and content blocks"
                     defaultExpanded={true}
                 >
+                    <div  className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <CollapsibleSection
                         title="Posts"
                         entity="posts"
@@ -85,6 +79,7 @@ async function Admin() {
                     >
                         <LazyAdminTable entity="categoriesonposts" />
                     </CollapsibleSection>
+                    </div>
                 </CollapsibleSectionGroup>
 
                 {/* User Management */}
@@ -92,6 +87,7 @@ async function Admin() {
                     title="👥 User Management"
                     description="Manage users, profiles, and authentication"
                 >
+                    <div  className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <CollapsibleSection
                         title="Users"
                         entity="user"
@@ -105,6 +101,7 @@ async function Admin() {
                     >
                         <LazyAdminTable entity="profiles" />
                     </CollapsibleSection>
+                    </div>
                 </CollapsibleSectionGroup>
 
                 {/* Site Management */}
@@ -112,6 +109,7 @@ async function Admin() {
                     title="⚙️ Site Management"
                     description="Manage site settings, projects, and social links"
                 >
+                    <div  className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <CollapsibleSection
                         title="Site Settings"
                         entity="site"
@@ -139,6 +137,7 @@ async function Admin() {
                     >
                         <LazyAdminTable entity="updates" />
                     </CollapsibleSection>
+                    </div>
                 </CollapsibleSectionGroup>
 
                 {/* System Tables */}
@@ -146,6 +145,7 @@ async function Admin() {
                     title="🔧 System Tables"
                     description="Authentication and system data (read-only)"
                 >
+                    <div  className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <CollapsibleSection
                         title="Accounts"
                         entity="account"
@@ -166,6 +166,7 @@ async function Admin() {
                     >
                         <LazyAdminTable entity="verificationtokens" isCRUD={false} />
                     </CollapsibleSection>
+                    </div>
                 </CollapsibleSectionGroup>
             </div>
         </main>

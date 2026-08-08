@@ -17,8 +17,7 @@ export function ShareRequests() {
       // Note: In a real implementation, you'd need to handle the WebRTC connection setup
       // console.log('Starting file transfer for request:', request.id);
     } catch (error) {
-      // console.error('Error accepting request:', error);
-      alert('Failed to accept request. Please try again.');
+      alert(error instanceof Error ? error.message : 'Failed to accept request. Please try again.');
     } finally {
       setProcessingRequest(null);
     }

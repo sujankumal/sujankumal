@@ -12,15 +12,18 @@ export interface FileTransfer {
   fileSize: number;
   fileType: string;
   progress: number;
-  status: 'pending' | 'transferring' | 'completed' | 'failed';
+  status: 'pending' | 'preparing' | 'transferring' | 'finalizing' | 'paused' | 'completed' | 'failed' | 'cancelled';
   senderId: string;
   senderName: string;
   receiverId: string;
   receiverName: string;
   timestamp: number;
+  completedAt?: number;     // epoch ms when finished (for history sorting)
   direction: 'sending' | 'receiving';
-  speed?: number; // bytes per second
-  eta?: number; // estimated time remaining in seconds
+  speed?: number;           // bytes per second
+  eta?: number;             // estimated time remaining in seconds
+  transferredBytes?: number; // bytes moved so far
+  errorMessage?: string;    // human-readable error detail
 }
 
 export interface PeerUser {
@@ -50,17 +53,36 @@ export interface ShareRequest {
   timestamp: number;
 }
 
+export interface OverallProgress {
+  total: number;
+  active: number;
+  paused: number;
+  completed: number;
+  failed: number;
+  cancelled: number;
+  remaining: number; // not yet completed
+  totalBytes: number;
+  transferredBytes: number;
+  overallPercent: number;
+}
+
 interface P2PContextType {
   availableUsers: PeerUser[];
   fileTransfers: FileTransfer[];
   shareRequests: ShareRequest[];
   isAvailable: boolean;
   availabilityLoaded: boolean;
+  overallProgress: OverallProgress;
   setAvailable: (available: boolean) => void;
   sendShareRequest: (toUserId: string, files: File[], requestId: string, message?: string) => Promise<void>;
   acceptShareRequest: (requestId: string) => Promise<void>;
   rejectShareRequest: (requestId: string) => Promise<void>;
-  startFileTransfer: (requestId: string, files: File[]) => Promise<void>;
+  startFileTransfer: (requestId: string, files: File[], receiverName?: string, receiverId?: string) => Promise<void>;
+  pauseTransfer: (id: string) => void;
+  resumeTransfer: (id: string) => void;
+  cancelTransfer: (id: string) => void;
+  retryTransfer: (id: string) => Promise<void>;
+  clearHistory: () => void;
   peerConnection: RTCPeerConnection | null;
 }
 
@@ -78,6 +100,10 @@ const ICE_SERVERS = [
   { urls: 'stun:stun.l.google.com:19302' },
   { urls: 'stun:stun1.l.google.com:19302' },
 ];
+
+// Safari and Firefox do not reliably expose a user-selected writable directory.
+// Their fallback receives into browser memory, so keep that mode intentionally small.
+const BROWSER_ONLY_MAX_FILE_SIZE = 500 * 1024 * 1024;
 
 interface P2PProviderProps {
   children: React.ReactNode;
@@ -156,17 +182,27 @@ const sha256Hex = async (buffer: ArrayBuffer) => {
 export function P2PProvider({ children }: P2PProviderProps) {
   const { user } = useAuth();
   const [availableUsers, setAvailableUsers] = useState<PeerUser[]>([]);
+  // Transfers are intentionally kept only for the lifetime of this page. A reload
+  // closes WebRTC channels, so restoring stale progress would be misleading.
   const [fileTransfers, setFileTransfers] = useState<FileTransfer[]>([]);
   const [shareRequests, setShareRequests] = useState<ShareRequest[]>([]);
   const [isAvailable, setIsAvailable] = useState(false);
   const [peerConnection, setPeerConnection] = useState<RTCPeerConnection | null>(null);
   const [availabilityLoaded, setAvailabilityLoaded] = useState(false);
+
+  // Pause / cancel tracking (by transferId)
+  const pausedTransfersRef = React.useRef<Set<string>>(new Set());
+  const cancelledTransfersRef = React.useRef<Set<string>>(new Set());
+  // Map of transferId -> File for retry support
+  const transferFilesRef = React.useRef<Map<string, { file: File; requestId: string; dataChannel: RTCDataChannel }>>(new Map());
+
   // E2EE session ephemeral storage
   const e2eeEphemeralRef = React.useRef<Record<string, { priv?: CryptoKey, pubRaw?: string, salt?: string }>>({});
   const e2eeKeysRef = React.useRef<Record<string, CryptoKey>>({});
   // Candidate queue for sessions: store remote ICE candidates that arrive before
   // remoteDescription is set on the RTCPeerConnection. Keyed by session/requestId.
   const candidateQueueRef = React.useRef<Record<string, RTCIceCandidateInit[]>>({});
+
 
   // Try to initialize client firebase at runtime (if server-side provided config exists)
   useEffect(() => {
@@ -302,7 +338,7 @@ export function P2PProvider({ children }: P2PProviderProps) {
     }
   }, [user]);
 
-  const drainCandidateQueue = async (sessionId: string, pc: RTCPeerConnection) => {
+  const drainCandidateQueue = useCallback(async (sessionId: string, pc: RTCPeerConnection) => {
     const queue = candidateQueueRef.current[sessionId];
     if (!queue || !pc) return;
     for (const candInit of queue) {
@@ -313,7 +349,7 @@ export function P2PProvider({ children }: P2PProviderProps) {
       }
     }
     delete candidateQueueRef.current[sessionId];
-  };
+  }, []);
 
   const queueOrAddCandidate = async (sessionId: string, pc: RTCPeerConnection, candInit: RTCIceCandidateInit) => {
     try {
@@ -342,6 +378,11 @@ export function P2PProvider({ children }: P2PProviderProps) {
     return newTransfer.id;
   }, []);
 
+  const addFileTransferWithId = useCallback((id: string, transfer: Omit<FileTransfer, 'id'>) => {
+    setFileTransfers(previous => [...previous, { ...transfer, id }]);
+    return id;
+  }, []);
+
   const updateFileTransfer = useCallback((id: string, updates: Partial<FileTransfer>) => {
     setFileTransfers(prev =>
       prev.map(transfer =>
@@ -349,6 +390,77 @@ export function P2PProvider({ children }: P2PProviderProps) {
       )
     );
   }, []);
+
+  // ── Pause / Resume / Cancel / Retry / Clear ──────────────────────────────
+
+  const pauseTransfer = useCallback((id: string) => {
+    pausedTransfersRef.current.add(id);
+    updateFileTransfer(id, { status: 'paused' });
+  }, [updateFileTransfer]);
+
+  const resumeTransfer = useCallback((id: string) => {
+    pausedTransfersRef.current.delete(id);
+    updateFileTransfer(id, { status: 'transferring' });
+  }, [updateFileTransfer]);
+
+  const cancelTransfer = useCallback((id: string) => {
+    cancelledTransfersRef.current.add(id);
+    pausedTransfersRef.current.delete(id); // unblock loop so it can detect cancel
+    updateFileTransfer(id, { status: 'cancelled', completedAt: Date.now() });
+    // Send cancel control message if we have a data channel open
+    const entry = transferFilesRef.current.get(id);
+    if (entry?.dataChannel && entry.dataChannel.readyState === 'open') {
+      try {
+        entry.dataChannel.send(JSON.stringify({ type: 'transfer-cancel', transferId: id }));
+      } catch { /* ignore */ }
+    }
+    transferFilesRef.current.delete(id);
+  }, [updateFileTransfer]);
+
+  const retryTransfer = useCallback(async (id: string) => {
+    const entry = transferFilesRef.current.get(id);
+    if (!entry) return;
+    const { file, requestId, dataChannel } = entry;
+    if (dataChannel.readyState !== 'open') return;
+
+    // Remove old cancelled/failed transfer from state and clean up tracking
+    cancelledTransfersRef.current.delete(id);
+    pausedTransfersRef.current.delete(id);
+    transferFilesRef.current.delete(id);
+    setFileTransfers(prev => prev.filter(t => t.id !== id));
+
+    // Create a new transfer record
+    const newTransferId = addFileTransfer({
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type,
+      progress: 0,
+      status: 'transferring',
+      senderId: user?.uid || 'unknown',
+      senderName: user?.displayName || 'Unknown User',
+      receiverId: 'unknown',
+      receiverName: 'Unknown User',
+      timestamp: Date.now(),
+      direction: 'sending',
+      transferredBytes: 0,
+    });
+
+    // Register the new transfer entry so it can be paused/cancelled/retried
+    transferFilesRef.current.set(newTransferId, { file, requestId, dataChannel });
+
+    // Re-send
+    // sendFile is defined below; we call it via a helper to avoid circular deps
+    sendFileRef.current?.(dataChannel, file, newTransferId, requestId);
+  }, [addFileTransfer, user]);
+
+  const clearHistory = useCallback(() => {
+    setFileTransfers(prev => prev.filter(t =>
+      t.status === 'transferring' || t.status === 'finalizing' || t.status === 'paused'
+    ));
+  }, []);
+
+  // Forward ref so retryTransfer can call sendFile before it's defined below
+  const sendFileRef = React.useRef<((dc: RTCDataChannel, file: File, transferId?: string, sessionId?: string) => Promise<void>) | null>(null);
 
 
 
@@ -522,7 +634,7 @@ export function P2PProvider({ children }: P2PProviderProps) {
   }, [user]);
 
   // Setup WebRTC as receiver (when accepting a request)
-  const setupWebRTCReceiver = useCallback(async (requestId: string, senderUserId: string, senderName?: string, fileHandle?: any) => {
+  const setupWebRTCReceiver = useCallback(async (requestId: string, senderUserId: string, senderName?: string, destinationDirectory?: any) => {
     if (!user) return;
 
     if (!database) return;
@@ -570,6 +682,21 @@ export function P2PProvider({ children }: P2PProviderProps) {
         }
       };
 
+      dataChannel.onclose = () => {
+        Object.values(receivedFiles).forEach((fileRecord) => {
+          if (fileRecord.transferId) {
+            updateFileTransfer(fileRecord.transferId, {
+              status: 'failed',
+              errorMessage: 'Connection closed before Chrome could finish saving the file.',
+              completedAt: Date.now(),
+            });
+          }
+          if (fileRecord.writeableStream) {
+            fileRecord.writeableStream.abort().catch(() => { });
+          }
+        });
+      };
+
       dataChannel.onmessage = async (event) => {
         const isArrayBuffer = event.data instanceof ArrayBuffer;
         const isString = typeof event.data === 'string';
@@ -582,8 +709,29 @@ export function P2PProvider({ children }: P2PProviderProps) {
             return;
           }
 
+          if (message.type === 'transfer-pause') {
+            // Sender has paused - reflect in receiver UI
+            const { transferId } = message;
+            if (transferId) updateFileTransfer(transferId, { status: 'paused' });
+            return;
+          }
+
+          if (message.type === 'transfer-resume') {
+            // Sender has resumed - reflect in receiver UI
+            const { transferId } = message;
+            if (transferId) updateFileTransfer(transferId, { status: 'transferring' });
+            return;
+          }
+
+          if (message.type === 'transfer-cancel') {
+            // Sender has cancelled - mark cancelled in receiver UI
+            const { transferId } = message;
+            if (transferId) updateFileTransfer(transferId, { status: 'cancelled', completedAt: Date.now() });
+            return;
+          }
+
           if (message.type === 'fileStart') {
-            const { fileName, fileSize, fileType, totalChunks, fileHash, e2ee, ivPrefix } = message;
+            const { fileName, fileSize, fileType, totalChunks, fileHash, e2ee, ivPrefix, transferId } = message;
 
             // 1. E2EE Downgrade Attack Protection
             const isSessionE2ee = !!e2eeKeysRef.current[requestId];
@@ -592,35 +740,66 @@ export function P2PProvider({ children }: P2PProviderProps) {
               return;
             }
 
-            // 2. DoS / Memory Exhaustion Protection
-            // If streaming to disk, we can support huge files.
-            // If in memory, limit to 2GB to avoid OOM.
-
-            // const MAX_ALLOWED_CHUNKS = 100000;
-            // const MAX_ALLOWED_SIZE = 5 * 1024 * 1024 * 1024; // 5GB
-            // if (totalChunks > MAX_ALLOWED_CHUNKS || totalChunks <= 0 || fileSize > MAX_ALLOWED_SIZE || fileSize <= 0) {
-            //   return;
-            // }
-            const maxAllowedSize = fileHandle ? 50 * 1024 * 1024 * 1024 : 2 * 1024 * 1024 * 1024; // 50GB vs 2GB
-
-            if (fileSize > maxAllowedSize || fileSize <= 0 || totalChunks <= 0) {
-              return;
-            }
-
             // 3. Filename Sanitization (Path Traversal Protection)
             const safeFileName = fileName.replace(/[\/\\]/g, '_');
 
-            // Initialize writeable stream if file handle is available
+            // 2. DoS / Memory Exhaustion Protection
+            const MAX_RAM_FILE_SIZE = 1.5 * 1024 * 1024 * 1024; // 1.5GB max in RAM
             let writeableStream: any = null;
-            if (fileHandle) {
+            if (destinationDirectory) {
               try {
-                writeableStream = await fileHandle.createWriteable();
+                const destinationFile = await destinationDirectory.getFileHandle(safeFileName, { create: true });
+                writeableStream = await destinationFile.createWritable();
               } catch (error) {
                 writeableStream = null;
               }
             }
 
-            const transferId = addFileTransfer({
+            if (!writeableStream && fileSize > MAX_RAM_FILE_SIZE) {
+              const errorMessage = 'Receiver cannot safely store this file in memory. Choose a save location in a supported browser, or send a smaller file.';
+              const failedTransferId = transferId || addFileTransfer({
+                fileName: safeFileName,
+                fileSize,
+                fileType,
+                progress: 0,
+                status: 'failed',
+                errorMessage,
+                senderId: senderUserId,
+                senderName: senderName || 'Unknown User',
+                receiverId: user?.uid || 'unknown',
+                receiverName: user?.displayName || 'Unknown User',
+                timestamp: Date.now(),
+                completedAt: Date.now(),
+                direction: 'receiving',
+              });
+              if (transferId) {
+                addFileTransferWithId(transferId, {
+                  fileName: safeFileName,
+                  fileSize,
+                  fileType,
+                  progress: 0,
+                  status: 'failed',
+                  errorMessage,
+                  senderId: senderUserId,
+                  senderName: senderName || 'Unknown User',
+                  receiverId: user?.uid || 'unknown',
+                  receiverName: user?.displayName || 'Unknown User',
+                  timestamp: Date.now(),
+                  completedAt: Date.now(),
+                  direction: 'receiving',
+                });
+              }
+              try {
+                dataChannel.send(JSON.stringify({ type: 'transfer-rejected', transferId: failedTransferId, errorMessage }));
+              } catch {
+                // The receiver still has a local failed record if the channel closed.
+              }
+              return;
+            }
+
+            // The sender's ID is shared by both peers so receiver progress and
+            // pause/cancel messages update the same transfer record.
+            const localTransferId = transferId || addFileTransfer({
               fileName: safeFileName,
               fileSize,
               fileType,
@@ -633,12 +812,28 @@ export function P2PProvider({ children }: P2PProviderProps) {
               timestamp: Date.now(),
               direction: 'receiving',
             });
+            if (transferId) {
+              addFileTransferWithId(transferId, {
+                fileName: safeFileName,
+                fileSize,
+                fileType,
+                progress: 0,
+                status: 'transferring',
+                senderId: senderUserId,
+                senderName: senderName || 'Unknown User',
+                receiverId: user?.uid || 'unknown',
+                receiverName: user?.displayName || 'Unknown User',
+                timestamp: Date.now(),
+                direction: 'receiving',
+                transferredBytes: 0,
+              });
+            }
             receivedFiles[safeFileName] = {
-              chunks: fileHandle ? [] : new Array(totalChunks).fill(null),
+              chunks: writeableStream ? [] : new Array(totalChunks).fill(null),
               totalChunks,
               size: fileSize,
               type: fileType,
-              transferId,
+              transferId: localTransferId,
               startTime: Date.now(),
               receivedCount: 0,
               fileHash,
@@ -712,7 +907,7 @@ export function P2PProvider({ children }: P2PProviderProps) {
               }
 
               const receivedBytes = fileRecord.writeableStream
-                ? fileRecord.receivedCount * (64 * 1024) // estimate for progress reporting
+                ? Math.min(fileRecord.receivedCount * (64 * 1024), fileRecord.size) // estimate for progress reporting
                 : fileRecord.chunks.reduce((acc, c) => acc + (c ? c.byteLength : 0), 0);
 
               const progress = Math.min((receivedBytes / fileRecord.size) * 100, 100);
@@ -720,16 +915,26 @@ export function P2PProvider({ children }: P2PProviderProps) {
                 const elapsed = (Date.now() - fileRecord.startTime) / 1000;
                 const speed = elapsed > 0 ? receivedBytes / elapsed : 0;
                 const eta = speed > 0 ? (fileRecord.size - receivedBytes) / speed : 0;
-                updateFileTransfer(fileRecord.transferId, { progress, speed, eta });
+                updateFileTransfer(fileRecord.transferId, { progress, speed, eta, transferredBytes: receivedBytes });
               }
 
               // If we've received all chunks, assemble and decrypt
               if (fileRecord.receivedCount === fileRecord.totalChunks) {
                 try {
                   if (fileRecord.writeableStream) {
+                    updateFileTransfer(fileRecord.transferId!, {
+                      status: 'finalizing',
+                      progress: 100,
+                    });
                     await fileRecord.writeableStream.close();
-                    if (fileRecord.transferId) updateFileTransfer(fileRecord.transferId, { progress: 100, status: 'completed' });
+                    if (fileRecord.transferId) updateFileTransfer(fileRecord.transferId, { progress: 100, status: 'completed', transferredBytes: fileRecord.size });
                     delete receivedFiles[activeFileName];
+                    try {
+                      dataChannel.send(JSON.stringify({ type: 'transfer-complete', transferId: fileRecord.transferId }));
+                    } catch {
+                      // The receiver has already completed the local write.
+                    }
+                    if (fileRecord.transferId) updateFileTransfer(fileRecord.transferId, { status: 'completed', completedAt: Date.now() });
                   } else {
                     // Fallback : Assemble plaintext chunks in memory
                     const totalSize = fileRecord.chunks.reduce((acc, c) => acc + (c ? c.byteLength : 0), 0);
@@ -765,7 +970,10 @@ export function P2PProvider({ children }: P2PProviderProps) {
                       delete receivedFiles[activeFileName];
                       return;
                     }
-
+                    updateFileTransfer(fileRecord.transferId!, {
+                      status: 'finalizing',
+                      progress: 100,
+                    });
                     const blob = new Blob([combined], { type: fileRecord.type });
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
@@ -776,7 +984,12 @@ export function P2PProvider({ children }: P2PProviderProps) {
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
 
-                    if (fileRecord.transferId) updateFileTransfer(fileRecord.transferId, { progress: 100, status: 'completed' });
+                    if (fileRecord.transferId) updateFileTransfer(fileRecord.transferId, { progress: 100, status: 'completed', completedAt: Date.now(), transferredBytes: fileRecord.size });
+                    try {
+                      dataChannel.send(JSON.stringify({ type: 'transfer-complete', transferId: fileRecord.transferId }));
+                    } catch {
+                      // The receiver has already completed the local write.
+                    }
                     delete receivedFiles[activeFileName];
                   }
                 } catch (e) {
@@ -831,6 +1044,7 @@ export function P2PProvider({ children }: P2PProviderProps) {
           // Only set remote description if we're in the right state
           if (pc.signalingState === 'stable') {
             await pc.setRemoteDescription(new RTCSessionDescription({ type: 'offer', sdp: data.sdp }));
+            await drainCandidateQueue(requestId, pc);
 
             // Create answer
             const answer = await pc.createAnswer();
@@ -924,30 +1138,10 @@ export function P2PProvider({ children }: P2PProviderProps) {
       }
     });
 
-    // Cleanup after 5 minutes
-    const cleanupTimer = setTimeout(() => {
-      try {
-        unsubscribe();
-      } catch (e) {
-        // ignore
-      }
-      try {
-        pc.close();
-      } catch (e) {
-        // ignore
-      }
-      // Attempt to remove signaling session to avoid lingering data
-      try {
-        const sigRef = ref(db, `signaling/${requestId}`);
-        remove(sigRef).catch(() => { /* ignore */ });
-      } catch (e) {
-        // ignore
-      }
-    }, 5 * 60 * 1000);
-
-    // Also return a small cleanup function in case caller wants to close earlier (not used now)
-    // Not returning from useCallback; we rely on timer above
-  }, [addFileTransfer, deriveSessionKey, ensurePeerRegistered, exportEphemeralPublicRaw, generateOrEnsureLongtermKey, signBytesWithLongterm, updateFileTransfer, user, verifyEphemeralSignature]);
+    // Do not apply a fixed connection timeout: large files can legitimately take
+    // much longer than five minutes. Closing this stream early discards Chrome's
+    // temporary .crswap file before it can be committed.
+  }, [addFileTransfer, addFileTransferWithId, deriveSessionKey, drainCandidateQueue, ensurePeerRegistered, exportEphemeralPublicRaw, generateOrEnsureLongtermKey, signBytesWithLongterm, updateFileTransfer, user, verifyEphemeralSignature]);
 
   // Accept share request
   const acceptShareRequest = useCallback(async (requestId: string) => {
@@ -957,17 +1151,20 @@ export function P2PProvider({ children }: P2PProviderProps) {
     if (!request) return;
     // Prompt the user for download location immediately (within user click gesture)
 
-    let fileHandle: any = null;
-    if (typeof window !== 'undefined' && 'showSaveFilePicker' in window) {
+    let destinationDirectory: any = null;
+    const supportsDiskStreaming = typeof window !== 'undefined' && 'showDirectoryPicker' in window;
+    if (!supportsDiskStreaming && request.files.some(file => file.size > BROWSER_ONLY_MAX_FILE_SIZE)) {
+      alert('This browser supports files up to 500 MB. Use Chrome or Edge on the receiving device for larger direct-to-folder transfers.');
+      // throw new Error('This browser supports files up to 500 MB. Use Chrome or Edge on the receiving device for larger direct-to-folder transfers.');
+    }
+
+    if (supportsDiskStreaming) {
       try {
-        const firstFile = request.files?.[0];
-        const suggestedName = firstFile ? firstFile.name.replace(/[\/\\]/g, '_') : 'download';
-        fileHandle = await (window as any).showSaveFilePicker({
-          suggestedName,
-        });
+        destinationDirectory = await (window as any).showDirectoryPicker({ mode: 'readwrite' });
       } catch (e) {
-        // User cancelled picker or browser blocked it. Fall back to RAM.
-        fileHandle = null;
+        // User cancelled picker or browser blocked it. The receiver can still
+        // accept files that fit safely in memory.
+        destinationDirectory = null;
       }
     }
 
@@ -978,7 +1175,7 @@ export function P2PProvider({ children }: P2PProviderProps) {
     await update(requestRef, { status: 'accepted', acceptedAt: Date.now() });
 
     // Start WebRTC connection as receiver using the requestId from the request
-    await setupWebRTCReceiver(request.requestId, request.fromUserId, request.fromUserName, fileHandle);
+    await setupWebRTCReceiver(request.requestId, request.fromUserId, request.fromUserName, destinationDirectory);
   }, [user, shareRequests, setupWebRTCReceiver]);
 
   // Helper function to send file through data channel
@@ -1027,21 +1224,38 @@ export function P2PProvider({ children }: P2PProviderProps) {
       }, timeout);
     });
   }, []);
-  // sendFile: chunk file, include sequence numbers, wait for per-chunk ACKs, and send file-level SHA-256 for verification
+  // sendFile: chunk file, include sequence numbers, support pause/cancel, and send file-level SHA-256 for verification
   const sendFile = useCallback(async (dataChannel: RTCDataChannel, file: File, transferId?: string, sessionId?: string) => {
     const chunkSize = 64 * 1024; // 64KB
     const totalChunks = Math.ceil(file.size / chunkSize);
     const startTime = Date.now();
+    let pausedMs = 0; // total time spent paused (excluded from speed calc)
+
+    // Update status to preparing while computing checksum / initiating
+    if (transferId) {
+      updateFileTransfer(transferId, { status: 'preparing' });
+    }
 
     // Precompute file hash for verification
     let fileHash = '';
     try {
-      const whole = await file.arrayBuffer();
-      fileHash = await sha256Hex(whole);
+      // Only pre-hash files <= 100MB to prevent V8 ArrayBuffer memory crash & UI freeze on multi-GB files (e.g. 7GB)
+      if (file.size <= 100 * 1024 * 1024) {
+        const whole = await file.arrayBuffer();
+        fileHash = await sha256Hex(whole);
+      }
     } catch (e) {
       // if hashing fails, proceed without hash (verification skipped)
       fileHash = '';
     }
+
+    // Transition to transferring state
+    if (transferId) {
+      updateFileTransfer(transferId, { status: 'transferring' });
+    }
+
+    // Early-exit if cancelled before we even start
+    if (transferId && cancelledTransfersRef.current.has(transferId)) return;
 
     // Prepare E2EE if session key available
     let sessionKey: CryptoKey | undefined;
@@ -1067,6 +1281,7 @@ export function P2PProvider({ children }: P2PProviderProps) {
         fileType: file.type,
         totalChunks,
         fileHash,
+        transferId: transferId ?? '',
       };
       if (e2eeEnabled && ivPrefixB64) {
         meta.e2ee = true;
@@ -1074,12 +1289,40 @@ export function P2PProvider({ children }: P2PProviderProps) {
       }
       dataChannel.send(JSON.stringify(meta));
     } catch (e) {
-      if (transferId) updateFileTransfer(transferId, { status: 'failed' });
+      if (transferId) updateFileTransfer(transferId, { status: 'failed', errorMessage: 'Failed to initiate file transfer', completedAt: Date.now() });
       return;
     }
 
     // send chunks sequentially, streaming through backpressure checks
     for (let seq = 0; seq < totalChunks; seq++) {
+      // ── Pause check ───────────────────────────────────────────────────────
+      if (transferId && pausedTransfersRef.current.has(transferId)) {
+        // Notify receiver we're pausing
+        try {
+          dataChannel.send(JSON.stringify({ type: 'transfer-pause', transferId }));
+        } catch { /* ignore */ }
+        const pauseStart = Date.now();
+        // Wait until resumed or cancelled
+        await new Promise<void>(resolve => {
+          const poll = setInterval(() => {
+            if (transferId && !pausedTransfersRef.current.has(transferId)) {
+              clearInterval(poll);
+              resolve();
+            }
+          }, 200);
+        });
+        pausedMs += Date.now() - pauseStart;
+        // Notify receiver we're resuming
+        try {
+          dataChannel.send(JSON.stringify({ type: 'transfer-resume', transferId }));
+        } catch { /* ignore */ }
+      }
+
+      // ── Cancel check ──────────────────────────────────────────────────────
+      if (transferId && cancelledTransfersRef.current.has(transferId)) {
+        break;
+      }
+
       const start = seq * chunkSize;
       const end = Math.min(start + chunkSize, file.size);
       const slice = file.slice(start, end);
@@ -1087,11 +1330,9 @@ export function P2PProvider({ children }: P2PProviderProps) {
 
       let chunkBuffer: ArrayBuffer;
       if (e2eeEnabled && sessionKey) {
-        // create IV = ivPrefix (8) + seq (4)
         const ivPrefix = ivPrefixB64 ? new Uint8Array(base64ToArrayBuffer(ivPrefixB64)) : crypto.getRandomValues(new Uint8Array(8));
         const iv = new Uint8Array(12);
         iv.set(ivPrefix, 0);
-        // set seq big-endian
         iv[8] = (seq >>> 24) & 0xff;
         iv[9] = (seq >>> 16) & 0xff;
         iv[10] = (seq >>> 8) & 0xff;
@@ -1099,7 +1340,7 @@ export function P2PProvider({ children }: P2PProviderProps) {
         try {
           chunkBuffer = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv.buffer }, sessionKey, arrayBuffer);
         } catch (e) {
-          if (transferId) updateFileTransfer(transferId, { status: 'failed' });
+          if (transferId) updateFileTransfer(transferId, { status: 'failed', errorMessage: 'Encryption failed', completedAt: Date.now() });
           return;
         }
       } else {
@@ -1108,7 +1349,7 @@ export function P2PProvider({ children }: P2PProviderProps) {
 
       // Respect channel state
       if (dataChannel.readyState !== 'open') {
-        if (transferId) updateFileTransfer(transferId, { status: 'failed' });
+        if (transferId) updateFileTransfer(transferId, { status: 'failed', errorMessage: 'Connection closed unexpectedly', completedAt: Date.now() });
         break;
       }
 
@@ -1122,7 +1363,7 @@ export function P2PProvider({ children }: P2PProviderProps) {
       try {
         dataChannel.send(packet.buffer);
       } catch (e) {
-        if (transferId) updateFileTransfer(transferId, { status: 'failed' });
+        if (transferId) updateFileTransfer(transferId, { status: 'failed', errorMessage: 'Network error while sending data', completedAt: Date.now() });
         break;
       }
 
@@ -1136,11 +1377,18 @@ export function P2PProvider({ children }: P2PProviderProps) {
       if (transferId) {
         const bytesSent = Math.min((seq + 1) * chunkSize, file.size);
         const progress = Math.min((bytesSent / file.size) * 100, 100);
-        const elapsed = (Date.now() - startTime) / 1000;
+        const activeMs = (Date.now() - startTime) - pausedMs;
+        const elapsed = activeMs / 1000;
         const speed = elapsed > 0 ? bytesSent / elapsed : 0;
         const eta = speed > 0 ? (file.size - bytesSent) / speed : 0;
-        updateFileTransfer(transferId, { progress, speed, eta });
+        updateFileTransfer(transferId, { progress, speed, eta, transferredBytes: bytesSent });
       }
+    }
+
+    // If cancelled, do not finalize
+    if (transferId && cancelledTransfersRef.current.has(transferId)) {
+      cancelledTransfersRef.current.delete(transferId);
+      return;
     }
 
     // Finalize
@@ -1148,13 +1396,40 @@ export function P2PProvider({ children }: P2PProviderProps) {
       dataChannel.send(JSON.stringify({ type: 'fileComplete', fileName: file.name }));
     } catch (e) { }
 
-    if (transferId) updateFileTransfer(transferId, { progress: 100, status: 'completed' });
+    if (transferId) updateFileTransfer(transferId, { progress: 100, status: 'finalizing', transferredBytes: file.size });
   }, [updateFileTransfer, waitForBufferedAmountLow]);
+
+  // Assign to forward ref so retryTransfer can call it
+  React.useEffect(() => {
+    sendFileRef.current = sendFile;
+  }, [sendFile]);
   // Start file transfer (WebRTC) - called by sender
-  const startFileTransfer = useCallback(async (requestId: string, files: File[]) => {
+  const startFileTransfer = useCallback(async (requestId: string, files: File[], receiverName?: string, receiverId?: string) => {
     if (!user) return;
     if (!database) return;
     const db = database;
+
+    // Resolve receiver info if available
+    let targetName = receiverName;
+    let targetUid = receiverId;
+
+    if (!targetName || !targetUid) {
+      const req = shareRequests.find(r => r.requestId === requestId || r.id === requestId);
+      if (req) {
+        if (req.fromUserId === user.uid) {
+          targetName = targetName || req.toUserName;
+          targetUid = targetUid || req.toUserId;
+        } else {
+          targetName = targetName || req.fromUserName;
+          targetUid = targetUid || req.fromUserId;
+        }
+      }
+    }
+
+    if (!targetName && targetUid) {
+      const peer = availableUsers.find(u => u.uid === targetUid);
+      if (peer) targetName = peer.displayName;
+    }
 
     // Create RTCPeerConnection
     const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
@@ -1168,37 +1443,89 @@ export function P2PProvider({ children }: P2PProviderProps) {
     // Configure data channel for binary data
     dataChannel.binaryType = 'arraybuffer';
 
+    dataChannel.onmessage = (event) => {
+      if (typeof event.data !== 'string') return;
+      try {
+        const message = JSON.parse(event.data);
+        if (message.type === 'transfer-rejected' && message.transferId) {
+          cancelledTransfersRef.current.add(message.transferId);
+          updateFileTransfer(message.transferId, {
+            status: 'failed',
+            errorMessage: message.errorMessage || 'The receiver could not accept this file.',
+            completedAt: Date.now(),
+          });
+        }
+        if (message.type === 'transfer-complete' && message.transferId) {
+          updateFileTransfer(message.transferId, {
+            status: 'completed',
+            completedAt: Date.now(),
+          });
+        }
+      } catch {
+        // Ignore malformed control messages.
+      }
+    };
+
     // Handle data channel events
     dataChannel.onopen = () => {
       // Start sending files with a small delay to ensure connection is stable
-      setTimeout(() => {
-        files.forEach((file) => {
+      setTimeout(async () => {
+        for (const file of files) {
           // Create file transfer record
           const transferId = addFileTransfer({
             fileName: file.name,
             fileSize: file.size,
             fileType: file.type,
             progress: 0,
-            status: 'transferring',
+            status: 'preparing',
             senderId: user?.uid || 'unknown',
             senderName: user?.displayName || 'Unknown User',
-            receiverId: 'unknown', // Will be updated when we know the receiver
-            receiverName: 'Unknown User',
+            receiverId: targetUid || 'unknown',
+            receiverName: targetName || 'Recipient',
             timestamp: Date.now(),
             direction: 'sending',
+            transferredBytes: 0,
           });
 
-          sendFile(dataChannel, file, transferId, requestId);
-        });
+          // Store file reference for pause/cancel/retry
+          transferFilesRef.current.set(transferId, { file, requestId, dataChannel });
+
+          // Send files sequentially so progress is clear
+          await sendFile(dataChannel, file, transferId, requestId);
+
+          // Clean up ref after completion (unless used for retry)
+          const currentEntry = transferFilesRef.current.get(transferId);
+          if (currentEntry) {
+            // Keep for retry if failed or cancelled
+            const currentStatus = currentEntry;
+            // We'll keep it; retryTransfer will clean it up
+          }
+        }
       }, 100);
     };
 
     dataChannel.onclose = () => {
-      // Data channel closed
+      transferFilesRef.current.forEach((entry, transferId) => {
+        if (entry.dataChannel === dataChannel) {
+          updateFileTransfer(transferId, {
+            status: 'failed',
+            errorMessage: 'Connection closed before the receiver confirmed the saved file.',
+            completedAt: Date.now(),
+          });
+        }
+      });
     };
 
     dataChannel.onerror = () => {
-      // Data channel error
+      transferFilesRef.current.forEach((entry, transferId) => {
+        if (entry.dataChannel === dataChannel) {
+          updateFileTransfer(transferId, {
+            status: 'failed',
+            errorMessage: 'A data-channel error interrupted this transfer.',
+            completedAt: Date.now(),
+          });
+        }
+      });
     };
 
     // Handle ICE candidates
@@ -1273,6 +1600,7 @@ export function P2PProvider({ children }: P2PProviderProps) {
           // Only set remote description if we're in the right state
           if (pc.signalingState === 'have-local-offer') {
             await pc.setRemoteDescription(new RTCSessionDescription({ type: 'answer', sdp: data.sdp }));
+            await drainCandidateQueue(requestId, pc);
           }
         } catch (error) {
           // Ignore WebRTC state errors
@@ -1299,27 +1627,25 @@ export function P2PProvider({ children }: P2PProviderProps) {
       }
     });
 
-    const cleanupTimer = setTimeout(() => {
-      try {
-        unsubscribe();
-      } catch (e) {
-        // ignore
-      }
-      try {
-        pc.close();
-      } catch (e) {
-        // ignore
-      }
-      // Attempt to remove signaling session to avoid lingering data
-      try {
-        const sigRef = ref(db, `signaling/${requestId}`);
-        remove(sigRef).catch(() => { /* ignore */ });
-      } catch (e) {
-        // ignore
-      }
-    }, 5 * 60 * 1000);
-  }, [addFileTransfer, deriveSessionKey, ensurePeerRegistered, sendFile, user, verifyEphemeralSignature]);
+    // Keep the peer connection alive for large transfers. It is closed by the
+    // browser or explicit cancellation, rather than an arbitrary five-minute timer.
+  }, [addFileTransfer, availableUsers, deriveSessionKey, drainCandidateQueue, ensurePeerRegistered, sendFile, shareRequests, updateFileTransfer, user, verifyEphemeralSignature]);
 
+
+  // ── Overall progress (derived) ────────────────────────────────────────────
+  const overallProgress = React.useMemo((): OverallProgress => {
+    const total = fileTransfers.length;
+    const active = fileTransfers.filter(t => t.status === 'transferring' || t.status === 'preparing' || t.status === 'finalizing').length;
+    const paused = fileTransfers.filter(t => t.status === 'paused').length;
+    const completed = fileTransfers.filter(t => t.status === 'completed').length;
+    const failed = fileTransfers.filter(t => t.status === 'failed').length;
+    const cancelled = fileTransfers.filter(t => t.status === 'cancelled').length;
+    const remaining = active + paused;
+    const totalBytes = fileTransfers.reduce((a, t) => a + t.fileSize, 0);
+    const transferredBytes = fileTransfers.reduce((a, t) => a + (t.transferredBytes ?? (t.status === 'completed' ? t.fileSize : 0)), 0);
+    const overallPercent = totalBytes > 0 ? Math.min((transferredBytes / totalBytes) * 100, 100) : 0;
+    return { total, active, paused, completed, failed, cancelled, remaining, totalBytes, transferredBytes, overallPercent };
+  }, [fileTransfers]);
 
   const value = {
     availableUsers,
@@ -1327,11 +1653,17 @@ export function P2PProvider({ children }: P2PProviderProps) {
     shareRequests,
     isAvailable,
     availabilityLoaded,
+    overallProgress,
     setAvailable,
     sendShareRequest,
     acceptShareRequest,
     rejectShareRequest,
     startFileTransfer,
+    pauseTransfer,
+    resumeTransfer,
+    cancelTransfer,
+    retryTransfer,
+    clearHistory,
     peerConnection,
   };
 

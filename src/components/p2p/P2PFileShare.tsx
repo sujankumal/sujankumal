@@ -11,12 +11,13 @@ import { FaUsers, FaInbox, FaExchangeAlt, FaUpload } from 'react-icons/fa';
 
 export function P2PFileShare() {
   const { user } = useAuth();
-  const { availableUsers, shareRequests, fileTransfers, isAvailable, acceptShareRequest, rejectShareRequest } = useP2P();
+  const { availableUsers, shareRequests, fileTransfers, isAvailable, overallProgress, acceptShareRequest, rejectShareRequest } = useP2P();
 
-  const activeTransfers = fileTransfers.filter(t => t.status === 'transferring');
+  const activeTransfers = fileTransfers.filter(t => t.status === 'transferring' || t.status === 'preparing' || t.status === 'finalizing' || t.status === 'paused');
   const [activeTab, setActiveTab] = useState<'users' | 'requests' | 'transfers'>('users');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
+  const [supportsDiskStreaming, setSupportsDiskStreaming] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   // transient popover state for incoming requests
   const [popoverRequest, setPopoverRequest] = useState<any | null>(null);
@@ -50,7 +51,7 @@ export function P2PFileShare() {
       id: 'transfers' as const,
       label: 'File Transfers',
       icon: FaExchangeAlt,
-      count: fileTransfers.filter(t => t.status === 'transferring').length,
+      count: fileTransfers.filter(t => t.status === 'transferring' || t.status === 'preparing' || t.status === 'finalizing' || t.status === 'paused').length,
       color: 'purple',
     },
   ];
@@ -73,6 +74,10 @@ export function P2PFileShare() {
     const t = setTimeout(() => setPopoverRequest(null), 20_000);
     return () => clearTimeout(t);
   }, [shareRequests]);
+
+  useEffect(() => {
+    setSupportsDiskStreaming('showDirectoryPicker' in window);
+  }, []);
 
   if (!isAvailable) {
     return (
@@ -107,20 +112,60 @@ export function P2PFileShare() {
         </p>
       </div>
 
+      <div className={`mb-8 rounded-xl border p-4 ${supportsDiskStreaming ? 'border-emerald-200 bg-emerald-50' : 'border-amber-200 bg-amber-50'}`}>
+        <p className={`text-sm font-semibold ${supportsDiskStreaming ? 'text-emerald-900' : 'text-amber-900'}`}>
+          {supportsDiskStreaming ? 'Large-file mode enabled' : 'Browser compatibility mode'}
+        </p>
+        <p className={`mt-1 text-sm ${supportsDiskStreaming ? 'text-emerald-700' : 'text-amber-800'}`}>
+          {supportsDiskStreaming
+            ? 'Incoming files are streamed directly to a folder you select. Large files are supported.'
+            : 'Files up to 500 MB are supported in this browser. Receive larger files with Chrome or Edge.'}
+        </p>
+      </div>
+
+
       {/* Active Transfers Progress */}
       {activeTransfers.length > 0 && (
         <div className="mb-8">
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Active Transfers ({activeTransfers.length})
-            </h2>
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Active Transfers ({activeTransfers.length})
+              </h2>
+              {overallProgress.remaining > 0 && (
+                <span className="text-sm text-indigo-600 font-medium bg-indigo-50 px-3 py-1 rounded-full">
+                  {overallProgress.remaining} file{overallProgress.remaining !== 1 ? 's' : ''} remaining
+                </span>
+              )}
+            </div>
+
+            {/* Overall progress bar */}
+            {overallProgress.total > 1 && (
+              <div className="mb-6">
+                <div className="flex justify-between text-xs text-gray-500 mb-1">
+                  <span>Overall: {Math.round(overallProgress.overallPercent)}%</span>
+                  <span>{overallProgress.completed}/{overallProgress.total} done</span>
+                </div>
+                <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                  <div
+                    className="h-1.5 rounded-full bg-linear-to-r from-indigo-500 to-purple-500 transition-all duration-500"
+                    style={{ width: `${overallProgress.overallPercent}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
             <div className="space-y-4">
               {activeTransfers.map((transfer) => (
-                <div key={transfer.id} className="border border-blue-200 bg-blue-50 rounded-lg p-4">
+                <div key={transfer.id} className={`rounded-lg p-4 border ${
+                  transfer.status === 'paused' ? 'border-amber-200 bg-amber-50' : 'border-blue-200 bg-blue-50'
+                }`}>
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center space-x-3">
-                      <div className={`w-3 h-3 rounded-full ${transfer.senderId === user?.uid ? 'bg-blue-500' : 'bg-green-500'
-                        } animate-pulse`}></div>
+                      <div className={`w-3 h-3 rounded-full ${
+                        transfer.status === 'paused' ? 'bg-amber-400' :
+                        transfer.senderId === user?.uid ? 'bg-blue-500' : 'bg-green-500'
+                      } ${transfer.status !== 'paused' ? 'animate-pulse' : ''}`}></div>
                       <div>
                         <h4 className="font-medium text-gray-900">{transfer.fileName}</h4>
                         <p className="text-sm text-gray-600">
@@ -130,29 +175,42 @@ export function P2PFileShare() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-lg font-bold text-gray-900">
-                        {Math.round(transfer.progress)}%
-                      </p>
+                      {transfer.status === 'preparing' ? (
+                        <p className="text-xs text-indigo-600 font-semibold animate-pulse">⏳ Preparing...</p>
+                      ) : transfer.status === 'finalizing' ? (
+                        <p className="text-xs text-violet-600 font-semibold animate-pulse">💾 Saving file to disk...</p>
+                      ) : (
+                        <p className="text-lg font-bold text-gray-900">
+                          {Math.round(transfer.progress)}%
+                        </p>
+                      )}
                       {transfer.speed && transfer.speed > 0 && (
                         <p className="text-sm text-blue-600">
                           {(transfer.speed / (1024 * 1024)).toFixed(1)} MB/s
                         </p>
                       )}
+                      {transfer.status === 'paused' && (
+                        <p className="text-xs text-amber-600 font-semibold">⏸ Paused</p>
+                      )}
                     </div>
                   </div>
 
                   {/* Progress Bar */}
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                     <div
-                      className={`h-2 rounded-full transition-all duration-300 ${transfer.senderId === user?.uid ? 'bg-blue-600' : 'bg-green-600'
-                        }`}
-                      style={{ width: `${transfer.progress}%` }}
+                      className={`h-2 rounded-full transition-all duration-300 ${
+                        transfer.status === 'preparing' ? 'bg-linear-to-r from-indigo-400 to-blue-500 animate-pulse w-full' :
+                        transfer.status === 'finalizing' ? 'bg-violet-500 animate-pulse w-full' :
+                        transfer.status === 'paused' ? 'bg-amber-400' :
+                        transfer.senderId === user?.uid ? 'bg-blue-600' : 'bg-green-600'
+                      }`}
+                      style={transfer.status === 'preparing' || transfer.status === 'finalizing' ? {} : { width: `${transfer.progress}%` }}
                     ></div>
                   </div>
 
                   <div className="flex justify-between items-center mt-2 text-sm text-gray-600">
                     <span>{((transfer.fileSize * transfer.progress) / 100 / (1024 * 1024)).toFixed(1)} MB / {(transfer.fileSize / (1024 * 1024)).toFixed(1)} MB</span>
-                    {transfer.eta && transfer.eta > 0 && transfer.progress < 100 && (
+                    {transfer.eta && transfer.eta > 0 && transfer.progress < 100 && transfer.status !== 'paused' && (
                       <span>ETA: {transfer.eta < 60 ? `${Math.round(transfer.eta)}s` : `${Math.round(transfer.eta / 60)}m`}</span>
                     )}
                   </div>
@@ -197,6 +255,7 @@ export function P2PFileShare() {
           />
         </div>
       </div>
+
 
       {/* Tabs */}
       <div className="mb-6">
@@ -244,7 +303,7 @@ export function P2PFileShare() {
 
       {/* Incoming share request popover */}
       {popoverRequest && (
-        <div className="fixed bottom-4 left-4 right-4 md:bottom-6 md:right-6 md:left-auto z-50 max-w-[380px] mx-auto md:mx-0">
+        <div className="fixed bottom-4 left-4 right-4 md:bottom-6 md:right-6 md:left-auto z-50 max-w-95 mx-auto md:mx-0">
           <div className="w-full bg-white border border-gray-200 rounded-2xl shadow-xl p-5">
             <div className="flex items-start gap-3">
               <div className="flex-1">
@@ -261,8 +320,8 @@ export function P2PFileShare() {
                     onClick={async () => {
                       try {
                         await acceptShareRequest(popoverRequest.id);
-                      } catch (e) {
-                        // ignore
+                      } catch (error) {
+                        alert(error instanceof Error ? error.message : 'Failed to accept request. Please try again.');
                       }
                       setPopoverRequest(null);
                     }}
