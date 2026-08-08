@@ -7,6 +7,8 @@ export type FormControl =
     | "number"
     | "boolean"
     | "date"
+    | "datetime-local"
+    | "checkbox"
     | "image"
     | "relation"
     | "manyToMany"
