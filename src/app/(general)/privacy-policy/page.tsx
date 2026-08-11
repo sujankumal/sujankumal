@@ -3,6 +3,8 @@ import Sidebar from "@/components/Sidebar";
 import { fetchSitePrivacyPolicy } from "@/services/data_access";
 import { Metadata } from "next";
 
+export const instant = false;
+
 export const metadata: Metadata = {
     title: 'Privacy-Policy | Sujan Kumal | Software Engineer',
     description: "Explore our comprehensive privacy policy outlining how we collect, use, and protect your personal information.",

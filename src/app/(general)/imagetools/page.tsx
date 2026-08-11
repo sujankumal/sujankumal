@@ -4,6 +4,8 @@ import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 import Sidebar from "@/components/Sidebar";
 
+export const instant = false;
+
 export const metadata: Metadata = {
   title: 'Image Tools | Sujan Kumal | Software Engineer',
   description: 'Compress, crop, rotate, and edit images online with Sujan Kumal’s Image Tools.',

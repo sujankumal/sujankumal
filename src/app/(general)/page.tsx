@@ -7,6 +7,8 @@ import { Metadata } from 'next';
 import { BlogJsonLd } from '../../components/seo/JsonLd';
 import { generateMetadata as generateSEOMetadata, getSiteConfig } from '@/lib/seo';
 
+export const instant = false;
+
 export async function generateMetadata(): Promise<Metadata> {
   const site: SiteType = await fetchSite();
   return generateSEOMetadata({

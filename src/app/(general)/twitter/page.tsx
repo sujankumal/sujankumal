@@ -1,6 +1,8 @@
 import Sidebar from "@/components/Sidebar";
 import { fetchTwitter } from "@/services/data_access";
 
+export const instant = false;
+
 async function Twitter() {
     const social_twitter = await fetchTwitter().then((data)=>{
         return data.find((item)=>{

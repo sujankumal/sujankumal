@@ -6,6 +6,8 @@ import { Metadata } from "next";
 import { Noto_Sans_Mono } from "next/font/google";
 import Link from "next/link";
 
+export const instant = false;
+
 export async function generateMetadata(): Promise<Metadata> {
   return generateSEOMetadata({
     title: "Projects",

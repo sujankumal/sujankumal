@@ -3,6 +3,8 @@ import { auth } from "../../../services/auth";
 import { redirect } from "next/navigation";
 import SignOutButton from "@/components/auth/SignOut";
 
+export const instant = false;
+
 export default async function NotAuthorized() {
   const session = await auth();
   if (!session?.user) {

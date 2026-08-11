@@ -20,9 +20,9 @@ export async function GET(request: NextRequest, context: {params: Promise<{ id: 
     return NextResponse.json(site);
 }
 
-export const dynamicParams = true // true | false,
+// export const dynamicParams = true // true | false,
 
-export const revalidate = 10
+// export const revalidate = 10
 // false | 'force-cache' | 0 | number
 
 export async function generateStaticParams(){

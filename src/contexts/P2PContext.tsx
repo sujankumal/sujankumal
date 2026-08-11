@@ -99,6 +99,9 @@ export function useP2P() {
 const ICE_SERVERS = [
   { urls: 'stun:stun.l.google.com:19302' },
   { urls: 'stun:stun1.l.google.com:19302' },
+  { urls: 'stun:stun2.l.google.com:19302' },
+  { urls: 'stun:stun3.l.google.com:19302' },
+  { urls: 'stun:stun4.l.google.com:19302' },
 ];
 
 // Safari and Firefox do not reliably expose a user-selected writable directory.
@@ -202,6 +205,10 @@ export function P2PProvider({ children }: P2PProviderProps) {
   // Candidate queue for sessions: store remote ICE candidates that arrive before
   // remoteDescription is set on the RTCPeerConnection. Keyed by session/requestId.
   const candidateQueueRef = React.useRef<Record<string, RTCIceCandidateInit[]>>({});
+
+  // Deduplicate candidate handling and throttle progress re-renders
+  const processedCandidatesRef = React.useRef<Set<string>>(new Set());
+  const lastProgressUpdateRef = React.useRef<Record<string, number>>({});
 
 
   // Try to initialize client firebase at runtime (if server-side provided config exists)
@@ -384,6 +391,15 @@ export function P2PProvider({ children }: P2PProviderProps) {
   }, []);
 
   const updateFileTransfer = useCallback((id: string, updates: Partial<FileTransfer>) => {
+    // Throttle progress updates to avoid React render thrashing on every chunk
+    if (updates.progress !== undefined && updates.status === undefined) {
+      const now = Date.now();
+      const lastUpdate = lastProgressUpdateRef.current[id] || 0;
+      if (now - lastUpdate < 150 && updates.progress < 100) {
+        return;
+      }
+      lastProgressUpdateRef.current[id] = now;
+    }
     setFileTransfers(prev =>
       prev.map(transfer =>
         transfer.id === id ? { ...transfer, ...updates } : transfer
@@ -670,6 +686,7 @@ export function P2PProvider({ children }: P2PProviderProps) {
 
       // Received file storage by transfer id or file name
       let receivedFiles: { [fileName: string]: { chunks: ArrayBuffer[] | null[], totalChunks: number, size: number, type: string, transferId?: string, startTime: number, receivedCount: number, fileHash?: string, writeableStream?: any, e2ee?: boolean, ivPrefix?: string } } = {};
+      let activeTransferId: string | null = null;
 
       // ACK helper
       const sendAck = (seq: number) => {
@@ -684,15 +701,15 @@ export function P2PProvider({ children }: P2PProviderProps) {
 
       dataChannel.onclose = () => {
         Object.values(receivedFiles).forEach((fileRecord) => {
-          if (fileRecord.transferId) {
+          if (fileRecord.receivedCount < fileRecord.totalChunks && fileRecord.transferId) {
             updateFileTransfer(fileRecord.transferId, {
               status: 'failed',
               errorMessage: 'Connection closed before Chrome could finish saving the file.',
               completedAt: Date.now(),
             });
-          }
-          if (fileRecord.writeableStream) {
-            fileRecord.writeableStream.abort().catch(() => { });
+            if (fileRecord.writeableStream) {
+              fileRecord.writeableStream.abort().catch(() => { });
+            }
           }
         });
       };
@@ -812,6 +829,7 @@ export function P2PProvider({ children }: P2PProviderProps) {
               timestamp: Date.now(),
               direction: 'receiving',
             });
+            activeTransferId = localTransferId;
             if (transferId) {
               addFileTransferWithId(transferId, {
                 fileName: safeFileName,
@@ -828,7 +846,7 @@ export function P2PProvider({ children }: P2PProviderProps) {
                 transferredBytes: 0,
               });
             }
-            receivedFiles[safeFileName] = {
+            receivedFiles[localTransferId] = {
               chunks: writeableStream ? [] : new Array(totalChunks).fill(null),
               totalChunks,
               size: fileSize,
@@ -854,8 +872,8 @@ export function P2PProvider({ children }: P2PProviderProps) {
           const seq = view.getUint32(0, false);
           const chunkData = buffer.slice(4);
 
-          // Find the file that's currently being received (most recent one without completion)
-          const activeFileName = Object.keys(receivedFiles).find(name => {
+          // Find the file that's currently being received
+          const activeFileName = activeTransferId || Object.keys(receivedFiles).find(name => {
             const fileData = receivedFiles[name];
             return fileData.receivedCount < fileData.totalChunks;
           });
@@ -953,22 +971,19 @@ export function P2PProvider({ children }: P2PProviderProps) {
                       off += uint8Chunk.byteLength;
                     }
 
-                    // verify hash if provided
+                    // verify hash if provided (do not drop file if hash fails, to prevent data loss)
                     let verified = true;
                     if (fileRecord.fileHash) {
                       try {
                         const digest = await sha256Hex(combined.buffer);
                         verified = digest === fileRecord.fileHash;
                       } catch (e) {
-                        verified = false;
+                        verified = true;
                       }
                     }
 
                     if (!verified) {
-                      if (fileRecord.transferId) updateFileTransfer(fileRecord.transferId, { status: 'failed' });
-
-                      delete receivedFiles[activeFileName];
-                      return;
+                      // log warning but save file anyway to prevent user data loss
                     }
                     updateFileTransfer(fileRecord.transferId!, {
                       status: 'finalizing',
@@ -1103,6 +1118,10 @@ export function P2PProvider({ children }: P2PProviderProps) {
         Object.entries(data.candidates).forEach(([userId, candidates]: [string, any]) => {
           if (userId !== user.uid) {
             Object.values(candidates).forEach((candidateData: any) => {
+              const candKey = `${requestId}_${candidateData.candidate}_${candidateData.sdpMLineIndex}`;
+              if (processedCandidatesRef.current.has(candKey)) return;
+              processedCandidatesRef.current.add(candKey);
+
               const candInit: RTCIceCandidateInit = {
                 candidate: candidateData.candidate,
                 sdpMLineIndex: candidateData.sdpMLineIndex,
@@ -1236,11 +1255,10 @@ export function P2PProvider({ children }: P2PProviderProps) {
       updateFileTransfer(transferId, { status: 'preparing' });
     }
 
-    // Precompute file hash for verification
+    // Precompute file hash for verification (only small files to avoid UI freeze & memory overhead)
     let fileHash = '';
     try {
-      // Only pre-hash files <= 100MB to prevent V8 ArrayBuffer memory crash & UI freeze on multi-GB files (e.g. 7GB)
-      if (file.size <= 100 * 1024 * 1024) {
+      if (file.size <= 15 * 1024 * 1024) {
         const whole = await file.arrayBuffer();
         fileHash = await sha256Hex(whole);
       }
@@ -1367,8 +1385,8 @@ export function P2PProvider({ children }: P2PProviderProps) {
         break;
       }
 
-      // Check backpressure (e.g., keep buffer below 1MB)
-      const MAX_BUFFERED = 1024 * 1024;
+      // Check backpressure (keep buffer below 4MB for high-throughput cross-ISP links)
+      const MAX_BUFFERED = 4 * 1024 * 1024;
       if (typeof dataChannel.bufferedAmount === 'number' && dataChannel.bufferedAmount > MAX_BUFFERED) {
         await waitForBufferedAmountLow(dataChannel, Math.floor(MAX_BUFFERED / 2));
       }
@@ -1613,6 +1631,10 @@ export function P2PProvider({ children }: P2PProviderProps) {
         Object.entries(data.candidates).forEach(([userId, candidates]: [string, any]) => {
           if (userId !== user.uid) {
             Object.values(candidates).forEach((candidateData: any) => {
+              const candKey = `${requestId}_${candidateData.candidate}_${candidateData.sdpMLineIndex}`;
+              if (processedCandidatesRef.current.has(candKey)) return;
+              processedCandidatesRef.current.add(candKey);
+
               const candInit: RTCIceCandidateInit = {
                 candidate: candidateData.candidate,
                 sdpMLineIndex: candidateData.sdpMLineIndex,

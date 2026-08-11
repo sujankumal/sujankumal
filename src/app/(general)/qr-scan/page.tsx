@@ -3,6 +3,8 @@ import { Metadata } from "next";
 import { Suspense } from 'react';
 import Sidebar from "@/components/Sidebar";
 
+export const instant = false;
+
 export const metadata: Metadata = {
   title: 'QR Scan | Sujan Kumal | Software Engineer',
   description: "QR Scan is a web application that allows users to scan QR codes for various purposes. It is designed to be user-friendly and efficient, making it easy for anyone to scan QR codes quickly.",

@@ -3,6 +3,8 @@ import { fetchTechPosts } from "@/services/data_access";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { Metadata } from "next";
 
+export const instant = false;
+
 export async function generateMetadata(): Promise<Metadata> {
   return generateSEOMetadata({
     title: "Technologies",

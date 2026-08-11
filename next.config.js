@@ -1,9 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: true,
-    experimental: {
-        useCache: true,
-    },
+    cacheComponents: true,
+    allowedDevOrigins: (() => {
+        try {
+            return JSON.parse(process.env.ALLOWEDDEVORIGINS || '[]');
+        } catch {
+            return [];
+        }
+    })(),
     images: {
         remotePatterns: [
             {

@@ -3,6 +3,8 @@ import { Metadata } from "next";
 import { Suspense } from 'react';
 import Sidebar from "@/components/Sidebar";
 
+export const instant = false;
+
 export const metadata: Metadata = {
   title: 'QR | Sujan Kumal | Software Engineer',
   description: "QR generator is a web application that allows users to create QR codes for various purposes, such as sharing links, contact information, and more. It is designed to be user-friendly and efficient, making it easy for anyone to generate QR codes quickly.",

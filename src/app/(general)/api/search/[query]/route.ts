@@ -51,5 +51,5 @@ export async function GET(request: NextRequest, context: { params: Promise<{ que
 
 
 
-export const dynamicParams = true
-export const revalidate = 10
+// export const dynamicParams = true
+// export const revalidate = 10

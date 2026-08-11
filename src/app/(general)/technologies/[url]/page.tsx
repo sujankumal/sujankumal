@@ -4,7 +4,7 @@ import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-export const dynamicParams = true;
+export const instant = false;
 
 export async function generateStaticParams() {
   const urls = await fetchTechPostsUrl();

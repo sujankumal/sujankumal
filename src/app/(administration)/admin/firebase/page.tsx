@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   description: "Securely explore and manage Firebase Realtime Database data.",
 };
 
+export const instant = false;
+
 export default async function FirebasePage() {
   const session = await auth();
 

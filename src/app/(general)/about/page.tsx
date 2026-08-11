@@ -7,6 +7,8 @@ import { ArticleJsonLd, BreadcrumbJsonLd } from "../../../components/seo/JsonLd"
 import { generateMetadata as generateSEOMetadata, getSiteConfig } from "@/lib/seo";
 import Image from "next/image";
 
+export const instant = false;
+
 export async function generateMetadata(): Promise<Metadata> {
   const about_: Array<PostType> = await fetchAbout();
   const main_image: string = about_.slice(-1)[0]?.main_image || "";

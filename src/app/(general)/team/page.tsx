@@ -4,6 +4,8 @@ import Image from "next/image";
 import prisma from "@/../prisma/prisma";
 import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 
+export const instant = false;
+
 export async function generateMetadata(): Promise<Metadata> {
   return generateSEOMetadata({
     title: "Our Team",

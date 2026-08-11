@@ -11,7 +11,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 
-export const dynamicParams = true;
+export const instant = false;
 
 export async function generateStaticParams() {
   const possibleValues = await fetchCategoryNameArray();
