@@ -59,11 +59,10 @@ export function FileDropZone({ onFilesSelected, selectedFiles, onRemoveFile }: F
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-          isDragOver
+        className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${isDragOver
             ? 'border-blue-400 bg-blue-50'
             : 'border-gray-300 hover:border-gray-400'
-        }`}
+          }`}
       >
         <div className="flex flex-col items-center">
           <FaUpload className={`text-4xl mb-4 ${isDragOver ? 'text-blue-500' : 'text-gray-400'}`} />
@@ -73,7 +72,7 @@ export function FileDropZone({ onFilesSelected, selectedFiles, onRemoveFile }: F
           <p className="text-gray-500 mb-4">
             or click &quot;Browse Files&quot; to select files from your computer
           </p>
-          <div className="text-sm text-gray-400">
+          <div className="text-xs text-gray-400">
             <p>Supports multiple files and folders</p>
             <p>Large files stream directly to the receiver&apos;s selected folder in Chrome or Edge</p>
           </div>
@@ -115,7 +114,7 @@ export function FileDropZone({ onFilesSelected, selectedFiles, onRemoveFile }: F
               </div>
             ))}
           </div>
-          
+
           {/* Summary */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
             <div className="flex items-center justify-between text-sm">

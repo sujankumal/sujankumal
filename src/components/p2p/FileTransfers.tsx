@@ -69,12 +69,12 @@ export function FileTransfers() {
   const historyTransfers = fileTransfers.filter(t => t.status !== 'transferring' && t.status !== 'preparing' && t.status !== 'finalizing' && t.status !== 'paused');
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="w-full p-3 sm:p-4 md:p-6 space-y-6 sm:space-y-8 overflow-hidden">
 
       {/* ── Overall Progress Banner ─────────────────────────────────────────── */}
       {overallProgress.total > 0 && (
         <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-2xl p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-3 flex-wrap gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
             <div>
               <h3 className="text-base font-bold text-indigo-900 flex items-center gap-2">
                 <FaShieldAlt className="text-indigo-500" />
@@ -86,7 +86,7 @@ export function FileTransfers() {
                   : 'All transfers complete'}
               </p>
             </div>
-            <div className="flex gap-3 text-center text-xs">
+            <div className="flex flex-wrap gap-2 text-center text-xs">
               {overallProgress.active > 0 && (
                 <div className="bg-blue-100 text-blue-700 px-3 py-1.5 rounded-xl font-semibold flex items-center gap-1.5">
                   <FaSpinner className="animate-spin text-xs" />
@@ -139,30 +139,28 @@ export function FileTransfers() {
               return (
                 <div
                   key={transfer.id}
-                  className={`rounded-2xl border p-5 shadow-sm transition-all duration-300 ${
-                    isPreparing
-                      ? 'bg-indigo-50 border-indigo-200'
-                      : isFinalizing
-                        ? 'bg-violet-50 border-violet-200'
+                  className={`rounded-2xl border p-5 shadow-sm transition-all duration-300 ${isPreparing
+                    ? 'bg-indigo-50 border-indigo-200'
+                    : isFinalizing
+                      ? 'bg-violet-50 border-violet-200'
                       : isPaused
                         ? 'bg-amber-50 border-amber-200'
                         : sender
                           ? 'bg-blue-50 border-blue-200'
                           : 'bg-emerald-50 border-emerald-200'
-                  }`}
+                    }`}
                 >
                   {/* Header row */}
-                  <div className="flex items-start justify-between gap-3 mb-4">
+                  <div className="flex flex-col gap-3 mb-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="flex items-center gap-3 min-w-0">
                       {isPreparing || isFinalizing ? (
                         <FaSpinner className="text-indigo-600 text-base animate-spin flex-shrink-0" />
                       ) : (
-                        <div className={`w-3 h-3 rounded-full flex-shrink-0 ${
-                          isPaused ? 'bg-amber-400' : sender ? 'bg-blue-500 animate-pulse' : 'bg-emerald-500 animate-pulse'
-                        }`} />
+                        <div className={`w-3 h-3 rounded-full flex-shrink-0 ${isPaused ? 'bg-amber-400' : sender ? 'bg-blue-500 animate-pulse' : 'bg-emerald-500 animate-pulse'
+                          }`} />
                       )}
                       <div className="min-w-0">
-                        <p className="font-semibold text-gray-900 text-sm truncate max-w-[200px] sm:max-w-xs">
+                        <p className="font-semibold text-gray-900 text-sm truncate max-w-[calc(100vw-120px)] sm:max-w-xs">
                           {transfer.fileName}
                         </p>
                         <p className="text-xs text-gray-500 mt-0.5">
@@ -174,7 +172,7 @@ export function FileTransfers() {
                     </div>
 
                     {/* Controls — only for sender */}
-                    <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto flex-shrink-0">
                       {sender && (
                         <>
                           {isPaused ? (
@@ -250,34 +248,33 @@ export function FileTransfers() {
                       <div className="h-2.5 rounded-full bg-violet-500 animate-pulse w-full" />
                     ) : (
                       <div
-                        className={`h-2.5 rounded-full transition-all duration-300 ${
-                          isPaused
-                            ? 'bg-amber-400'
-                            : sender ? 'bg-blue-500' : 'bg-emerald-500'
-                        }`}
+                        className={`h-2.5 rounded-full transition-all duration-300 ${isPaused
+                          ? 'bg-amber-400'
+                          : sender ? 'bg-blue-500' : 'bg-emerald-500'
+                          }`}
                         style={{ width: `${transfer.progress}%` }}
                       />
                     )}
                   </div>
 
                   {/* Stats row */}
-                  <div className="flex items-center justify-between text-xs text-gray-500 flex-wrap gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs text-gray-500 gap-2">
                     {isPreparing ? (
                       <span className="text-indigo-600 font-medium flex items-center gap-1.5 animate-pulse">
                         <FaSpinner className="animate-spin text-[10px]" />
                         Calculating checksum & preparing file...
                       </span>
                     ) : isFinalizing ? (
-                      <span className="text-violet-700 font-medium flex items-center gap-1.5 animate-pulse">
+                      <span className="text-violet-700 font-medium flex items-start gap-1.5 animate-pulse min-w-0">
                         <FaSpinner className="animate-spin text-[10px]" />
-                        Chrome is finalizing the disk write (.crswap is temporary)
+                        <span className="leading-5 break-words">Chrome is finalizing the disk write (.crswap is temporary)</span>
                       </span>
                     ) : (
                       <span>
                         {formatFileSize(transfer.transferredBytes ?? 0)} / {formatFileSize(transfer.fileSize)}
                       </span>
                     )}
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 flex-wrap sm:justify-end">
                       {!isPreparing && !isFinalizing && transfer.speed && transfer.speed > 0 && (
                         <span className={`font-medium ${sender ? 'text-blue-600' : 'text-emerald-600'}`}>
                           ↑ {formatSpeed(transfer.speed)}
@@ -341,7 +338,7 @@ export function FileTransfers() {
 
               return (
                 <div key={transfer.id} className={`rounded-xl border p-4 ${statusStyle} transition-all duration-200`}>
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div className="flex items-start gap-3 min-w-0 flex-1">
                       <StatusIcon />
                       <div className="min-w-0 flex-1">
@@ -369,7 +366,7 @@ export function FileTransfers() {
                       </div>
                     </div>
 
-                    <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                    <div className="flex flex-row sm:flex-col items-start sm:items-end gap-2 flex-wrap flex-shrink-0">
                       <p className="text-xs text-gray-500 font-medium">{formatFileSize(transfer.fileSize)}</p>
                       <p className="text-[10px] text-gray-400">{formatTimestamp(transfer.completedAt ?? transfer.timestamp)}</p>
 

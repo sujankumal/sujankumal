@@ -72,7 +72,7 @@ export function AvailableUsers({ selectedFiles, selectedUser, onUserSelect }: Av
           There are currently no other users available for file sharing.
         </p>
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-md mx-auto">
-            <p className="text-blue-800 text-sm">
+          <p className="text-blue-800 text-sm">
             💡 Users will appear here when they&apos;re online and set themselves as available for sharing.
           </p>
         </div>
@@ -92,16 +92,14 @@ export function AvailableUsers({ selectedFiles, selectedUser, onUserSelect }: Av
           </div>
         )}
       </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="text-sm flex gap-4 overflow-x-auto pb-3 md:grid md:grid-cols-2 lg:grid-cols-3 md:overflow-visible snap-x snap-mandatory">
         {availableUsers.map((user) => (
           <div
             key={user.uid}
-            className={`border rounded-lg p-4 transition-all hover:shadow-md ${
-              selectedUser === user.uid
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-200 hover:border-gray-300'
-            }`}
+            className={`border rounded-lg p-4 transition-all hover:shadow-md ${selectedUser === user.uid
+              ? 'border-blue-500 bg-blue-50'
+              : 'border-gray-200 hover:border-gray-300'
+              }`}
           >
             {/* User Info */}
             <div className="flex items-center space-x-3 mb-4">

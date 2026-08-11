@@ -101,12 +101,12 @@ export function P2PFileShare() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto py-8">
+    <div className="max-w-6xl mx-auto py-8 text-xs">
       {/* Welcome Message */}
       <div className="mb-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <div className="text-lg sm:text-lg font-bold text-gray-900 mb-2">
           Welcome, {user?.displayName || 'Anonymous User'}!
-        </h1>
+        </div>
         <p className="text-gray-600">
           You&apos;re now available for file sharing. Select files and choose users to share with.
         </p>
@@ -116,7 +116,7 @@ export function P2PFileShare() {
         <p className={`text-sm font-semibold ${supportsDiskStreaming ? 'text-emerald-900' : 'text-amber-900'}`}>
           {supportsDiskStreaming ? 'Large-file mode enabled' : 'Browser compatibility mode'}
         </p>
-        <p className={`mt-1 text-sm ${supportsDiskStreaming ? 'text-emerald-700' : 'text-amber-800'}`}>
+        <p className={`mt-1 text-xs ${supportsDiskStreaming ? 'text-emerald-700' : 'text-amber-800'}`}>
           {supportsDiskStreaming
             ? 'Incoming files are streamed directly to a folder you select. Large files are supported.'
             : 'Files up to 500 MB are supported in this browser. Receive larger files with Chrome or Edge.'}
@@ -157,15 +157,13 @@ export function P2PFileShare() {
 
             <div className="space-y-4">
               {activeTransfers.map((transfer) => (
-                <div key={transfer.id} className={`rounded-lg p-4 border ${
-                  transfer.status === 'paused' ? 'border-amber-200 bg-amber-50' : 'border-blue-200 bg-blue-50'
-                }`}>
+                <div key={transfer.id} className={`rounded-lg p-4 border ${transfer.status === 'paused' ? 'border-amber-200 bg-amber-50' : 'border-blue-200 bg-blue-50'
+                  }`}>
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center space-x-3">
-                      <div className={`w-3 h-3 rounded-full ${
-                        transfer.status === 'paused' ? 'bg-amber-400' :
+                      <div className={`w-3 h-3 rounded-full ${transfer.status === 'paused' ? 'bg-amber-400' :
                         transfer.senderId === user?.uid ? 'bg-blue-500' : 'bg-green-500'
-                      } ${transfer.status !== 'paused' ? 'animate-pulse' : ''}`}></div>
+                        } ${transfer.status !== 'paused' ? 'animate-pulse' : ''}`}></div>
                       <div>
                         <h4 className="font-medium text-gray-900">{transfer.fileName}</h4>
                         <p className="text-sm text-gray-600">
@@ -198,12 +196,11 @@ export function P2PFileShare() {
                   {/* Progress Bar */}
                   <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                     <div
-                      className={`h-2 rounded-full transition-all duration-300 ${
-                        transfer.status === 'preparing' ? 'bg-linear-to-r from-indigo-400 to-blue-500 animate-pulse w-full' :
+                      className={`h-2 rounded-full transition-all duration-300 ${transfer.status === 'preparing' ? 'bg-linear-to-r from-indigo-400 to-blue-500 animate-pulse w-full' :
                         transfer.status === 'finalizing' ? 'bg-violet-500 animate-pulse w-full' :
-                        transfer.status === 'paused' ? 'bg-amber-400' :
-                        transfer.senderId === user?.uid ? 'bg-blue-600' : 'bg-green-600'
-                      }`}
+                          transfer.status === 'paused' ? 'bg-amber-400' :
+                            transfer.senderId === user?.uid ? 'bg-blue-600' : 'bg-green-600'
+                        }`}
                       style={transfer.status === 'preparing' || transfer.status === 'finalizing' ? {} : { width: `${transfer.progress}%` }}
                     ></div>
                   </div>
@@ -223,17 +220,17 @@ export function P2PFileShare() {
 
       {/* File Selection Area */}
       <div className="mb-8">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="bg-white text-md rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className="font-semibold text-gray-900">
               Select Files to Share
             </h2>
 
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center justify-center space-x-2 px-5 py-3 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-all active:scale-95 shadow-sm w-full sm:w-auto"
+              className="flex items-center justify-center space-x-2 px-3 py-2 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-all active:scale-95 shadow-sm w-full sm:w-auto"
             >
-              <FaUpload className="text-lg" />
+              <FaUpload className="text-md" />
               <span>Browse Files</span>
             </button>
           </div>
