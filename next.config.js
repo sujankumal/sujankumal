@@ -4,6 +4,13 @@ const nextConfig = {
     experimental: {
         useCache: true,
     },
+    allowedDevOrigins: (() => {
+        try {
+            return JSON.parse(process.env.ALLOWEDDEVORIGINS || '[]');
+        } catch {
+            return [];
+        }
+    })(),
     images: {
         remotePatterns: [
             {
