@@ -1,6 +1,8 @@
 import Game2048 from "@/components/2048/2048";
 import { Metadata } from "next";
 
+export const instant = false;
+
 export const metadata: Metadata = {
     title: '2048: Egg to Chicken | Sujan Kumal | Software Engineer',
     description: "A charming twist on the classic 2048 puzzle game, this single-player sliding game challenges players to combine tiles on a 4x4 grid, evolving them from egg to majestic chicken. Slide tiles using arrow keys to merge matching stages, progressing through delightful icons representing growth (egg, chick, chicken, and more). Strategize to reach the ultimate chicken tile while keeping the grid open in this addictive, visually engaging adventure.",

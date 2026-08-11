@@ -11,7 +11,7 @@ import { generateMetadata as generateSEOMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-export const dynamicParams = true;
+export const instant = false;
 
 export async function generateStaticParams() {
   const year_month = await fetchPostCountYearMonthArray();

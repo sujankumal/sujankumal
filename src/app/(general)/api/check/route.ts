@@ -4,4 +4,4 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ 'value': true })
 }
 
-export const revalidate = 86400;
+// export const revalidate = 86400;

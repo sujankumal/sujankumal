@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   description: "Manage Cloudflare short URLs.",
 };
 
+export const instant = false;
+
 export default async function ShortUrlsPage() {
   const session = await auth();
 

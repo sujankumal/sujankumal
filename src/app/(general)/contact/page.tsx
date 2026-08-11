@@ -2,6 +2,8 @@ import MousePhobia from "@/components/MousePhobia";
 import Sidebar from "@/components/Sidebar";
 import { fetchSite } from "@/services/data_access";
 
+export const instant = false;
+
 export default async function Contact() {
     const site = await fetchSite();
     const contactEmail = site?.contact_email || "support@sujankumal.com.np";

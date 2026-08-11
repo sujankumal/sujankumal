@@ -36,5 +36,5 @@ export async function GET(request: NextRequest){
 
 // 
 // export const dynamicParams = true // true | false,
-export const revalidate = 86400;
+// export const revalidate = 86400;
 //

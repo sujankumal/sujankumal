@@ -39,8 +39,8 @@ export async function GET(request: NextRequest, context: { params: Promise<{ url
 
 
 
-export const dynamicParams = true // true | false,
-export const revalidate = 10
+// export const dynamicParams = true // true | false,
+// export const revalidate = 10
 
 export async function generateStaticParams() {
 

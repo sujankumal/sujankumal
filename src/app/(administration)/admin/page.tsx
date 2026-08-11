@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     description: "Admin page.",
 }
 
-export const dynamic = 'force-dynamic';
+export const instant = false;
 
 async function Admin() {
     const session = await auth();
