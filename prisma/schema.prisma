@@ -58,7 +58,7 @@ model Project {
 model Post {
   id                      Int     @default(autoincrement()) @id 
   title                   String
-  url                     String  @default("/")
+  url                     String  @default("/") @unique
   description             String?
   content                 Content[]
   main_image              String
@@ -68,12 +68,9 @@ model Post {
   year                    Int?
   categories              CategoriesOnPosts[]
   published               Boolean @default(false)
-  author                  User?   @relation(fields: [authorId], references: [id])
+  author                  User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
   authorId                Int?
-  @@index([url])
-  @@index([published])
-  @@index([date])
-  @@index([authorId])
+  @@index([published, date])
   @@index([year, month])
   @@map(name: "posts")
 }
@@ -83,27 +80,29 @@ model Content {
   type          String
   content       String?
   sequence      Int?
-  post          Post? @relation(fields: [postId], references: [id])
+  post          Post? @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId        Int? //is Foreign Key
-  @@index([postId])
+  @@index([postId, sequence])
   @@map(name: "content")
 }
 
 model Category {
-  id            Int     @default(autoincrement()) @id
-  name          String
-  posts          CategoriesOnPosts[]
-  @@map(name: "categories")
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  posts CategoriesOnPosts[]
+
+  @@map("categories")
 }
 
 model CategoriesOnPosts {
-  id            Int      @default(autoincrement())
-  post          Post     @relation(fields: [postId], references: [id])
-  postId        Int
-  category      Category @relation(fields: [categoryId], references: [id])
-  categoryId    Int
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId     Int
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId Int
+
   @@id([postId, categoryId])
-  @@map(name :"categoriesonposts")
+  @@index([categoryId])
+  @@map("categoriesonposts")
 }
 
 model User {
