@@ -398,7 +398,7 @@ export const adminEntities: AdminEntities = {
         resolveWhere: async ({ id }, prisma) => {
             const row = await prisma.categoriesOnPosts.findFirst({
                 where: {
-                    id: Number(id),
+                    postId: Number(id),
                 },
             });
 
