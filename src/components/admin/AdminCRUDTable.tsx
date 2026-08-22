@@ -1,9 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Plus, Edit, Trash2, Search, ArrowUpDown, ArrowUp, ArrowDown, ImageIcon } from "lucide-react";
-import ReactMarkdown from "react-markdown";
-import Image from "next/image";
+import { useState } from "react";
+import { Plus, Edit, Trash2, Search, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { Modal } from "./Modal";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { Pagination } from "./Pagination";
@@ -14,247 +12,110 @@ import { AdvancedFilters } from "./AdvancedFilters";
 import { BulkActions, SelectableRow } from "./BulkActions";
 import { useWarningBanner } from "./WarningBanner";
 import { adminEntities } from "@/config/entities";
-import { formatImageUrl } from "@/lib/image";
-
-function ImageCell({ value, field }: { value: string; field: string }) {
-  const [imageError, setImageError] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const imageSrc = formatImageUrl(value);
-
-  if (!imageSrc || imageError) {
-    return (
-      <div className="w-16 h-10 bg-gray-100 rounded flex items-center justify-center border border-gray-200">
-        <ImageIcon className="h-4 w-4 text-gray-400" />
-        {imageError && (
-          <span className="sr-only">Failed to load image: {value}</span>
-        )}
-      </div>
-    );
-  }
-
-  return (
-    <div className="w-16 h-10 relative bg-gray-100 rounded overflow-hidden border border-gray-200">
-      {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-4 h-4 border-2 border-gray-300 border-t-orange-600 rounded-full animate-spin"></div>
-        </div>
-      )}
-      <Image
-        src={imageSrc}
-        alt={field}
-        fill
-        className="object-cover"
-        onLoad={() => setIsLoading(false)}
-        onError={() => {
-          setImageError(true);
-          setIsLoading(false);
-        }}
-        unoptimized
-        sizes="64px"
-      />
-    </div>
-  );
-}
+import { renderCellContent } from "./table/renderCellContent";
+import { useTableData } from "./table/useTableData";
 
 interface AdminCRUDTableProps {
   entity: keyof typeof adminEntities;
   initialData?: any[];
 }
 
-interface PaginationData {
-  page: number;
-  limit: number;
-  total: number;
-  pages: number;
-}
-
-export function AdminCRUDTable({
-  entity,
-  initialData = [],
-}: AdminCRUDTableProps) {
+export function AdminCRUDTable({ entity, initialData = [] }: AdminCRUDTableProps) {
   const config = adminEntities[entity];
 
   if (!config) {
     throw new Error(`No admin configuration found for entity "${entity}"`);
   }
-  const [items, setItems] = useState<any[]>(initialData);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const defaultSort = config.defaultSort ?? {
-    field: "id",
-    order: "desc",
-  };
 
-  const [sortBy, setSortBy] = useState(defaultSort.field);
+  // ── Data / fetch / sort / filter state (extracted hook) ───────────────────
+  const {
+    items,
+    loading,
+    error,
+    setError,
+    searchTerm,
+    sortBy,
+    sortOrder,
+    pagination,
+    fetchData,
+    handleSort,
+    handleSearch,
+    handlePageChange,
+    handleFiltersChange,
+  } = useTableData({ entity });
 
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">(
-    defaultSort.order
-  );
-
-  const [pagination, setPagination] = useState<PaginationData>({
-    page: 1,
-    limit: 10,
-    total: 0,
-    pages: 0,
-  });
-
-  // Modal states
+  // ── Modal states ──────────────────────────────────────────────────────────
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [formLoading, setFormLoading] = useState(false);
   const [selectedItems, setSelectedItems] = useState<any[]>([]);
-  const [filters, setFilters] = useState<any[]>([]);
 
-  // Toast notifications
-  const { toasts, removeToast, showSuccess, showError, showWarning } = useToast();
-
-  // Warning banners
+  // ── Toast / warning banners ───────────────────────────────────────────────
+  const { toasts, removeToast, showSuccess, showError } = useToast();
   const { showDeleteWarning, WarningBanners } = useWarningBanner();
 
-  // Fetch data
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const params = new URLSearchParams({
-        page: pagination.page.toString(),
-        limit: pagination.limit.toString(),
-        search: searchTerm,
-        sortBy,
-        sortOrder,
-      });
-
-      if (filters.length > 0) {
-        params.set(
-          "filters",
-          JSON.stringify(filters.map(({ field, operator, value }) => ({ field, operator, value })))
-        );
-      }
-
-      const response = await fetch(`/api/admin/${entity}?${params}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch data");
-      }
-
-      const data = await response.json();
-      setItems(data.items);
-      setPagination(data.pagination);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-    } finally {
-      setLoading(false);
-    }
-  }, [entity, filters, pagination.page, pagination.limit, searchTerm, sortBy, sortOrder]);
-
-  // Effects
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  // Handlers
-  const handleSort = (field: string) => {
-    if (sortBy === field) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setSortBy(field);
-      setSortOrder("asc");
-    }
+  // ── Sort icon helper ──────────────────────────────────────────────────────
+  const getSortIcon = (field: string) => {
+    if (sortBy !== field) return <ArrowUpDown className="h-4 w-4 text-gray-400" />;
+    return sortOrder === "asc"
+      ? <ArrowUp className="h-4 w-4 text-orange-600" />
+      : <ArrowDown className="h-4 w-4 text-orange-600" />;
   };
 
-  const handleSearch = (value: string) => {
-    setSearchTerm(value);
-    setPagination(prev => ({ ...prev, page: 1 }));
-  };
-
-  const handlePageChange = (page: number) => {
-    setPagination(prev => ({ ...prev, page }));
-  };
-
-  const handleCreate = () => {
-    setSelectedItem(null);
-    setShowCreateModal(true);
-  };
-
-  const handleEdit = (item: any) => {
-    setSelectedItem(item);
-    setShowEditModal(true);
-  };
+  // ── CRUD handlers ─────────────────────────────────────────────────────────
+  const handleCreate = () => { setSelectedItem(null); setShowCreateModal(true); };
+  const handleEdit = (item: any) => { setSelectedItem(item); setShowEditModal(true); };
 
   const handleDelete = (item: any) => {
-    // Show warning banner first
     showDeleteWarning(entity, 1);
-
     setSelectedItem(item);
     setShowDeleteDialog(true);
   };
 
   const confirmDelete = async () => {
     if (!selectedItem) return;
-
     try {
-      const response = await fetch(`/api/admin/${entity}?id=${selectedItem.id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to delete item. ${response.statusText}`);
-      }
-
+      const response = await fetch(`/api/admin/${entity}?id=${selectedItem.id}`, { method: "DELETE" });
+      if (!response.ok) throw new Error(`Failed to delete item. ${response.statusText}`);
       await fetchData();
       setShowDeleteDialog(false);
       setSelectedItem(null);
       showSuccess("Item deleted", `${entity} has been successfully deleted.`);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : `Failed to delete item: ${err}`;
-      setError(errorMessage);
-      showError("Delete failed", errorMessage);
+      const msg = err instanceof Error ? err.message : `Failed to delete item: ${err}`;
+      setError(msg);
+      showError("Delete failed", msg);
     }
   };
 
   const handleFormSubmit = async (formData: any) => {
     setFormLoading(true);
     setError(null);
-
     try {
       const isEdit = !!selectedItem;
-      const url = `/api/admin/${entity}`;
-      const method = isEdit ? "PUT" : "POST";
       const body = isEdit ? { ...selectedItem, ...formData } : formData;
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
+      const response = await fetch(`/api/admin/${entity}`, {
+        method: isEdit ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-
       const result = await response.json();
-
       if (!response.ok) {
-        if (result.fields) {
-          return result.fields;
-        }
-
+        if (result.fields) return result.fields;
         throw new Error(result.error);
       }
-
       await fetchData();
       setShowCreateModal(false);
       setShowEditModal(false);
       setSelectedItem(null);
-
       const action = isEdit ? "updated" : "created";
       showSuccess(`Item ${action}`, `${entity} has been successfully ${action}.`);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to save item";
-      setError(errorMessage);
-      showError("Save failed", errorMessage);
+      const msg = err instanceof Error ? err.message : "Failed to save item";
+      setError(msg);
+      showError("Save failed", msg);
     } finally {
       setFormLoading(false);
     }
@@ -267,182 +128,32 @@ export function AdminCRUDTable({
     setError(null);
   };
 
-  // Bulk operations
+  // ── Bulk operations ───────────────────────────────────────────────────────
   const handleSelectAll = (selected: boolean) => {
-    if (selected) {
-      setSelectedItems([...items]);
-    } else {
-      setSelectedItems([]);
-    }
+    setSelectedItems(selected ? [...items] : []);
   };
 
   const handleSelectItem = (item: any, selected: boolean) => {
-    if (selected) {
-      setSelectedItems(prev => [...prev, item]);
-    } else {
-      setSelectedItems(prev => prev.filter(i => i.id !== item.id));
-    }
+    setSelectedItems(prev => selected ? [...prev, item] : prev.filter(i => i.id !== item.id));
   };
 
   const handleBulkDelete = async (itemsToDelete: any[]) => {
-    // Show warning banner for bulk delete
     showDeleteWarning(entity, itemsToDelete.length);
-
     try {
       await Promise.all(
-        itemsToDelete.map(item =>
-          fetch(`/api/admin/${entity}?id=${item.id}`, { method: "DELETE" })
-        )
+        itemsToDelete.map(item => fetch(`/api/admin/${entity}?id=${item.id}`, { method: "DELETE" }))
       );
-
       await fetchData();
       setSelectedItems([]);
       showSuccess("Items deleted", `${itemsToDelete.length} ${entity}(s) have been successfully deleted.`);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to delete items";
-      setError(errorMessage);
-      showError("Bulk delete failed", errorMessage);
+      const msg = err instanceof Error ? err.message : "Failed to delete items";
+      setError(msg);
+      showError("Bulk delete failed", msg);
     }
   };
 
-  const handleFiltersChange = useCallback((newFilters: any[]) => {
-    setFilters((prevFilters) => {
-      const isSame = prevFilters.length === newFilters.length && prevFilters.every((prevFilter, index) => {
-        const nextFilter = newFilters[index];
-        return (
-          prevFilter.field === nextFilter?.field &&
-          prevFilter.operator === nextFilter?.operator &&
-          prevFilter.value === nextFilter?.value
-        );
-      });
-
-      return isSame ? prevFilters : newFilters;
-    });
-
-    setPagination((prev) => (prev.page === 1 ? prev : { ...prev, page: 1 }));
-  }, []);
-
-
-  const renderCellContent = (item: any, column: any) => {
-    const { field, renderer, display } = column;
-    const value = item[field];
-
-    if (renderer === "markdown" && value) {
-      return (
-        <div className="max-w-none prose prose-xs prose-orange line-clamp-3">
-          <ReactMarkdown>{value}</ReactMarkdown>
-        </div>
-      );
-    }
-
-    if (renderer === "image" && value) {
-      return <ImageCell value={value} field={field} />;
-    }
-
-    // Handle foreign key relationships
-    if (field.endsWith("Id") && item[field.replace("Id", "")]) {
-      const relatedItem = item[field.replace("Id", "")];
-      if (relatedItem) {
-        const displayName = relatedItem.name || relatedItem.title || relatedItem.email || `ID: ${value}`;
-        return (
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-900">{displayName}</span>
-            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">ID: {value}</span>
-          </div>
-        );
-      }
-    }
-
-    // Handle special relationship fields
-    if (renderer === "relation" && value) {
-
-      const displayValue =
-        value?.[display ?? "name"] ??
-        value?.[display ?? "post"] ??
-        value?.[display ?? "category"] ??
-        value?.title ??
-        value?.name ??
-        value?.email ??
-        value?.id;
-
-      return (
-        <div className="flex items-center space-x-2">
-          <span>{displayValue}</span>
-        </div>
-      );
-    }
-
-    if (renderer === "manyToMany" && Array.isArray(value)) {
-      const manyToManyContent = (
-        <div className="flex flex-wrap gap-1">
-          {value.slice(0, 3).map((item: any, idx: number) => {
-            const displayValue =
-              item.category?.[display ?? "name"] ??
-              item[display ?? "name"] ??
-              item.title ??
-              item.name;
-            return (
-              <span
-                key={`${item.id || idx}-${column.field}`}
-
-                className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full"
-              >
-                {displayValue}
-              </span>
-            );
-          })}
-          {value.length > 3 && (
-            <span className="text-xs text-gray-500">
-              +{value.length - 3} more
-            </span>
-          )}
-        </div>
-      );
-      return manyToManyContent;
-    }
-
-    if (typeof value === "boolean") {
-      return (
-        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${value ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
-          {value ? "Yes" : "No"}
-        </span>
-      );
-    }
-
-
-    if (renderer === "date" && value) {
-      return new Date(value).toLocaleDateString();
-    }
-
-    if (renderer === "number") {
-      return value ?? "";
-    }
-
-    if (typeof value === "string" && value.length > 50) {
-      return (
-        <span title={value} className="truncate block max-w-xs">
-          {value.substring(0, 50)}...
-        </span>
-      );
-    }
-
-    // Guard against rendering objects as [object Object]
-    if (value !== null && typeof value === "object") {
-      return JSON.stringify(value);
-    }
-
-    return String(value ?? "");
-  };
-
-  const getSortIcon = (field: string) => {
-    if (sortBy !== field) {
-      return <ArrowUpDown className="h-4 w-4 text-gray-400" />;
-    }
-    return sortOrder === "asc" ?
-      <ArrowUp className="h-4 w-4 text-orange-600" /> :
-      <ArrowDown className="h-4 w-4 text-orange-600" />;
-  };
-
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 relative">
       <LoadingOverlay isLoading={loading} />
@@ -476,11 +187,7 @@ export function AdminCRUDTable({
       </div>
 
       {/* Advanced Filters */}
-      <AdvancedFilters
-        entity={entity}
-        onFiltersChange={handleFiltersChange}
-        className="mx-6 my-2"
-      />
+      <AdvancedFilters entity={entity} onFiltersChange={handleFiltersChange} className="mx-6 my-2" />
 
       {/* Bulk Actions */}
       <BulkActions
@@ -493,7 +200,7 @@ export function AdminCRUDTable({
         onShowDeleteWarning={(count) => showDeleteWarning(entity, count)}
       />
 
-      {/* Error Message */}
+      {/* Error */}
       {error && (
         <div className="px-6 py-4 bg-red-50 border-b border-red-200">
           <p className="text-sm text-red-600">{error}</p>
@@ -528,7 +235,7 @@ export function AdminCRUDTable({
           <tbody className="bg-white divide-y divide-gray-200">
             {items.map((item, idx) => {
               const rowKey = config.primaryKey ?? "id";
-              const isSelected = selectedItems.some(selected => selected[rowKey] === item[rowKey]);
+              const isSelected = selectedItems.some(s => s[rowKey] === item[rowKey]);
               return (
                 <SelectableRow
                   key={item[rowKey] ?? idx}
@@ -586,37 +293,16 @@ export function AdminCRUDTable({
       )}
 
       {/* Create Modal */}
-      <Modal
-        isOpen={showCreateModal}
-        onClose={handleFormCancel}
-        title={`Create ${config.title}`}
-        size="lg"
-      >
-        <EntityForm
-          entity={entity}
-          onSubmit={handleFormSubmit}
-          onCancel={handleFormCancel}
-          isLoading={formLoading}
-        />
+      <Modal isOpen={showCreateModal} onClose={handleFormCancel} title={`Create ${config.title}`} size="lg">
+        <EntityForm entity={entity} onSubmit={handleFormSubmit} onCancel={handleFormCancel} isLoading={formLoading} />
       </Modal>
 
       {/* Edit Modal */}
-      <Modal
-        isOpen={showEditModal}
-        onClose={handleFormCancel}
-        title={`Edit ${config.title}`}
-        size="lg"
-      >
-        <EntityForm
-          entity={entity}
-          initialData={selectedItem}
-          onSubmit={handleFormSubmit}
-          onCancel={handleFormCancel}
-          isLoading={formLoading}
-        />
+      <Modal isOpen={showEditModal} onClose={handleFormCancel} title={`Edit ${config.title}`} size="lg">
+        <EntityForm entity={entity} initialData={selectedItem} onSubmit={handleFormSubmit} onCancel={handleFormCancel} isLoading={formLoading} />
       </Modal>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Delete Confirmation */}
       <ConfirmDialog
         isOpen={showDeleteDialog}
         onClose={() => setShowDeleteDialog(false)}
@@ -632,10 +318,7 @@ export function AdminCRUDTable({
         showExtraWarning={true}
       />
 
-      {/* Warning Banners */}
       <WarningBanners />
-
-      {/* Toast Notifications */}
       <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
