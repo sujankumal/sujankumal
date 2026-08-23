@@ -1,5 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/services/auth';
+import { NextResponse } from 'next/server';
+import NextAuth from 'next-auth';
+import { authConfig } from '../auth.config';
+
+const { auth } = NextAuth(authConfig);
 
 /**
  * Returns the list of approved origins parsed from environment variables,
@@ -93,7 +96,7 @@ function applyStandardSecurityHeaders(response: NextResponse): void {
   );
 }
 
-export async function middleware(request: NextRequest) {
+export default auth(async function middleware(request) {
   const origin = request.headers.get('origin');
   const allowedOrigins = getAllowedOrigins();
   const isAllowedOrigin = origin ? allowedOrigins.includes(origin) : false;
@@ -118,7 +121,7 @@ export async function middleware(request: NextRequest) {
   // ── 2. Handle Admin Page Route Protection ────────────────────────────────
   const pathname = request.nextUrl.pathname;
   if (pathname.startsWith('/admin')) {
-    const session = await auth();
+    const session = request.auth;
     if (!session?.user?.verified) {
       const redirectResponse = NextResponse.redirect(new URL('/', request.url));
       applyStandardSecurityHeaders(redirectResponse);
@@ -159,7 +162,7 @@ export async function middleware(request: NextRequest) {
   }
 
   return response;
-}
+});
 
 export const config = {
   matcher: [
