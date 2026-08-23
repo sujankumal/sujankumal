@@ -64,7 +64,7 @@ function buildCspHeader(nonce: string): string {
     // Fonts: allow self, Google Fonts, and data URIs
     "font-src 'self' https://fonts.gstatic.com data:",
     // Connect: allow self, Firebase RTDB/Auth endpoints, GA, WebRTC STUN servers, and allowed origins
-    `connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com ${allowedOrigins}`,
+    `connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com https://firebase.googleapis.com https://firebaseinstallations.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com ${allowedOrigins}`,
     // Frames: allow self and Google OAuth accounts
     "frame-src 'self' https://accounts.google.com",
     // Frame Ancestors: Anti-Clickjacking - prohibit all embedding in iframes
