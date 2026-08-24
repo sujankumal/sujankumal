@@ -96,7 +96,7 @@ function applyStandardSecurityHeaders(response: NextResponse): void {
   );
 }
 
-export default auth(async function middleware(request) {
+export default auth(async function proxy(request) {
   const origin = request.headers.get('origin');
   const allowedOrigins = getAllowedOrigins();
   const isAllowedOrigin = origin ? allowedOrigins.includes(origin) : false;
