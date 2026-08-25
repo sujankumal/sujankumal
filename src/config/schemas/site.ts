@@ -5,7 +5,7 @@ export const siteSchema = z.object({
     header_image_credit: z.string().nullable().optional(),
     title: z.string().min(2, "Title is required"),
     name: z.string().min(2, "Name is required"),
-    motto: z.string().min(100, "Motto is required"),
+    motto: z.string().min(10, "Motto is required"),
     greeting: z.string().min(20, "Greeting is required"),
     description: z.string().min(50, "Description is required"),
     detail: z.string().min(200, "Detail is required"),

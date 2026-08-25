@@ -103,7 +103,13 @@ export function AdminCRUDTable({ entity, initialData = [] }: AdminCRUDTableProps
       });
       const result = await response.json();
       if (!response.ok) {
-        if (result.fields) return result.fields;
+        if (result.fields) {
+          const errorPayload = await response.json().catch(() => ({}));
+          const errorMessage = errorPayload.message || response.statusText;
+          setError(errorMessage);
+          showError(`${errorMessage}. ${JSON.stringify(result.fields)}`);
+          return result.fields;
+        }
         throw new Error(result.error);
       }
       await fetchData();
