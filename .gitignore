@@ -42,3 +42,5 @@ next-env.d.ts
 prisma/app/generated
 *.db
 *.db-journal
+
+AGENTS.md

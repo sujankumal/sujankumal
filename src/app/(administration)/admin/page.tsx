@@ -3,6 +3,7 @@ import { auth } from "../../../services/auth";
 import { redirect } from "next/navigation";
 import { CollapsibleSection, CollapsibleSectionGroup } from "../../../components/admin/CollapsibleSection";
 import { LazyAdminTable } from "../../../components/admin/LazyAdminTable";
+import { AdminSecurityButton } from "../../../components/admin/AdminSecurityButton";
 
 export const metadata: Metadata = {
     title: 'Admin | Sujan Kumal | Software Engineer',
@@ -21,14 +22,15 @@ async function Admin() {
     }
 
     return (
-        <main className="min-h-screen bg-gray-50 rounded-2xl opacity-80">            
+        <main className="min-h-screen bg-gray-50 rounded-2xl">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                    <div>
+                    <div className="flex flex-col gap-2 w-fit mt-8">
                         <h1 className="text-xl font-bold text-gray-900 mb-2">Database Management</h1>
                         <p className="text-sm text-gray-600">Manage your application data with full CRUD operations. Click on any section to expand and load the data.</p>
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 items-center">
+                        <AdminSecurityButton />
                         <a
                             href="/admin/firebase"
                             className="inline-flex w-fit items-center justify-center rounded-md bg-orange-600 px-4 py-2 text-sm text-white hover:bg-orange-700"
@@ -50,35 +52,35 @@ async function Admin() {
                     description="Manage posts, categories, and content blocks"
                     defaultExpanded={true}
                 >
-                    <div  className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <CollapsibleSection
-                        title="Posts"
-                        entity="posts"
-                        defaultExpanded={false}
-                    >
-                        <LazyAdminTable entity="posts" />
-                    </CollapsibleSection>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <CollapsibleSection
+                            title="Posts"
+                            entity="posts"
+                            defaultExpanded={false}
+                        >
+                            <LazyAdminTable entity="posts" />
+                        </CollapsibleSection>
 
-                    <CollapsibleSection
-                        title="Categories"
-                        entity="categories"
-                    >
-                        <LazyAdminTable entity="categories" />
-                    </CollapsibleSection>
+                        <CollapsibleSection
+                            title="Categories"
+                            entity="categories"
+                        >
+                            <LazyAdminTable entity="categories" />
+                        </CollapsibleSection>
 
-                    <CollapsibleSection
-                        title="Content Blocks"
-                        entity="content"
-                    >
-                        <LazyAdminTable entity="content" />
-                    </CollapsibleSection>
+                        <CollapsibleSection
+                            title="Content Blocks"
+                            entity="content"
+                        >
+                            <LazyAdminTable entity="content" />
+                        </CollapsibleSection>
 
-                    <CollapsibleSection
-                        title="Categories On Posts"
-                        entity="categoriesonposts"
-                    >
-                        <LazyAdminTable entity="categoriesonposts" />
-                    </CollapsibleSection>
+                        <CollapsibleSection
+                            title="Categories On Posts"
+                            entity="categoriesonposts"
+                        >
+                            <LazyAdminTable entity="categoriesonposts" />
+                        </CollapsibleSection>
                     </div>
                 </CollapsibleSectionGroup>
 
@@ -87,20 +89,20 @@ async function Admin() {
                     title="👥 User Management"
                     description="Manage users, profiles, and authentication"
                 >
-                    <div  className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <CollapsibleSection
-                        title="Users"
-                        entity="user"
-                    >
-                        <LazyAdminTable entity="users" />
-                    </CollapsibleSection>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <CollapsibleSection
+                            title="Users"
+                            entity="user"
+                        >
+                            <LazyAdminTable entity="users" />
+                        </CollapsibleSection>
 
-                    <CollapsibleSection
-                        title="Profiles"
-                        entity="profile"
-                    >
-                        <LazyAdminTable entity="profiles" />
-                    </CollapsibleSection>
+                        <CollapsibleSection
+                            title="Profiles"
+                            entity="profile"
+                        >
+                            <LazyAdminTable entity="profiles" />
+                        </CollapsibleSection>
                     </div>
                 </CollapsibleSectionGroup>
 
@@ -109,34 +111,34 @@ async function Admin() {
                     title="⚙️ Site Management"
                     description="Manage site settings, projects, and social links"
                 >
-                    <div  className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <CollapsibleSection
-                        title="Site Settings"
-                        entity="site"
-                    >
-                        <LazyAdminTable entity="sites" />
-                    </CollapsibleSection>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <CollapsibleSection
+                            title="Site Settings"
+                            entity="site"
+                        >
+                            <LazyAdminTable entity="sites" />
+                        </CollapsibleSection>
 
-                    <CollapsibleSection
-                        title="Projects"
-                        entity="project"
-                    >
-                        <LazyAdminTable entity="projects" />
-                    </CollapsibleSection>
+                        <CollapsibleSection
+                            title="Projects"
+                            entity="project"
+                        >
+                            <LazyAdminTable entity="projects" />
+                        </CollapsibleSection>
 
-                    <CollapsibleSection
-                        title="Social Links"
-                        entity="social"
-                    >
-                        <LazyAdminTable entity="socials" />
-                    </CollapsibleSection>
+                        <CollapsibleSection
+                            title="Social Links"
+                            entity="social"
+                        >
+                            <LazyAdminTable entity="socials" />
+                        </CollapsibleSection>
 
-                    <CollapsibleSection
-                        title="Updates"
-                        entity="updates"
-                    >
-                        <LazyAdminTable entity="updates" />
-                    </CollapsibleSection>
+                        <CollapsibleSection
+                            title="Updates"
+                            entity="updates"
+                        >
+                            <LazyAdminTable entity="updates" />
+                        </CollapsibleSection>
                     </div>
                 </CollapsibleSectionGroup>
 
@@ -145,27 +147,34 @@ async function Admin() {
                     title="🔧 System Tables"
                     description="Authentication and system data (read-only)"
                 >
-                    <div  className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <CollapsibleSection
-                        title="Accounts"
-                        entity="account"
-                    >
-                        <LazyAdminTable entity="accounts" isCRUD={false} />
-                    </CollapsibleSection>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <CollapsibleSection
+                            title="Accounts"
+                            entity="account"
+                        >
+                            <LazyAdminTable entity="accounts" isCRUD={false} />
+                        </CollapsibleSection>
 
-                    <CollapsibleSection
-                        title="Sessions"
-                        entity="session"
-                    >
-                        <LazyAdminTable entity="sessions" isCRUD={false} />
-                    </CollapsibleSection>
+                        <CollapsibleSection
+                            title="Sessions"
+                            entity="session"
+                        >
+                            <LazyAdminTable entity="sessions" isCRUD={false} />
+                        </CollapsibleSection>
 
-                    <CollapsibleSection
-                        title="Verification Tokens"
-                        entity="verificationToken"
-                    >
-                        <LazyAdminTable entity="verificationtokens" isCRUD={false} />
-                    </CollapsibleSection>
+                        <CollapsibleSection
+                            title="Verification Tokens"
+                            entity="verificationToken"
+                        >
+                            <LazyAdminTable entity="verificationtokens" isCRUD={false} />
+                        </CollapsibleSection>
+
+                        <CollapsibleSection
+                            title="Security Logs"
+                            entity="securitylogs"
+                        >
+                            <LazyAdminTable entity="securitylogs" isCRUD={false} />
+                        </CollapsibleSection>
                     </div>
                 </CollapsibleSectionGroup>
             </div>

@@ -12,6 +12,7 @@ import { profileSchema } from "./schemas/profile";
 import { accountSchema } from "./schemas/account";
 import { sessionSchema } from "./schemas/session";
 import { verificationTokenSchema } from "./schemas/verificationtoken";
+import { securityLogSchema } from "./schemas/securityLog";
 
 export const ENTITY_NAMES = [
     "sites",
@@ -27,6 +28,7 @@ export const ENTITY_NAMES = [
     "accounts",
     "sessions",
     "verificationtokens",
+    "securitylogs",
 ] as const;
 
 export type EntityName = typeof ENTITY_NAMES[number];
@@ -685,6 +687,45 @@ export const adminEntities: AdminEntities = {
             { name: "identifier", label: "Identifier", control: "text", required: true },
             { name: "token", label: "Token", control: "text", required: true },
             { name: "expires", label: "Expiration Date", control: "date", required: true },
+        ],
+    },
+
+    securitylogs: {
+        primaryKey: "id",
+        title: "Security Logs",
+        schema: securityLogSchema,
+        defaultSort: {
+            field: "createdAt",
+            order: "desc",
+        },
+        sortableFields: [
+            "id",
+            "event",
+            "userId",
+            "ipAddress",
+            "createdAt",
+        ],
+        searchable: (search: string) => ({
+            OR: [
+                { event: { contains: search, mode: "insensitive" } },
+                { ipAddress: { contains: search, mode: "insensitive" } },
+                { userAgent: { contains: search, mode: "insensitive" } },
+                { details: { contains: search, mode: "insensitive" } },
+            ],
+        }),
+        columns: [
+            { field: "event", label: "Event", renderer: "text", sortable: true },
+            { field: "userId", label: "User ID", renderer: "number", sortable: true },
+            { field: "ipAddress", label: "IP Address", renderer: "text", sortable: true },
+            { field: "userAgent", label: "User Agent", renderer: "text" },
+            { field: "details", label: "Details", renderer: "text" },
+            { field: "createdAt", label: "Timestamp", renderer: "date", sortable: true },
+        ],
+        form: [
+            { name: "event", label: "Event", control: "text", required: true },
+            { name: "ipAddress", label: "IP Address", control: "text" },
+            { name: "userAgent", label: "User Agent", control: "text" },
+            { name: "details", label: "Details", control: "textarea" },
         ],
     },
 };

@@ -106,20 +106,53 @@ model CategoriesOnPosts {
 }
 
 model User {
-  id            Int       @default(autoincrement()) @id
-  name          String?
-  email         String?   @unique
-  password      String?
-  verified      Boolean   @default(false)
-  createdAt     DateTime  @default(now()) @map(name: "created_at")
-  updatedAt     DateTime  @updatedAt @map(name: "updated_at")
-  posts         Post[]
-  profile       Profile?
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
+  id                  Int                  @default(autoincrement()) @id
+  name                String?
+  email               String?              @unique
+  password            String?
+  verified            Boolean              @default(false)
+  failedLoginAttempts Int                  @default(0)
+  lockedUntil         DateTime?
+  lastFailedLogin     DateTime?
+  twoFactorSecret     String?
+  twoFactorEnabled    Boolean              @default(false)
+  createdAt           DateTime             @default(now()) @map(name: "created_at")
+  updatedAt           DateTime             @updatedAt @map(name: "updated_at")
+  posts               Post[]
+  profile             Profile?
+  emailVerified       DateTime?
+  image               String?
+  accounts            Account[]
+  sessions            Session[]
+  backupCodes         TwoFactorBackupCode[]
+  securityLogs        SecurityLog[]
   @@map(name: "users")
+}
+
+model TwoFactorBackupCode {
+  id        Int       @default(autoincrement()) @id
+  userId    Int
+  codeHash  String
+  used      Boolean   @default(false)
+  usedAt    DateTime?
+  createdAt DateTime  @default(now()) @map(name: "created_at")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+  @@map(name: "two_factor_backup_codes")
+}
+
+model SecurityLog {
+  id        Int       @default(autoincrement()) @id
+  userId    Int?
+  event     String
+  ipAddress String?
+  userAgent String?
+  details   String?
+  createdAt DateTime  @default(now()) @map(name: "created_at")
+  user      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, event])
+  @@index([createdAt])
+  @@map(name: "security_logs")
 }
 
 model Profile {

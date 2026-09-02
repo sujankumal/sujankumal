@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import NextAuth from 'next-auth';
 import { authConfig } from '../auth.config';
+import { getClientIp, globalApiRateLimiter, authRateLimiter } from './lib/rate-limiter';
 
 const { auth } = NextAuth(authConfig);
 
@@ -54,19 +55,19 @@ function buildCspHeader(nonce: string): string {
 
   const directives = [
     "default-src 'self'",
-    // Scripts: allow self, nonced scripts, strict-dynamic, and Google Analytics / Tag Manager.
+    // Scripts: allow self, nonced scripts, strict-dynamic, Cloudflare Turnstile, and Google Analytics / Tag Manager.
     // In development mode, 'unsafe-eval' is permitted for Fast Refresh / HMR.
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://www.googletagmanager.com https://www.google-analytics.com ${isDev ? "'unsafe-eval'" : ""}`,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://challenges.cloudflare.com https://www.googletagmanager.com https://www.google-analytics.com ${isDev ? "'unsafe-eval'" : ""}`,
     // Styles: allow self, inline styles (needed by Tailwind / CSS-in-JS), and Google Fonts
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     // Images: allow self, blob, data URIs, and configured remote media hosts
     `img-src 'self' blob: data: https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://images.unsplash.com https://drive.google.com https://drive.usercontent.google.com https://sujankumal.com.np https://www.google-analytics.com https://www.googletagmanager.com ${allowedOrigins}`,
     // Fonts: allow self, Google Fonts, and data URIs
     "font-src 'self' https://fonts.gstatic.com data:",
-    // Connect: allow self, Firebase RTDB/Auth endpoints, GA, WebRTC STUN servers, and allowed origins
-    `connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com https://firebase.googleapis.com https://firebaseinstallations.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com ${allowedOrigins}`,
-    // Frames: allow self and Google OAuth accounts
-    "frame-src 'self' https://accounts.google.com",
+    // Connect: allow self, Cloudflare Turnstile, Firebase RTDB/Auth endpoints, GA, WebRTC STUN servers, and allowed origins
+    `connect-src 'self' https://challenges.cloudflare.com https://*.firebaseio.com wss://*.firebaseio.com https://firebase.googleapis.com https://firebaseinstallations.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com ${allowedOrigins}`,
+    // Frames: allow self, Cloudflare Turnstile, and Google OAuth accounts
+    "frame-src 'self' https://challenges.cloudflare.com https://accounts.google.com",
     // Frame Ancestors: Anti-Clickjacking - prohibit all embedding in iframes
     "frame-ancestors 'none'",
     // Prevent plugins like Flash, Java, Silverlight
@@ -100,7 +101,59 @@ export default auth(async function proxy(request) {
   const origin = request.headers.get('origin');
   const allowedOrigins = getAllowedOrigins();
   const isAllowedOrigin = origin ? allowedOrigins.includes(origin) : false;
-  const isApiRoute = request.nextUrl.pathname.startsWith('/api');
+  const pathname = request.nextUrl.pathname;
+  const isApiRoute = pathname.startsWith('/api');
+  const clientIp = getClientIp(request.headers);
+
+  // ── 0. Rate Limiting Check ────────────────────────────────────────────────
+  const isAuthRoute =
+    pathname.startsWith('/api/auth') ||
+    pathname === '/log-in' ||
+    pathname === '/sign-up';
+
+  if (isAuthRoute) {
+    const rateLimit = authRateLimiter.check(`auth:${clientIp}`);
+    if (!rateLimit.success) {
+      const response = new NextResponse(
+        JSON.stringify({
+          error: 'Too many authentication attempts. Please try again later.',
+          retryAfter: rateLimit.retryAfterSeconds,
+        }),
+        {
+          status: 429,
+          headers: {
+            'Content-Type': 'application/json',
+            'Retry-After': String(rateLimit.retryAfterSeconds ?? 60),
+            'X-RateLimit-Limit': String(rateLimit.limit),
+            'X-RateLimit-Remaining': '0',
+          },
+        }
+      );
+      applyStandardSecurityHeaders(response);
+      return response;
+    }
+  } else if (isApiRoute) {
+    const rateLimit = globalApiRateLimiter.check(`api:${clientIp}`);
+    if (!rateLimit.success) {
+      const response = new NextResponse(
+        JSON.stringify({
+          error: 'Rate limit exceeded. Please slow down your requests.',
+          retryAfter: rateLimit.retryAfterSeconds,
+        }),
+        {
+          status: 429,
+          headers: {
+            'Content-Type': 'application/json',
+            'Retry-After': String(rateLimit.retryAfterSeconds ?? 60),
+            'X-RateLimit-Limit': String(rateLimit.limit),
+            'X-RateLimit-Remaining': '0',
+          },
+        }
+      );
+      applyStandardSecurityHeaders(response);
+      return response;
+    }
+  }
 
   // ── 1. Handle CORS Preflight (OPTIONS) Requests for API Routes ───────────
   if (request.method === 'OPTIONS' && isApiRoute) {
@@ -119,7 +172,6 @@ export default auth(async function proxy(request) {
   }
 
   // ── 2. Handle Admin Page Route Protection ────────────────────────────────
-  const pathname = request.nextUrl.pathname;
   if (pathname.startsWith('/admin')) {
     const session = request.auth;
     if (!session?.user?.verified) {
