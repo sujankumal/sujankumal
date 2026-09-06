@@ -1,5 +1,7 @@
 import { Metadata } from 'next';
+import { cacheTag } from 'next/cache';
 import prisma from '../../prisma/prisma';
+import { CACHE_TAGS } from '@/constants/cache-tags';
 
 // ─── Shared Config Type ───────────────────────────────────────────────────────
 
@@ -42,9 +44,26 @@ export const siteConfig: SiteConfigType = {
 // ─── Dynamic Config (from DB) ─────────────────────────────────────────────────
 
 export async function getSiteConfig(): Promise<SiteConfigType> {
+  "use cache";
+  cacheTag(CACHE_TAGS.site, CACHE_TAGS.social);
+
   try {
-    const site = await prisma.site.findFirst({ orderBy: { id: 'desc' } });
-    const socials = await prisma.social.findMany();
+    const [site, socials] = await Promise.all([
+      prisma.site.findFirst({
+        orderBy: { id: 'desc' },
+        select: {
+          name: true,
+          description: true,
+          contact_email: true,
+        },
+      }),
+      prisma.social.findMany({
+        select: {
+          name: true,
+          username: true,
+        },
+      }),
+    ]);
 
     const twitterSocial = socials.find(s => s.name.toLowerCase() === 'twitter');
     const githubSocial = socials.find(s => s.name.toLowerCase() === 'github');
