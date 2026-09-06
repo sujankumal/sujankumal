@@ -12,7 +12,7 @@ import { TurnstileWidget } from "./TurnstileWidget";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function SignupForm() {
+export function SignupForm({ nonce }: { nonce?: string }) {
     const [show_alert, set_show_alert] = useState(false);
     const [show_error_message, set_show_error_message] = useState('');
     const [csrfToken, setCsrfToken] = useState('');
@@ -283,6 +283,7 @@ export function SignupForm() {
                                     onExpire={handleCaptchaReset}
                                     onError={handleCaptchaReset}
                                     className="my-4 text-xs"
+                                    nonce={nonce}
                                 />
 
                                 {show_error_message && (

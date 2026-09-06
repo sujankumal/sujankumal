@@ -1,17 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "../../../../../services/auth";
 import { headers } from "next/headers";
+import { requireVerifiedUser } from "@/services/authorization";
 
 /**
  * Checks that the current session belongs to a verified admin user.
  * Returns a 401 response if not, or null if auth passes.
  */
 export async function checkAdminAuth(): Promise<NextResponse | null> {
-  const session = await auth();
-  if (!session?.user?.verified) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  return null;
+  const authorization = await requireVerifiedUser();
+  return authorization.response;
 }
 
 /**

@@ -2,6 +2,7 @@ import '../globals.css';
 import { Noto_Serif, Noto_Serif_Devanagari } from 'next/font/google';
 import { SessionProvider } from 'next-auth/react';
 import Script from 'next/script';
+import { headers } from 'next/headers';
 import { auth } from '@/services/auth';
 import { Metadata } from 'next';
 import { generateMetadata as generateSEOMetadata, getSiteConfig } from '../../lib/seo';
@@ -35,7 +36,7 @@ export default async function AdminLayout({
 }) {
   const session = await auth();
   const dynamicConfig = await getSiteConfig();
-
+  const nonce = (await headers()).get('x-nonce') ?? undefined;
   return (
     <html lang="en">
       <GoogleAnalytics />
@@ -55,6 +56,13 @@ export default async function AdminLayout({
           "description": dynamicConfig.description,
         })}
       </Script>
+      {/* Cloudflare Turnstile — loaded here with nonce so strict-dynamic trusts it
+          and its child scripts (including proof-of-work eval calls). */}
+      <Script
+        src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
+        strategy="afterInteractive"
+        nonce={nonce}
+      />
       <body className={`${noto.variable} ${notoNepali.variable} antialiased`}>
         <SessionProvider session={session}>
           <AdminShell session={session}>

@@ -132,5 +132,5 @@ export const globalApiRateLimiter = new InMemoryRateLimiter({
 // 2. Strict Auth & Mutation Limiter: 10 attempts per minute (stops brute-force & credential-stuffing bursts)
 export const authRateLimiter = new InMemoryRateLimiter({
   windowMs: 60 * 1000,
-  maxRequests: 10,
+  maxRequests: 20,
 });

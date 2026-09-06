@@ -7,6 +7,7 @@ interface TurnstileWidgetProps {
   onExpire?: () => void;
   onError?: (error: unknown) => void;
   className?: string;
+  nonce?: string;
 }
 
 declare global {
@@ -25,7 +26,6 @@ declare global {
       reset: (widgetId?: string) => void;
       remove: (widgetId?: string) => void;
     };
-    onTurnstileLoaded?: () => void;
   }
 }
 
@@ -34,6 +34,7 @@ export function TurnstileWidget({
   onExpire,
   onError,
   className = 'my-3 flex justify-center',
+  nonce,
 }: TurnstileWidgetProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
@@ -46,6 +47,7 @@ export function TurnstileWidget({
 
   useEffect(() => {
     let isMounted = true;
+    let pollInterval: NodeJS.Timeout | null = null;
 
     function initTurnstile() {
       if (!window.turnstile || !containerRef.current || !isMounted) return;
@@ -56,6 +58,7 @@ export function TurnstileWidget({
         } catch {
           // ignore
         }
+        widgetIdRef.current = null;
       }
 
       try {
@@ -81,21 +84,38 @@ export function TurnstileWidget({
     if (window.turnstile) {
       initTurnstile();
     } else {
+      // Ensure the Turnstile script exists in document.head
       const existingScript = document.querySelector('script[src*="turnstile/v0/api.js"]');
       if (!existingScript) {
         const script = document.createElement('script');
         script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
         script.async = true;
         script.defer = true;
-        script.onload = () => initTurnstile();
+        if (nonce) {
+          script.nonce = nonce;
+        }
         document.head.appendChild(script);
-      } else {
-        existingScript.addEventListener('load', () => initTurnstile(), { once: true });
       }
+
+      // Poll until window.turnstile is ready
+      let attempts = 0;
+      pollInterval = setInterval(() => {
+        attempts++;
+        if (window.turnstile) {
+          if (pollInterval) clearInterval(pollInterval);
+          initTurnstile();
+        } else if (attempts >= 100) {
+          if (pollInterval) clearInterval(pollInterval);
+          console.warn('Turnstile: api.js did not load within 10s');
+        }
+      }, 100);
     }
 
     return () => {
       isMounted = false;
+      if (pollInterval) {
+        clearInterval(pollInterval);
+      }
 
       const widgetId = widgetIdRef.current;
       widgetIdRef.current = null;
@@ -108,7 +128,7 @@ export function TurnstileWidget({
         }
       }
     };
-  }, [siteKey, onVerify, onExpire, onError]);
+  }, [siteKey, onVerify, onExpire, onError, nonce]);
 
   return <div ref={containerRef} className={className} />;
 }

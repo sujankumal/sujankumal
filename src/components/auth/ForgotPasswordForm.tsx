@@ -8,7 +8,7 @@ import { TurnstileWidget } from './TurnstileWidget';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function ForgotPasswordForm() {
+export function ForgotPasswordForm({ nonce }: { nonce?: string }) {
   const [email, setEmail] = useState('');
   const [captchaToken, setCaptchaToken] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -128,6 +128,7 @@ export function ForgotPasswordForm() {
                       onExpire={handleCaptchaReset}
                       onError={handleCaptchaReset}
                       className="my-4 text-xs"
+                      nonce={nonce}
                     />
 
                     <div className="flex items-center justify-center mt-4">

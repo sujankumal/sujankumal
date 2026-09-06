@@ -1,6 +1,6 @@
 import { Metadata } from "next";
-import { auth } from "../../../services/auth";
 import { redirect } from "next/navigation";
+import { getCurrentUser } from "@/services/authorization";
 import { CollapsibleSection, CollapsibleSectionGroup } from "../../../components/admin/CollapsibleSection";
 import { LazyAdminTable } from "../../../components/admin/LazyAdminTable";
 import { AdminSecurityButton } from "../../../components/admin/AdminSecurityButton";
@@ -13,11 +13,11 @@ export const metadata: Metadata = {
 export const instant = false;
 
 async function Admin() {
-    const session = await auth();
-    if (!session?.user) {
+    const user = await getCurrentUser();
+    if (!user) {
         return redirect('/log-in');
     }
-    if (!session.user.verified) {
+    if (!user.verified) {
         return redirect('/not-authorized');
     }
 

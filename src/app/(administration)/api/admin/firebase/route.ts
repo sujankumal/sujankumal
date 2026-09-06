@@ -2,15 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/services/auth";
 import { database as adminDatabase } from "@/lib/firebase";
 import { headers } from "next/headers";
-
-// Helper function to check admin authorization
-async function checkAdminAuth() {
-  const session = await auth();
-  if (!session?.user?.verified) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  return null;
-}
+import { requireVerifiedUser } from "@/services/authorization";
 
 // Basic CSRF validation helper for write operations
 async function validateRequest(request: NextRequest) {
@@ -61,8 +53,8 @@ function sanitizePath(rawPath: string | null): string {
 
 // GET: Read data from Firebase Realtime Database
 export async function GET(request: NextRequest) {
-  const authError = await checkAdminAuth();
-  if (authError) return authError;
+  const authorization = await requireVerifiedUser();
+  if (authorization.response) return authorization.response;
 
   if (!adminDatabase) {
     return NextResponse.json({ error: "Firebase Realtime Database Admin SDK not initialized." }, { status: 500 });
@@ -87,8 +79,8 @@ export async function GET(request: NextRequest) {
 
 // PUT: Overwrite data at a path (or create a path)
 export async function PUT(request: NextRequest) {
-  const authError = await checkAdminAuth();
-  if (authError) return authError;
+  const authorization = await requireVerifiedUser();
+  if (authorization.response) return authorization.response;
 
   const requestError = await validateRequest(request);
   if (requestError) return requestError;
@@ -112,8 +104,8 @@ export async function PUT(request: NextRequest) {
 
 // POST: Push data (generates a unique child ID under the path)
 export async function POST(request: NextRequest) {
-  const authError = await checkAdminAuth();
-  if (authError) return authError;
+  const authorization = await requireVerifiedUser();
+  if (authorization.response) return authorization.response;
 
   const requestError = await validateRequest(request);
   if (requestError) return requestError;
@@ -143,8 +135,8 @@ export async function POST(request: NextRequest) {
 
 // PATCH: Partial updates on child nodes (merges keys instead of overwriting)
 export async function PATCH(request: NextRequest) {
-  const authError = await checkAdminAuth();
-  if (authError) return authError;
+  const authorization = await requireVerifiedUser();
+  if (authorization.response) return authorization.response;
 
   const requestError = await validateRequest(request);
   if (requestError) return requestError;
@@ -172,8 +164,8 @@ export async function PATCH(request: NextRequest) {
 
 // DELETE: Delete node at a path
 export async function DELETE(request: NextRequest) {
-  const authError = await checkAdminAuth();
-  if (authError) return authError;
+  const authorization = await requireVerifiedUser();
+  if (authorization.response) return authorization.response;
 
   const requestError = await validateRequest(request);
   if (requestError) return requestError;

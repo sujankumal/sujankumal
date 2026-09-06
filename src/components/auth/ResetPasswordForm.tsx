@@ -7,7 +7,7 @@ import { CircularProgress, Alert } from '@mui/material';
 import { useDebounce } from '@/lib/useDebounce';
 import { TurnstileWidget } from './TurnstileWidget';
 
-export function ResetPasswordForm() {
+export function ResetPasswordForm({ nonce }: { nonce?: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -197,6 +197,7 @@ export function ResetPasswordForm() {
                       onExpire={handleCaptchaReset}
                       onError={handleCaptchaReset}
                       className="my-4 text-xs"
+                      nonce={nonce}
                     />
 
                     <div className="flex items-center justify-center mt-4">

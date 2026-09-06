@@ -84,7 +84,7 @@ export async function POST(request: Request) {
     // Hash backup codes before persisting
     const hashedBackupCodes = await Promise.all(
       plainBackupCodes.map(async (code) => {
-        const hash = await bcrypt.hash(code, 10);
+        const hash = await bcrypt.hash(code, 12);
         return {
           codeHash: hash,
           used: false,

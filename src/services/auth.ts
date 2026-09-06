@@ -1,6 +1,7 @@
 import NextAuth from 'next-auth';
 import CredentialProvider from 'next-auth/providers/credentials';
 import GoogleProvider from "next-auth/providers/google";
+import { CredentialsSignin } from '@auth/core/errors';
 import { z } from 'zod';
 import bcrypt from 'bcrypt';
 
@@ -12,7 +13,23 @@ import { verifyTotp } from './totp';
 import { verifyTurnstileToken } from './captcha';
 
 // Pre-computed constant bcrypt hash to prevent timing attack enumeration for nonexistent accounts
-const DUMMY_BCRYPT_HASH = '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi';
+const DUMMY_BCRYPT_HASH = '$2a$12$7HJLMe2hKd2dC086lxCDqOmCnW2NSiqIdl8OAM7HjNgfWhN52WPpi';
+
+class MfaRequiredError extends CredentialsSignin {
+  code = 'mfa_required';
+}
+
+class InvalidMfaError extends CredentialsSignin {
+  code = 'invalid_2fa';
+}
+
+class CaptchaVerificationError extends CredentialsSignin {
+  code = 'captcha_failed';
+}
+
+class AccountLockedError extends CredentialsSignin {
+  code = 'account_locked';
+}
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -32,8 +49,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         const parsedCredentials = z
           .object({
-            email: z.string().email(),
-            password: z.string().min(8),
+            email: z.email(),
+            password: z.string().min(10),
             totpCode: z.string().optional(),
             captchaToken: z.string().min(1),
           })
@@ -47,7 +64,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const captchaResult = await verifyTurnstileToken(captchaToken);
         if (!captchaResult.success) {
-          throw new Error('CAPTCHA verification failed.');
+          throw new CaptchaVerificationError();
         }
 
         // Fetch user with security and MFA attributes
@@ -81,7 +98,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             event: 'ACCOUNT_LOCKED',
             details: { email, remainingMinutes },
           });
-          throw new Error(`Account is temporarily locked. Please try again in ${remainingMinutes} minutes.`);
+          throw new AccountLockedError(`Account is temporarily locked. Please try again later.`);
         }
 
         // 3. Verify password
@@ -123,16 +140,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // 4. Multi-Factor Authentication (MFA / 2FA) Verification if enabled
         if (user.twoFactorEnabled && user.twoFactorSecret) {
           if (!totpCode) {
-            throw new Error('MFA_REQUIRED');
+            throw new MfaRequiredError();
           }
 
           const isTotpValid = verifyTotp(totpCode.trim(), user.twoFactorSecret);
           let isBackupCodeValid = false;
 
           if (!isTotpValid) {
-            // Check backup recovery codes
+            // Check backup recovery codes (normalize uppercase and hyphenated format)
+            const rawCode = totpCode.trim().toUpperCase();
+            const cleanHex = rawCode.replace(/[^A-F0-9]/g, '');
+            const formattedCode = cleanHex.length === 8 ? `${cleanHex.slice(0, 4)}-${cleanHex.slice(4, 8)}` : rawCode;
+
             for (const backup of user.backupCodes) {
-              const matches = await bcrypt.compare(totpCode.trim(), backup.codeHash);
+              const matches =
+                (await bcrypt.compare(rawCode, backup.codeHash)) ||
+                (await bcrypt.compare(formattedCode, backup.codeHash));
               if (matches) {
                 isBackupCodeValid = true;
                 await prisma.twoFactorBackupCode.update({
@@ -154,7 +177,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               event: 'MFA_FAILED',
               details: { reason: 'Invalid TOTP or backup code' },
             });
-            throw new Error('Invalid 2FA code.');
+            throw new InvalidMfaError();
           }
 
           await logSecurityEvent({

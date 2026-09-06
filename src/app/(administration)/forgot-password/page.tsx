@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { Suspense } from 'react';
+import { headers } from 'next/headers';
 import { ForgotPasswordForm } from '@/components/auth/ForgotPasswordForm';
 
 export const metadata: Metadata = {
@@ -9,10 +10,11 @@ export const metadata: Metadata = {
 
 export const instant = false;
 
-export default function ForgotPasswordPage() {
+export default async function ForgotPasswordPage() {
+  const nonce = (await headers()).get('x-nonce') ?? undefined;
   return (
     <Suspense fallback={<div className="p-8 text-center text-white">Loading Forgot Password page...</div>}>
-      <ForgotPasswordForm />
+      <ForgotPasswordForm nonce={nonce} />
     </Suspense>
   );
 }

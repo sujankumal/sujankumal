@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { z } from "zod";
-import { auth } from "@/services/auth";
+import { requireVerifiedUser } from "@/services/authorization";
 
 const addUrlSchema = z.object({
   longUrl: z.string().trim().url("Enter a valid URL"),
@@ -16,15 +16,6 @@ const addUrlSchema = z.object({
 const deleteUrlsSchema = z.object({
   codes: z.array(z.string().trim().regex(/^[A-Za-z0-9_-]{3,64}$/)).min(1),
 });
-
-async function checkAdminAuth() {
-  const session = await auth();
-  if (!session?.user?.verified) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  return null;
-}
 
 async function validateRequestOrigin(request: NextRequest) {
   if (request.method === "GET") {
@@ -101,8 +92,8 @@ async function callWorker(path: string, init?: RequestInit) {
 }
 
 export async function GET(request: NextRequest) {
-  const authError = await checkAdminAuth();
-  if (authError) return authError;
+  const authorization = await requireVerifiedUser();
+  if (authorization.response) return authorization.response;
 
   const { searchParams } = new URL(request.url);
   const params = new URLSearchParams();
@@ -118,8 +109,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const authError = await checkAdminAuth();
-  if (authError) return authError;
+  const authorization = await requireVerifiedUser();
+  if (authorization.response) return authorization.response;
 
   const requestError = await validateRequestOrigin(request);
   if (requestError) return requestError;
@@ -144,8 +135,8 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const authError = await checkAdminAuth();
-  if (authError) return authError;
+  const authorization = await requireVerifiedUser();
+  if (authorization.response) return authorization.response;
 
   const requestError = await validateRequestOrigin(request);
   if (requestError) return requestError;

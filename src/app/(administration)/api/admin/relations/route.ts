@@ -1,21 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "../../../../../services/auth";
 import { getEntityModel } from "@/config/entity-server";
-
-// Helper function to check admin authorization
-async function checkAdminAuth() {
-  const session = await auth();
-  if (!session?.user?.verified) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  return null;
-}
+import { requireVerifiedUser } from "@/services/authorization";
 
 // GET - Fetch related data for dropdowns
 // Accepts ?entity=users,categories (comma-separated entity names from config)
 export async function GET(request: NextRequest) {
-  const authError = await checkAdminAuth();
-  if (authError) return authError;
+  const authorization = await requireVerifiedUser();
+  if (authorization.response) return authorization.response;
 
   try {
     const { searchParams } = new URL(request.url);

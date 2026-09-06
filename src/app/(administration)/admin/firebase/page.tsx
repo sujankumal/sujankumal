@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { auth } from "@/services/auth";
+import { getCurrentUser } from "@/services/authorization";
 import FirebaseManager from "./firebase-manager";
 
 export const metadata: Metadata = {
@@ -11,13 +11,11 @@ export const metadata: Metadata = {
 export const instant = false;
 
 export default async function FirebasePage() {
-  const session = await auth();
-
-  if (!session?.user) {
+  const user = await getCurrentUser();
+  if (!user) {
     return redirect("/log-in");
   }
-
-  if (!session.user.verified) {
+  if (!user.verified) {
     return redirect("/not-authorized");
   }
 

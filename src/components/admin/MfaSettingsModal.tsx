@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect} from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import { OtpInput } from '@/components/auth/OtpInput';
 
 interface MfaSettingsModalProps {
   isOpen: boolean;
@@ -48,9 +49,9 @@ export function MfaSettingsModal({ isOpen, onClose }: MfaSettingsModalProps) {
     }
   };
 
-  const handleEnableMfa = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!setupData || !verificationCode) return;
+  const handleEnableMfa = async (codeToUse?: string) => {
+    const code = (codeToUse || verificationCode).trim();
+    if (!setupData || !code || code.length !== 6 || submitting) return;
     setSubmitting(true);
     setErrorMsg('');
     setSuccessMsg('');
@@ -218,21 +219,23 @@ export function MfaSettingsModal({ isOpen, onClose }: MfaSettingsModalProps) {
               </div>
             )}
 
-            <form onSubmit={handleEnableMfa} className="space-y-3 pt-2">
-              <label className="block text-xs text-gray-300">Enter 6-Digit Authenticator Code</label>
-              <input
-                type="text"
-                maxLength={6}
+            <form onSubmit={(e) => { e.preventDefault(); handleEnableMfa(); }} className="space-y-3 pt-2">
+              <label className="block text-xs text-gray-300 text-center font-medium">
+                Enter 6-Digit Authenticator Code
+              </label>
+              <OtpInput
+                length={6}
                 value={verificationCode}
-                onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
-                placeholder="123456"
-                required
-                className="w-full text-center text-xl font-mono tracking-widest bg-gray-800 border border-gray-700 rounded px-3 py-2 focus:outline-none focus:border-orange-500"
+                onChange={setVerificationCode}
+                onComplete={(code) => {console.log('Complete code entered:', code)}}
+                disabled={submitting}
+                hasError={Boolean(errorMsg)}
+                autoFocus
               />
               <button
                 type="submit"
                 disabled={submitting || verificationCode.length !== 6}
-                className="w-full py-2 bg-orange-600 hover:bg-orange-700 disabled:opacity-50 rounded-lg text-sm font-medium transition-colors"
+                className="w-full py-2 bg-orange-600 hover:bg-orange-700 disabled:opacity-50 rounded-lg text-sm font-medium transition-colors cursor-pointer"
               >
                 {submitting ? 'Activating...' : 'Verify & Enable 2FA'}
               </button>

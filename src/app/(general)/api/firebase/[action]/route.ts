@@ -1,12 +1,10 @@
 import { NextResponse } from 'next/server';
-import { auth } from "@/services/auth";
 import { database as adminDatabase } from '@/lib/firebase';
+import { requireVerifiedUser } from '@/services/authorization';
 
 export async function GET(_req: Request, context: any) {
-  const session = await auth();
-  if (!session?.user?.verified) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const authorization = await requireVerifiedUser();
+  if (authorization.response) return authorization.response;
 
   const { params } = context || {};
   const { action } = params || {};

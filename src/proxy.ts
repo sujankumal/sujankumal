@@ -56,8 +56,9 @@ function buildCspHeader(nonce: string): string {
   const directives = [
     "default-src 'self'",
     // Scripts: allow self, nonced scripts, strict-dynamic, Cloudflare Turnstile, and Google Analytics / Tag Manager.
-    // In development mode, 'unsafe-eval' is permitted for Fast Refresh / HMR.
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://challenges.cloudflare.com https://www.googletagmanager.com https://www.google-analytics.com ${isDev ? "'unsafe-eval'" : ""}`,
+    // 'wasm-unsafe-eval' permits Cloudflare Turnstile's WebAssembly compilation only — it does NOT allow
+    // arbitrary JS string eval (unlike 'unsafe-eval'). In development, 'unsafe-eval' is also added for HMR.
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'wasm-unsafe-eval' https://challenges.cloudflare.com https://www.googletagmanager.com https://www.google-analytics.com ${isDev ? "'unsafe-eval'" : ""}`,
     // Styles: allow self, inline styles (needed by Tailwind / CSS-in-JS), and Google Fonts
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     // Images: allow self, blob, data URIs, and configured remote media hosts
@@ -76,8 +77,7 @@ function buildCspHeader(nonce: string): string {
     "base-uri 'self'",
     // Restrict form submissions to same-origin
     "form-action 'self'",
-    // Block mixed (HTTP) content on HTTPS
-    "block-all-mixed-content",
+    // Automatically upgrade any insecure (HTTP) requests to HTTPS
     "upgrade-insecure-requests",
   ];
 
@@ -171,17 +171,7 @@ export default auth(async function proxy(request) {
     return forbiddenPreflight;
   }
 
-  // ── 2. Handle Admin Page Route Protection ────────────────────────────────
-  if (pathname.startsWith('/admin')) {
-    const session = request.auth;
-    if (!session?.user?.verified) {
-      const redirectResponse = NextResponse.redirect(new URL('/', request.url));
-      applyStandardSecurityHeaders(redirectResponse);
-      return redirectResponse;
-    }
-  }
-
-  // ── 3. Generate Strict CSP Nonce for HTML Pages ──────────────────────────
+  // ── 2. Generate Strict CSP Nonce for HTML Pages ──────────────────────────
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
   const cspHeader = buildCspHeader(nonce);
 
