@@ -13,17 +13,11 @@ export async function verifyTurnstileToken(
   token: string | undefined | null,
   remoteIp?: string
 ): Promise<{ success: boolean; error?: string }> {
-  // If turnstile secret is not set, allow in development or fallback to standard Cloudflare test key
-  const secretKey =
-    process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY ||
-    (process.env.NODE_ENV === 'development'
-      ? '1x0000000000000000000000000000000AA' // Cloudflare official test key that always passes
-      : '');
+  const secretKey = process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY;
 
   if (!secretKey) {
-    // If not configured in production, log warning and allow or block depending on policy
     console.warn('CLOUDFLARE_TURNSTILE_SECRET_KEY is not configured in environment variables.');
-    return { success: true };
+    return { success: false, error: 'CAPTCHA validation is unavailable.' };
   }
 
   if (!token) {
@@ -59,7 +53,6 @@ export async function verifyTurnstileToken(
     };
   } catch (error) {
     console.error('Turnstile verification request error:', error);
-    // In event of Cloudflare outage, allow request through to avoid locking out legitimate users
-    return { success: true };
+    return { success: false, error: 'CAPTCHA validation failed.' };
   }
 }

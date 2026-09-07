@@ -1,6 +1,35 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* ====================== Theme Configuration (Tailwind v4) ====================== */
+@theme {
+  /* Maps your Next.js font variables so Tailwind classes like font-serif and font-nepali work */
+  --font-serif: var(--font-noto-english), var(--font-noto-nepali), serif;
+  --font-sans: var(--font-noto-english), var(--font-noto-nepali), sans-serif;
+  --font-nepali: var(--font-noto-nepali), serif;
+}
+
+/* ====================== Base Styles ====================== */
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb));
+  
+  font-family: var(--font-noto-english), var(--font-noto-nepali), serif;
+}
+
+/* Fix MUI Input Background */
+.MuiInputBase-root,
+.MuiOutlinedInput-root {
+  background-color: white !important;
+}
+
+.MuiPaper-root {
+  background-color: white !important;
+}
+
+/* ====================== Keyframes & Animations ====================== */
 @keyframes bounceUp {
   0% {
     opacity: 0;
@@ -41,7 +70,6 @@
 /* Firefox */
 * {
   scrollbar-width: auto;
-  /* scrollbar-color: var(--secondary) var(--primary); */
 }
 
 /* Chrome, Edge, Safari */
@@ -74,22 +102,4 @@
   --primary: rgb(29, 27, 24);
   --secondary: rgb(204, 82, 16);
   --tertiary: rgb(189, 106, 11);
-}
-
-/* ====================== Base Styles ====================== */
-/* Fix MUI Input Background */
-.MuiInputBase-root,
-.MuiOutlinedInput-root {
-  background-color: white !important;
-}
-
-.MuiPaper-root {
-  background-color: white !important;
-}
-
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb));
 }

@@ -4,6 +4,7 @@ import { authConfig } from '../auth.config';
 import { getClientIp, globalApiRateLimiter, authRateLimiter } from './lib/rate-limiter';
 
 const { auth } = NextAuth(authConfig);
+const isDev = process.env.NODE_ENV === 'development';
 
 /**
  * Returns the list of approved origins parsed from environment variables,
@@ -50,15 +51,20 @@ function getAllowedOrigins(): string[] {
  * Builds the Content Security Policy header with a cryptographic per-request nonce.
  */
 function buildCspHeader(nonce: string): string {
-  const isDev = process.env.NODE_ENV === 'development';
   const allowedOrigins = getAllowedOrigins().join(' ');
 
-  const directives = [
-    "default-src 'self'",
+    // In development, Next.js HMR requires 'unsafe-eval' and relaxed script rules
     // Scripts: allow self, nonced scripts, strict-dynamic, Cloudflare Turnstile, and Google Analytics / Tag Manager.
     // 'wasm-unsafe-eval' permits Cloudflare Turnstile's WebAssembly compilation only — it does NOT allow
-    // arbitrary JS string eval (unlike 'unsafe-eval'). In development, 'unsafe-eval' is also added for HMR.
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'wasm-unsafe-eval' https://challenges.cloudflare.com https://www.googletagmanager.com https://www.google-analytics.com ${isDev ? "'unsafe-eval'" : ""}`,
+    // arbitrary JS string eval (unlike 'unsafe-eval').
+    
+    const scriptSrc = isDev
+    ? `script-src 'self' 'unsafe-eval' 'unsafe-inline' https://challenges.cloudflare.com https://www.googletagmanager.com https://www.google-analytics.com`
+    : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'wasm-unsafe-eval' https://challenges.cloudflare.com https://www.googletagmanager.com https://www.google-analytics.com`;
+
+    const directives = [
+    "default-src 'self'",
+    scriptSrc,
     // Styles: allow self, inline styles (needed by Tailwind / CSS-in-JS), and Google Fonts
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     // Images: allow self, blob, data URIs, and configured remote media hosts
@@ -78,7 +84,7 @@ function buildCspHeader(nonce: string): string {
     // Restrict form submissions to same-origin
     "form-action 'self'",
     // Automatically upgrade any insecure (HTTP) requests to HTTPS
-    "upgrade-insecure-requests",
+    ...(isDev ? [] : ["upgrade-insecure-requests"]),
   ];
 
   return directives.join('; ');
@@ -91,10 +97,12 @@ function applyStandardSecurityHeaders(response: NextResponse): void {
   response.headers.set('X-Frame-Options', 'DENY');
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  response.headers.set(
-    'Strict-Transport-Security',
-    'max-age=31536000; includeSubDomains; preload'
-  );
+  if (!isDev) {
+    response.headers.set(
+      'Strict-Transport-Security',
+      'max-age=31536000; includeSubDomains; preload'
+    );
+  }
 }
 
 export default auth(async function proxy(request) {

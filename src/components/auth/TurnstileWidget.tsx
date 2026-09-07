@@ -38,6 +38,15 @@ export function TurnstileWidget({
 }: TurnstileWidgetProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
+  const onVerifyRef = useRef(onVerify);
+  const onExpireRef = useRef(onExpire);
+  const onErrorRef = useRef(onError);
+
+  useEffect(() => {
+    onVerifyRef.current = onVerify;
+    onExpireRef.current = onExpire;
+    onErrorRef.current = onError;
+  }, [onVerify, onExpire, onError]);
 
   const siteKey = process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY;
 
@@ -66,13 +75,13 @@ export function TurnstileWidget({
           sitekey: siteKey || '',
           theme: 'dark',
           callback: (token: string) => {
-            if (isMounted) onVerify(token);
+            if (isMounted) onVerifyRef.current(token);
           },
           'expired-callback': () => {
-            if (isMounted && onExpire) onExpire();
+            if (isMounted) onExpireRef.current?.();
           },
           'error-callback': (err: unknown) => {
-            if (isMounted && onError) onError(err);
+            if (isMounted) onErrorRef.current?.(err);
           },
         });
         widgetIdRef.current = id;
@@ -128,7 +137,7 @@ export function TurnstileWidget({
         }
       }
     };
-  }, [siteKey, onVerify, onExpire, onError, nonce]);
+  }, [siteKey, nonce]);
 
   return <div ref={containerRef} className={className} />;
 }

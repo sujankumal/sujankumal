@@ -8,11 +8,14 @@ import GoogleAnalytics from '@/components/GoogleAnalytics';
 import { generateMetadata as generateSEOMetadata, getSiteConfig } from '@/lib/seo';
 import { WebSiteJsonLd, PersonJsonLd } from '@/components/seo/JsonLd';
 import PageLoader from '@/components/PageLoader';
+import { headers } from 'next/headers';
 
 const noto = Noto_Serif({
   weight: ['300', '400', '500', '600', '700'],
   subsets: ['latin'],
   variable: '--font-noto-english',
+  display: 'swap',
+  preload: false,
 });
 
 const notoNepali = Noto_Serif_Devanagari({
@@ -20,6 +23,8 @@ const notoNepali = Noto_Serif_Devanagari({
   subsets: ['devanagari'],
   style: ['normal'],
   variable: '--font-noto-nepali',
+  display: 'swap',
+  preload: false,
 });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -35,6 +40,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const nonce = (await headers()).get('x-nonce') ?? undefined;
   const dynamicConfig = await getSiteConfig();
   return (
     <html lang="en">
@@ -53,7 +59,7 @@ export default async function RootLayout({
         <meta name="msapplication-tap-highlight" content="no" />
       </head>
 
-      <GoogleAnalytics />
+      <GoogleAnalytics nonce={nonce}/>
 
       {/* Structured Data */}
       <WebSiteJsonLd

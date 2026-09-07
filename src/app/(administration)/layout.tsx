@@ -13,6 +13,8 @@ const noto = Noto_Serif({
   weight: ['300', '400', '500', '600', '700'],
   subsets: ['latin'],
   variable: '--font-noto-english',
+  display: 'swap',
+  preload: false,
 });
 
 const notoNepali = Noto_Serif_Devanagari({
@@ -20,6 +22,8 @@ const notoNepali = Noto_Serif_Devanagari({
   subsets: ['devanagari'],
   style: ['normal'],
   variable: '--font-noto-nepali',
+  display: 'swap',
+  preload: false,
 });
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -39,9 +43,9 @@ export default async function AdminLayout({
   const nonce = (await headers()).get('x-nonce') ?? undefined;
   return (
     <html lang="en">
-      <GoogleAnalytics />
+      <GoogleAnalytics nonce={nonce} />
       {/* Add schema markup */}
-      <Script id="schema-markup" type="application/ld+json">
+      <Script id="schema-markup" type="application/ld+json" nonce={nonce}>
         {JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Person",
