@@ -12,7 +12,6 @@ const isDev = process.env.NODE_ENV === 'development';
  */
 function getAllowedOrigins(): string[] {
   const defaultOrigins = [
-    'https://sujankumal.com.np',
     'http://localhost:3000',
     'http://127.0.0.1:3000',
   ];
@@ -68,7 +67,7 @@ function buildCspHeader(nonce: string): string {
     // Styles: allow self, inline styles (needed by Tailwind / CSS-in-JS), and Google Fonts
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     // Images: allow self, blob, data URIs, and configured remote media hosts
-    `img-src 'self' blob: data: https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://images.unsplash.com https://drive.google.com https://drive.usercontent.google.com https://sujankumal.com.np https://www.google-analytics.com https://www.googletagmanager.com ${allowedOrigins}`,
+    `img-src 'self' blob: data: https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://images.unsplash.com https://drive.google.com https://drive.usercontent.google.com https://www.google-analytics.com https://www.googletagmanager.com ${allowedOrigins}`,
     // Fonts: allow self, Google Fonts, and data URIs
     "font-src 'self' https://fonts.gstatic.com data:",
     // Connect: allow self, Cloudflare Turnstile, Firebase RTDB/Auth endpoints, GA, WebRTC STUN servers, and allowed origins
