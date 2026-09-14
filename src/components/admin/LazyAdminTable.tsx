@@ -5,6 +5,7 @@ import { AdminCRUDTable } from "./AdminCRUDTable";
 import { TableSection } from "../../app/(administration)/admin/AdminTables";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { adminEntities } from "@/config/entities";
+import { listAdminRecords } from "@/services/api/admin";
 
 interface LazyAdminTableProps {
   entity: keyof typeof adminEntities;
@@ -35,11 +36,7 @@ export function LazyAdminTable({
         setIsLoaded(true);
       } else {
         // For read-only tables, fetch the data here
-        const response = await fetch(`/api/admin/${entity}?limit=10`);
-        if (!response.ok) {
-          throw new Error(`Failed to load ${entity} data`);
-        }
-        const result = await response.json();
+        const result = await listAdminRecords(entity, { limit: 10, page: 1 });
         setData(result.items || []);
         setIsLoaded(true);
       }

@@ -3,6 +3,7 @@
 import React, { useState, useEffect} from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { OtpInput } from '@/components/auth/OtpInput';
+import { disableMfa, enableMfa, getMfaStatus } from '@/services/api/admin';
 
 interface MfaSettingsModalProps {
   isOpen: boolean;
@@ -32,14 +33,12 @@ export function MfaSettingsModal({ isOpen, onClose }: MfaSettingsModalProps) {
     setSuccessMsg('');
     setBackupCodes([]);
     try {
-      const res = await fetch('/api/admin/mfa');
-      const data = await res.json();
-      if (res.ok) {
-        setIsMfaEnabled(data.enabled);
-        if (!data.enabled && data.secret && data.otpUri) {
-          setSetupData({ secret: data.secret, otpUri: data.otpUri });
-        }
-      } else {
+      const data = await getMfaStatus();
+      setIsMfaEnabled(data.enabled);
+      if (!data.enabled && data.secret && data.otpUri) {
+        setSetupData({ secret: data.secret, otpUri: data.otpUri });
+      }
+      if (data.error) {
         setErrorMsg(data.error || 'Failed to load MFA status');
       }
     } catch {
@@ -57,17 +56,11 @@ export function MfaSettingsModal({ isOpen, onClose }: MfaSettingsModalProps) {
     setSuccessMsg('');
 
     try {
-      const res = await fetch('/api/admin/mfa', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          token: verificationCode,
-          secret: setupData.secret,
-        }),
+      const data = await enableMfa({
+        token: verificationCode,
+        secret: setupData.secret,
       });
-
-      const data = await res.json();
-      if (res.ok && data.success) {
+      if (data.success) {
         setIsMfaEnabled(true);
         setBackupCodes(data.backupCodes || []);
         setSuccessMsg('Two-factor authentication is now active!');
@@ -88,14 +81,8 @@ export function MfaSettingsModal({ isOpen, onClose }: MfaSettingsModalProps) {
     setSuccessMsg('');
 
     try {
-      const res = await fetch('/api/admin/mfa', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: disablePassword }),
-      });
-
-      const data = await res.json();
-      if (res.ok && data.success) {
+      const data = await disableMfa({ password: disablePassword });
+      if (data.success) {
         setIsMfaEnabled(false);
         setSuccessMsg('Two-factor authentication has been disabled.');
         fetchMfaStatus();

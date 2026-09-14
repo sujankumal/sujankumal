@@ -1,22 +1,8 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { SubmitEvent, useEffect, useMemo, useState } from "react";
 import { CheckSquare, Copy, ExternalLink, Link2, Loader2, Plus, RefreshCw, Search, Square, Trash2 } from "lucide-react";
-
-type ShortUrlItem = {
-  code: string;
-  longUrl: string;
-  shortUrl: string;
-  createdAt?: string;
-};
-
-type ListResponse = {
-  success: boolean;
-  items: ShortUrlItem[];
-  cursor?: string;
-  complete: boolean;
-  limit: number;
-};
+import { createShortUrl, deleteShortUrls, listShortUrls, type ShortUrlItem } from "@/services/api/short-urls";
 
 const LIMIT = 20;
 
@@ -48,14 +34,7 @@ export default function ShortUrlsManager() {
     if (searchPrefix) params.set("prefix", searchPrefix);
 
     try {
-      const response = await fetch(`/api/short-urls?${params.toString()}`, { cache: "no-store" });
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Could not load short URLs");
-      }
-
-      const list = data as ListResponse;
+      const list = await listShortUrls({ limit: LIMIT, cursor, prefix: searchPrefix });
       setItems(list.items || []);
       setNextCursor(list.cursor);
       setSelected([]);
@@ -71,21 +50,16 @@ export default function ShortUrlsManager() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function handleCreate(event: FormEvent<HTMLFormElement>) {
+  async function handleCreate(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsSaving(true);
     setError("");
     setMessage("");
 
     try {
-      const response = await fetch("/api/short-urls", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ longUrl, customCode }),
-      });
-      const data = await response.json();
+      const data = await createShortUrl({ longUrl, customCode });
 
-      if (!response.ok) {
+      if (data.error || data.details?.[0]?.message) {
         throw new Error(data.error || data.details?.[0]?.message || "Could not create short URL");
       }
 
@@ -111,14 +85,9 @@ export default function ShortUrlsManager() {
     setMessage("");
 
     try {
-      const response = await fetch("/api/short-urls", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ codes: selected }),
-      });
-      const data = await response.json();
+      const data = await deleteShortUrls({ codes: selected });
 
-      if (!response.ok) {
+      if (data.error) {
         throw new Error(data.error || "Could not delete selected URLs");
       }
 
@@ -141,7 +110,7 @@ export default function ShortUrlsManager() {
     setSelected(allSelected ? [] : items.map((item) => item.code));
   }
 
-  function handleSearch(event: FormEvent<HTMLFormElement>) {
+  function handleSearch(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     const nextPrefix = prefix.trim();
     setActivePrefix(nextPrefix);

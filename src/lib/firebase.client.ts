@@ -86,9 +86,8 @@ export async function ensureClientInitialized() {
 
     // Otherwise fetch runtime config from server route (does not embed in bundle)
     try {
-      const resp = await fetch('/api/firebase/config');
-      if (!resp.ok) return;
-      const cfg = await resp.json();
+      const { getFirebaseRuntimeConfig } = await import('@/services/api/firebase');
+      const cfg = await getFirebaseRuntimeConfig();
       await initAppFromConfig(cfg);
     } catch (e) {
       // ignore - client will operate without Firebase

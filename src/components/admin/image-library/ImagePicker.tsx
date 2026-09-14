@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { Modal } from "../Modal";
 import { RefreshCw } from "lucide-react";
+import { getImageLibrary } from "@/services/api/admin";
 
 interface ImageFile {
     path: string;
@@ -91,15 +92,7 @@ export function ImagePicker({
                 }
             }
 
-            const response = await fetch("/api/admin/images", {
-                cache: "default",
-            });
-
-            if (!response.ok) {
-                throw new Error("Failed to load images");
-            }
-
-            const data = await response.json();
+            const data = await getImageLibrary();
 
             setImages(data);
             if (data.length) {

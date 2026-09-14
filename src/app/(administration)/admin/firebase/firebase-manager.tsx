@@ -20,6 +20,7 @@ import {
   X,
   CornerDownRight,
 } from "lucide-react";
+import { deleteFirebaseData, getFirebaseData, setFirebaseData } from "@/services/api/admin";
 
 interface FirebaseDataResponse {
   path: string;
@@ -85,13 +86,7 @@ export default function FirebaseManager() {
     setIsLoading(true);
     setError(null);
     try {
-      const params = new URLSearchParams({ path });
-      const res = await fetch(`/api/admin/firebase?${params.toString()}`);
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.error || "Failed to load database content");
-      }
-      const resData: FirebaseDataResponse = await res.json();
+      const resData: FirebaseDataResponse = await getFirebaseData(path);
       setDbData(resData.data);
       setExists(resData.exists);
       setRawJsonText(resData.data ? JSON.stringify(resData.data, null, 2) : "");
@@ -174,15 +169,7 @@ export default function FirebaseManager() {
     const targetPath = currentPath === "/" ? `/${deleteTargetKey}` : `${currentPath}/${deleteTargetKey}`;
 
     try {
-      const params = new URLSearchParams({ path: targetPath });
-      const res = await fetch(`/api/admin/firebase?${params.toString()}`, {
-        method: "DELETE",
-      });
-
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.error || "Failed to delete item");
-      }
+      await deleteFirebaseData(targetPath);
 
       setSuccessMsg(`Successfully deleted node '${deleteTargetKey}'`);
       setShowDeleteModal(false);
@@ -222,16 +209,7 @@ export default function FirebaseManager() {
     }
 
     try {
-      const res = await fetch("/api/admin/firebase", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: targetPath, value: parsedValue }),
-      });
-
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.error || "Failed to create node");
-      }
+      await setFirebaseData(targetPath, parsedValue);
 
       setSuccessMsg(`Successfully created node '${newKey.trim()}'`);
       setShowAddModal(false);
@@ -294,16 +272,7 @@ export default function FirebaseManager() {
     }
 
     try {
-      const res = await fetch("/api/admin/firebase", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: targetPath, value: parsedValue }),
-      });
-
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.error || "Failed to update node");
-      }
+      await setFirebaseData(targetPath, parsedValue);
 
       setSuccessMsg(`Successfully updated node '${selectedKey}'`);
       setShowEditModal(false);
@@ -331,16 +300,7 @@ export default function FirebaseManager() {
         throw new Error("Invalid JSON structure. Please fix formatting issues.");
       }
 
-      const res = await fetch("/api/admin/firebase", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: currentPath, value: parsedValue }),
-      });
-
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.error || "Failed to write raw data");
-      }
+      await setFirebaseData(currentPath, parsedValue);
 
       setSuccessMsg(`Successfully saved raw data at path '${currentPath}'`);
       fetchData();

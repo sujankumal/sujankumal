@@ -1,9 +1,11 @@
 /** CSRF token helper — used by client-side mutation helpers. */
+import { apiGet } from "@/lib/api/client";
+import { API_ENDPOINTS } from "@/lib/api/endpoints";
+
 export async function _csrfToken(): Promise<string> {
   try {
-    return await fetch('/api/auth/csrf', { method: "GET", next: { revalidate: 10 } })
-      .then(res => res.json())
-      .then(data => data.csrfToken ?? '');
+    const data = await apiGet<{ csrfToken?: string }>(API_ENDPOINTS.auth.csrf, { revalidate: 10 });
+    return data.csrfToken ?? '';
   } catch {
     return '';
   }

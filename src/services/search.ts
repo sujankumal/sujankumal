@@ -1,19 +1,15 @@
-import { API_BASE_URL } from "@/constants/constants";
+import { apiGet } from "@/lib/api/client";
+import { API_ENDPOINTS } from "@/lib/api/endpoints";
 
-export async function searchData(query: string) {
-    try {
-        return fetch(API_BASE_URL + "/api/search/" + encodeURIComponent(query), {
-            method: "GET",
-            next: {
-                revalidate: 10,
-            }
-        }).then((response) => {
-            if (!response.ok) {
-                return [];
-            }
-            return response.json();
-        });
-    } catch (error) {
-        return [];
-    }
+export type SearchResult = {
+  url: string;
+  title: string;
+};
+
+export async function searchData(query: string): Promise<SearchResult[]> {
+  try {
+    return await apiGet<SearchResult[]>(API_ENDPOINTS.search(query), { revalidate: 10 });
+  } catch {
+    return [];
+  }
 }

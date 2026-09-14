@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { useSession, signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { csrfToken as getCsrfToken } from "@/services/csrf";
+import { registerAccount } from "@/services/api/auth";
 import { useDebounce } from "@/lib/useDebounce";
 import Link from "next/link";
 import { Google } from "@mui/icons-material";
@@ -113,22 +114,14 @@ export function SignupForm({ nonce }: { nonce?: string }) {
         setIsSubmitting(true);
 
         try {
-            const res = await fetch('/api/auth/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    name,
-                    email,
-                    password,
-                    captchaToken,
-                }),
+            const data = await registerAccount({
+                name,
+                email,
+                password,
+                captchaToken,
             });
 
-            const data = await res.json();
-
-            if (res.ok && data.success) {
+            if (data.success) {
                 set_success_message(data.message || 'Account created successfully! Redirecting to login...');
                 set_show_success_alert(true);
                 setTimeout(() => {

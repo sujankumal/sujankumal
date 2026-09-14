@@ -4,6 +4,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { CircularProgress, Alert } from '@mui/material';
 import { useDebounce } from '@/lib/useDebounce';
+import { requestPasswordReset } from '@/services/api/auth';
 import { TurnstileWidget } from './TurnstileWidget';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -45,15 +46,9 @@ export function ForgotPasswordForm({ nonce }: { nonce?: string }) {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, captchaToken }),
-      });
+      const data = await requestPasswordReset({ email, captchaToken });
 
-      const data = await res.json();
-
-      if (res.ok && data.success) {
+      if (data.success) {
         setSuccessMessage(data.message || 'If an account exists with that email, reset instructions have been sent.');
       } else {
         setErrorMessage(data.error || 'Failed to request password reset. Please try again.');

@@ -6,6 +6,7 @@ import { LoadingSpinner } from "../LoadingSpinner";
 import { AdminFormField } from "@/config/types";
 import { getEntityConfig } from "@/config/entity-config";
 import { normalizeImagePath } from "@/lib/image";
+import { getRelationOptions } from "@/services/api/admin";
 
 interface EntityFormProps {
   entity: string;
@@ -38,21 +39,18 @@ export function EntityForm({ entity, initialData, onSubmit, onCancel, isLoading 
       const relationEntities = config.form
         .filter(field => field.control === "relation" || field.control === "manyToMany")
         .map(field => field.relation?.entity);
-      const uniqueRelations = [...new Set(relationEntities)];
+      const uniqueRelations = [...new Set(relationEntities.filter((entity): entity is string => Boolean(entity)))];
 
       // Check if entity has foreign key fields or many-to-many relation fields
       const hasRelations = config.form.some(
         field => field.control === "relation" || field.control === "manyToMany"
       );
 
-      if (hasRelations) {
+      if (hasRelations && uniqueRelations.length > 0) {
         setLoadingRelations(true);
         try {
-          const response = await fetch(`/api/admin/relations?entity=${uniqueRelations.join(",")}`);
-          if (response.ok) {
-            const data = await response.json();
-            setRelationData(data);
-          }
+          const data = await getRelationOptions(uniqueRelations);
+          setRelationData(data);
         } catch (error) {
 
         } finally {

@@ -1,19 +1,9 @@
-import { API_BASE_URL } from "@/constants/constants";
+import { apiGet } from "@/lib/api/client";
 
 /**
- * Typed fetch helper for all external API calls in data_access.ts.
- * Centralises error handling and removes ~30 instances of repeated boilerplate.
- *
- * @param path   API path, e.g. "/api/post/home"
- * @param tags   Cache tags for Next.js on-demand revalidation
+ * Typed fetch helper for app API calls.
+ * Centralises request behavior and keeps domain services using a shared contract.
  */
 export async function apiFetch<T>(path: string, tags: string[]): Promise<T> {
-  const response = await fetch(API_BASE_URL + path, {
-    method: "GET",
-    next: { tags },
-  });
-  if (!response.ok) {
-    throw new Error(`API fetch failed [${response.status}]: ${path}`);
-  }
-  return response.json() as Promise<T>;
+  return apiGet<T>(path, { tags });
 }

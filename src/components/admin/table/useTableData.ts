@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { adminEntities } from "@/config/entities";
+import { listAdminRecords } from "@/services/api/admin";
 
 export interface PaginationData {
   page: number;
@@ -57,10 +58,14 @@ export function useTableData({ entity }: UseTableDataOptions) {
         );
       }
 
-      const response = await fetch(`/api/admin/${entity}?${params}`);
-      if (!response.ok) throw new Error("Failed to fetch data");
-
-      const data = await response.json();
+      const data = await listAdminRecords(entity, {
+        page: pagination.page,
+        limit: pagination.limit,
+        search: searchTerm,
+        sortBy,
+        sortOrder,
+        filters: filters.length > 0 ? JSON.stringify(filters.map(({ field, operator, value }) => ({ field, operator, value }))) : undefined,
+      });
       setItems(data.items);
       setPagination(data.pagination);
     } catch (err) {

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { CircularProgress, Alert } from '@mui/material';
 import { useDebounce } from '@/lib/useDebounce';
+import { resetPassword } from '@/services/api/auth';
 import { TurnstileWidget } from './TurnstileWidget';
 
 export function ResetPasswordForm({ nonce }: { nonce?: string }) {
@@ -76,20 +77,14 @@ export function ResetPasswordForm({ nonce }: { nonce?: string }) {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch('/api/auth/reset-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: emailParam,
-          token: tokenParam,
-          password,
-          captchaToken,
-        }),
+      const data = await resetPassword({
+        email: emailParam,
+        token: tokenParam,
+        password,
+        captchaToken,
       });
 
-      const data = await res.json();
-
-      if (res.ok && data.success) {
+      if (data.success) {
         setSuccessMessage(data.message || 'Password has been reset successfully! Redirecting to login...');
         setTimeout(() => {
           router.push('/log-in?reset=true');

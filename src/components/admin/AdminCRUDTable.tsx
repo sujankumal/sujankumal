@@ -14,6 +14,7 @@ import { useWarningBanner } from "./WarningBanner";
 import { adminEntities } from "@/config/entities";
 import { renderCellContent } from "./table/renderCellContent";
 import { useTableData } from "./table/useTableData";
+import { createAdminRecord, deleteAdminRecord, updateAdminRecord } from "@/services/api/admin";
 
 interface AdminCRUDTableProps {
   entity: keyof typeof adminEntities;
@@ -77,8 +78,7 @@ export function AdminCRUDTable({ entity, initialData = [] }: AdminCRUDTableProps
   const confirmDelete = async () => {
     if (!selectedItem) return;
     try {
-      const response = await fetch(`/api/admin/${entity}?id=${selectedItem.id}`, { method: "DELETE" });
-      if (!response.ok) throw new Error(`Failed to delete item. ${response.statusText}`);
+      await deleteAdminRecord(entity, selectedItem.id);
       await fetchData();
       setShowDeleteDialog(false);
       setSelectedItem(null);
@@ -96,20 +96,14 @@ export function AdminCRUDTable({ entity, initialData = [] }: AdminCRUDTableProps
     try {
       const isEdit = !!selectedItem;
       const body = isEdit ? { ...selectedItem, ...formData } : formData;
-      const response = await fetch(`/api/admin/${entity}`, {
-        method: isEdit ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const result = await response.json();
-      if (!response.ok) {
-        if (result.fields) {
-          const errorPayload = await response.json().catch(() => ({}));
-          const errorMessage = errorPayload.message || response.statusText;
-          setError(errorMessage);
-          showError(`${errorMessage}. ${JSON.stringify(result.fields)}`);
-          return result.fields;
-        }
+      const result = isEdit ? await updateAdminRecord(entity, body) : await createAdminRecord(entity, body);
+      if (result?.fields) {
+        const errorMessage = result.message || "Validation failed";
+        setError(errorMessage);
+        showError(`${errorMessage}. ${JSON.stringify(result.fields)}`);
+        return result.fields;
+      }
+      if (result?.error) {
         throw new Error(result.error);
       }
       await fetchData();
@@ -146,9 +140,7 @@ export function AdminCRUDTable({ entity, initialData = [] }: AdminCRUDTableProps
   const handleBulkDelete = async (itemsToDelete: any[]) => {
     showDeleteWarning(entity, itemsToDelete.length);
     try {
-      await Promise.all(
-        itemsToDelete.map(item => fetch(`/api/admin/${entity}?id=${item.id}`, { method: "DELETE" }))
-      );
+      await Promise.all(itemsToDelete.map(item => deleteAdminRecord(entity, item.id)));
       await fetchData();
       setSelectedItems([]);
       showSuccess("Items deleted", `${itemsToDelete.length} ${entity}(s) have been successfully deleted.`);

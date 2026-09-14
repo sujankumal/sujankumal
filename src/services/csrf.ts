@@ -1,12 +1,9 @@
-import { API_BASE_URL } from "@/constants/constants";
+import { apiGet } from "@/lib/api/client";
+import { API_ENDPOINTS } from "@/lib/api/endpoints";
 
 export async function csrfToken(): Promise<string> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/auth/csrf`, {
-      method: "GET",
-    });
-
-    const data = await response.json();
+    const data = await apiGet<{ csrfToken?: string }>(API_ENDPOINTS.auth.csrf);
     return data.csrfToken ?? "";
   } catch {
     return "";
