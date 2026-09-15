@@ -3,6 +3,7 @@ import { Noto_Serif, Noto_Serif_Devanagari } from 'next/font/google';
 import { SessionProvider } from 'next-auth/react';
 import Script from 'next/script';
 import { headers } from 'next/headers';
+import { connection } from 'next/server';
 import { auth } from '@/services/auth';
 import { Metadata } from 'next';
 import { generateMetadata as generateSEOMetadata, getSiteConfig } from '../../lib/seo';
@@ -38,6 +39,7 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  await connection();
   const session = await auth();
   const dynamicConfig = await getSiteConfig();
   const nonce = (await headers()).get('x-nonce') ?? undefined;

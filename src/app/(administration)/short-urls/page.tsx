@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { getCurrentUser } from "@/services/authorization";
 import ShortUrlsManager from "./short-urls-manager";
 
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
 export const instant = false;
 
 export default async function ShortUrlsPage() {
+  await connection();
   const user = await getCurrentUser();
   if (!user) {
     return redirect("/log-in");
