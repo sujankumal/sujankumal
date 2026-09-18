@@ -8,7 +8,7 @@ import { logSecurityEvent } from '@/services/security-logger';
 import { getClientIp, authRateLimiter } from '@/lib/rate-limiter';
 
 const forgotPasswordSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
+  email: z.email('Please enter a valid email address'),
   captchaToken: z.string().optional(),
 });
 

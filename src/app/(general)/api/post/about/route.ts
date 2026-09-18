@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "../../../../../../prisma/prisma";
-import { notFound } from "next/navigation";
 
 export async function GET(request: NextRequest){
     try {
