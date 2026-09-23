@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: { params: Promise<{ url: stri
   if (!article) return {};
 
   return generateSEOMetadata({
-    title: `Articles | ${article.title}`,
+    title: `Article | ${article.title}`,
     description: article.description,
     path: `/articles/${article.url}`,
     image: article.main_image,
