@@ -58,7 +58,7 @@ export default async function Archives({ params }: { params: Promise<{ year: num
                 </div>
                 <div className="mb-2">
                   <h2>
-                    <Link href={`/articles/${post.url}`} className="text-orange-600">
+                    <Link href={`/articles/${post.url}`} prefetch={false} className="text-orange-600">
                       {post.title}
                     </Link>
                   </h2>

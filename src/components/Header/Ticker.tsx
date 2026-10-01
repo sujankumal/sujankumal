@@ -44,7 +44,7 @@ function Ticker({items}:{items:Array<PostTitleType>}) {
                                 }
                             }}
                             >
-                            <Link href={"/articles"+"/"+item.url}>{item.title}</Link> 
+                            <Link href={"/articles"+"/"+item.url} prefetch={false}>{item.title}</Link> 
                         </motion.div>
                 })}
             </div>

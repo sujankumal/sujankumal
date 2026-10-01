@@ -32,6 +32,7 @@ function SearchDialog() {
                 posts.map((item: { url: string, title: string }, index) => (
                     <Link
                         href={'/articles/' + item.url}
+                        prefetch={false}
                         key={index}
                         className="block hover:bg-gray-800 hover:text-white py-2 px-1 w-full text-center"
                     >
