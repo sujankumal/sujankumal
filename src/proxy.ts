@@ -11,10 +11,7 @@ const isDev = process.env.NODE_ENV === 'development';
  * Vercel deployment URLs, and default domains.
  */
 function getAllowedOrigins(): string[] {
-  const defaultOrigins = [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-  ];
+  const defaultOrigins = [''];
 
   const raw = process.env.ALLOWED_ORIGINS || process.env.ALLOWEDDEVORIGINS || '';
   let envOrigins: string[] = [];
