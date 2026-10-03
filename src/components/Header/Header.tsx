@@ -38,12 +38,12 @@ async function Header() {
             </div>
             <div className="border-t-2 border-t-orange-600 bg-gray-800 px-2">
                 <div className="py-2 sm:px-20 md:flex">
-                    <div className="text-sm text-white mb-1 w-full text-center md:max-w-max">
-                        <div className="inline-flex float-none text-xs">
+                    <div className="text-base text-white mb-1 w-full text-center md:max-w-max">
+                        <div className="inline-flex float-none">
                             <DigitalClock />
                         </div>
                     </div>
-                    <div className="text-xs flex flex-wrap justify-center md:w-full md:justify-end">
+                    <div className="flex flex-wrap justify-center md:w-full md:justify-end">
                         {
                             social.map((soc, index) => {
                                 // return <div key={index}></div>

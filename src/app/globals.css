@@ -15,7 +15,8 @@ body {
   background: linear-gradient(to bottom,
       transparent,
       rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb));
-  
+  font-size: 1rem;
+  line-height: 1.6;
   font-family: var(--font-noto-english), var(--font-noto-nepali), serif;
 }
 

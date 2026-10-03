@@ -12,7 +12,7 @@ export default async function Contact() {
         <main className="grid md:grid-cols-4 min-h-screen justify-center">
             <div className="mb-8 p-2 md:m-8 md:col-span-3 inline-flex justify-center">
                 <MousePhobia comp={
-                    <div className="bg-gray-800 text-white h-fit p-1 rounded-lg text-sm">
+                    <div className="bg-gray-800 text-white h-fit p-1 rounded-lg text-base">
                         <span>Feel free to connect with me at </span>
                         <a className="hover:text-orange-600 underline text-gray-300" href={`mailto:${contactEmail}`}>{contactEmail}</a>
                     </div>

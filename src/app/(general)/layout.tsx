@@ -7,7 +7,6 @@ import FAB from '@/components/FAB';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
 import { generateMetadata as generateSEOMetadata, getSiteConfig } from '@/lib/seo';
 import { WebSiteJsonLd, PersonJsonLd } from '@/components/seo/JsonLd';
-import PageLoader from '@/components/PageLoader';
 import { headers } from 'next/headers';
 
 const noto = Noto_Serif({
@@ -80,7 +79,6 @@ export default async function RootLayout({
       />
       <body className={`${noto.variable} ${notoNepali.variable} antialiased`}>
         <Header />
-        <PageLoader />
         {children}
         <Footer />
         <FAB />

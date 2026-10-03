@@ -61,7 +61,7 @@ export default async function Category({ params }: { params: Promise<{ name: str
               <div className="text-center">
                 <p>{post.description}</p>
               </div>
-              <footer className="mt-5 text-center text-xs">
+              <footer className="mt-5 text-center text-sm">
                 <div className="inline-flex justify-center mr-4">
                   <DateTime datetime={post.date} />
                 </div>

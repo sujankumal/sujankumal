@@ -52,7 +52,7 @@ async function Team() {
                 </div>
                 <div className="text-gray-800 font-semibold mt-2">Name: {member.name || "Bot"}</div>
                 {member.profile?.status && (
-                  <div className="text-xs text-gray-500 mt-1">Role: {member.profile.status}</div>
+                  <div className="text-sm text-gray-500 mt-1">Role: {member.profile.status}</div>
                 )}
               </div>
             );

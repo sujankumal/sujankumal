@@ -45,7 +45,7 @@ export default function PostDetailPage({ post }: PostDetailPageProps) {
                 alt={`Image for ${post.title}`}
                 priority={true}
               />
-              <figcaption className="ml-1 prose hover:prose-a:text-orange-600 text-xs dark:prose-a:text-inherit">
+              <figcaption className="ml-1 prose hover:prose-a:text-orange-600 text-sm dark:prose-a:text-inherit">
                 {post.main_image_credit
                   ? <MarkdownComponent content={post.main_image_credit} />
                   : <div />}
@@ -62,7 +62,7 @@ export default function PostDetailPage({ post }: PostDetailPageProps) {
                 <div className="mb-0 ml-1">
                   <h2>{post.title}</h2>
                 </div>
-                <div className="mt-5 text-xs">
+                <div className="mt-5 text-sm">
                   <div className="inline-flex justify-center mr-4">
                     <DateTime datetime={post.date} />
                   </div>

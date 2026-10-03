@@ -77,7 +77,7 @@ async function About() {
                 alt={"Image for " + about.title}
                 priority={true}
               />
-              <figcaption className="ml-1 prose hover:prose-a:text-orange-600 text-xs dark:prose-a:text-inherit">
+              <figcaption className="ml-1 prose hover:prose-a:text-orange-600 text-sm dark:prose-a:text-inherit">
                 {about.main_image_credit ? <MarkdownComponent content={about.main_image_credit} /> : <div />}
               </figcaption>
             </figure>

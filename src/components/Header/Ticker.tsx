@@ -17,7 +17,7 @@ function Ticker({items}:{items:Array<PostTitleType>}) {
     }, [items, activeIndex]);
 
     return ( 
-        <div className="inline-block w-full h-8 text-sm overflow-hidden pt-2 pl-4 z-0">
+        <div className="inline-block w-full h-8 text-base overflow-hidden pt-2 pl-4 z-0">
             <div className="flex flex-col space-x-2 relative">
             { items.map((item, index): any => {
                 return  <motion.div
