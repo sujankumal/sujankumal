@@ -300,17 +300,17 @@ export async function fetchTechPostCountIdArray(): Promise<Array<{ id: number }>
 
 // ─── Posts — single-item detail ───────────────────────────────────────────────
 
-export async function fetchPostBySlug(slug: string): Promise<PostType> {
+export async function fetchPostBySlug(slug: string): Promise<PostType | null> {
   "use cache";
   cacheTag(CACHE_TAGS.posts, CACHE_TAGS.post(slug));
   try {
     if (!isExternalFetchSet()) {
       return prisma.post.findFirst({
-        where: { url: slug },
+        where: { url: slug, published: true },
         include: POST_DETAIL_INCLUDE,
       }).then();
     }
-    return apiFetch<PostType>(`/api/post/by-url/${slug}`, [CACHE_TAGS.posts, CACHE_TAGS.post(slug)]);
+    return apiFetch<PostType | null>(`/api/post/by-url/${slug}`, [CACHE_TAGS.posts, CACHE_TAGS.post(slug)]);
   } catch (error) {
     throw error;
   }

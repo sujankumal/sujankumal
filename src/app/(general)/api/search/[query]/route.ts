@@ -16,6 +16,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ que
                     url: true,
                 },
                 where: {
+                    published: true,
                     OR: [
                         {
                             title: {

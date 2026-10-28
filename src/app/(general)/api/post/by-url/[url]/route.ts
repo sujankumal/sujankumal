@@ -9,6 +9,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ url
             {
                 where: {
                     url: url,
+                    published: true,
                 },
                 include: {
                     categories: {
