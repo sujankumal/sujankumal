@@ -13,7 +13,7 @@ function PaginationPost(
     { items, pageSize, path }:
         { items: Array<PostType>, pageSize: number, path: string }) {
 
-    const [posts, setPosts] = useState<Array<PostType>>([]);
+    const [posts, setPosts] = useState<Array<PostType>>(() => items.slice(0, pageSize));
     const [currentPage, setCurrentPage] = useState(1);
     
     const numberOfPagesCeil = Math.ceil(items.length / pageSize);
