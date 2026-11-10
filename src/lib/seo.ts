@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { cacheTag } from 'next/cache';
 import prisma from '../../prisma/prisma';
 import { CACHE_TAGS } from '@/constants/cache-tags';
+import { METADATA_BASE_URL, METADATA_HOST } from '@/constants/constants';
 
 // ─── Shared Config Type ───────────────────────────────────────────────────────
 
@@ -26,12 +27,12 @@ export interface SiteConfigType {
 
 export const siteConfig: SiteConfigType = {
   name: "Sujan Kumal",
-  url: "https://sujankumal.com.np",
+  url: METADATA_BASE_URL,
   description: "Personal website and blog of Sujan Kumal - Software Developer, Writer, and Tech Enthusiast",
   author: {
     name: "Sujan Kumal",
-    email: "support@sujankumal.com.np",
-    url: "https://sujankumal.com.np",
+    email: `support@${METADATA_HOST}`,
+    url: METADATA_BASE_URL,
   },
   social: {
     twitter: "@sujan_03_",
@@ -70,7 +71,7 @@ export async function getSiteConfig(): Promise<SiteConfigType> {
     const linkedinSocial = socials.find(s => s.name.toLowerCase() === 'linkedin');
 
     const name = site?.name + "";
-    const url = siteConfig.url;
+    const url = METADATA_BASE_URL || siteConfig.url;
     const description = site?.description || siteConfig.description;
 
     return {

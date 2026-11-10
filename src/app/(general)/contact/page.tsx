@@ -1,12 +1,13 @@
 import MousePhobia from "@/components/MousePhobia";
 import Sidebar from "@/components/Sidebar";
 import { fetchSite } from "@/services/data_access";
+import { METADATA_HOST } from "@/constants/constants";
 
 export const instant = false;
 
 export default async function Contact() {
     const site = await fetchSite();
-    const contactEmail = site?.contact_email || "support@sujankumal.com.np";
+    const contactEmail = site?.contact_email || `support@${METADATA_HOST}`;
 
     return (
         <main className="grid md:grid-cols-4 min-h-screen justify-center">

@@ -6,6 +6,7 @@ import { CircularProgress, Alert } from '@mui/material';
 import { useDebounce } from '@/lib/useDebounce';
 import { requestPasswordReset } from '@/services/api/auth';
 import { TurnstileWidget } from './TurnstileWidget';
+import { METADATA_HOST } from '@/constants/constants';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -106,7 +107,7 @@ export function ForgotPasswordForm({ nonce }: { nonce?: string }) {
                         } focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:opacity-50`}
                         name="email"
                         type="email"
-                        placeholder="example@sujankumal.com.np"
+                        placeholder={`example@${METADATA_HOST}`}
                         autoComplete="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}

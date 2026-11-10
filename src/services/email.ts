@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { METADATA_HOST } from '@/constants/constants';
 
 /**
  * Email service helper for dispatching transactional emails.
@@ -65,7 +66,7 @@ export async function sendEmail({
     await transporter.sendMail({
       from:
         process.env.EMAIL_FROM ||
-        'Sujan Kumal <no-reply@sujankumal.com.np>',
+        `Sujan Kumal <no-reply@${METADATA_HOST}>`,
       to,
       subject,
       html,

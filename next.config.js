@@ -29,7 +29,20 @@ function getAllowedOrigins() {
     return Array.from(new Set([...origins, ...vercelOrigins]));
 }
 
+function getMetadataHost() {
+    try {
+        const raw = process.env.METADATA_BASE_URL || 'https://sujankumal.com.np';
+        const formatted = raw.startsWith('http://') || raw.startsWith('https://') ? raw : `https://${raw}`;
+        return new URL(formatted).hostname;
+    } catch {
+        return 'sujankumal.com.np';
+    }
+}
+
 const nextConfig = {
+    env: {
+        METADATA_BASE_URL: process.env.METADATA_BASE_URL || 'https://sujankumal.com.np',
+    },
     reactStrictMode: true,
     cacheComponents: true,
     allowedDevOrigins: getAllowedOrigins(),
@@ -65,6 +78,16 @@ const nextConfig = {
                 port: '',
                 pathname: '/**',
             },
+            ...(getMetadataHost() !== 'sujankumal.com.np'
+                ? [
+                      {
+                          protocol: 'https',
+                          hostname: getMetadataHost(),
+                          port: '',
+                          pathname: '/**',
+                      },
+                  ]
+                : []),
             {
                 protocol: 'https',
                 hostname: 'drive.usercontent.google.com',

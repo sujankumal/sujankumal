@@ -1,8 +1,20 @@
 // import { isNodeJs } from "@/services/check_node";
 
-export const APP_BASE_URL = process.env.VERCEL_URL?? '';
-export const API_BASE_URL = process.env.API_BASE_URL?? '';
-export const METADATA_BASE_URL = process.env.METADATA_BASE_URL??'';
+export const APP_BASE_URL = process.env.VERCEL_URL ?? '';
+export const API_BASE_URL = process.env.API_BASE_URL ?? '';
+export const METADATA_BASE_URL = (
+  process.env.NEXT_PUBLIC_METADATA_BASE_URL ||
+  process.env.METADATA_BASE_URL ||
+  'https://sujankumal.com.np'
+).replace(/\/+$/, '');
+
+export const METADATA_HOST = (() => {
+  try {
+    return new URL(METADATA_BASE_URL).hostname;
+  } catch {
+    return 'sujankumal.com.np';
+  }
+})();
 
 export const GA_TRACKING_ID = process.env.GA_TRACKING_ID??"";
 

@@ -2,6 +2,7 @@ import MarkdownComponent from "@/components/MarkdownComponent";
 import Sidebar from "@/components/Sidebar";
 import { fetchSitePrivacyPolicy } from "@/services/data_access";
 import { Metadata } from "next";
+import { METADATA_BASE_URL } from "@/constants/constants";
 
 export const instant = false;
 
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
     openGraph: {
         images: ['/bird-1024x576-20.png'],
         type: 'website',
-        url: 'https://sujankumal.com.np/',
+        url: `${METADATA_BASE_URL}/privacy-policy`,
         siteName: 'Sujan Kumal | Software Engineer',
         title: 'Privacy-Policy | Sujan Kumal | Software Engineer',
         description: "Explore our comprehensive privacy policy outlining how we collect, use, and protect your personal information.",

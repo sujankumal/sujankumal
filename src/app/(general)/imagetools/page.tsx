@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { METADATA_BASE_URL } from '@/constants/constants';
 
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
     title: 'Image Tools | Sujan Kumal | Software Engineer',
     description: 'Compress, crop, rotate, and edit images online with Sujan Kumal’s Image Tools.',
     type: 'website',
-    url: 'https://sujankumal.com.np/imagetools',
+    url: `${METADATA_BASE_URL}/imagetools`,
     siteName: 'Sujan Kumal',
     images: ['/bird-1024x576-20.png'],
   },

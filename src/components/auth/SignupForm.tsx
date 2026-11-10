@@ -10,6 +10,7 @@ import Link from "next/link";
 import { Google } from "@mui/icons-material";
 import { Alert, CircularProgress, Snackbar } from "@mui/material";
 import { TurnstileWidget } from "./TurnstileWidget";
+import { METADATA_HOST } from "@/constants/constants";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -233,7 +234,7 @@ export function SignupForm({ nonce }: { nonce?: string }) {
                                         className={`shadow border rounded w-full py-2 px-3 leading-tight text-white ${emailError ? 'border-red-500' : 'border-zinc-700'} focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:opacity-50`}
                                         name="email"
                                         type="email"
-                                        placeholder="example@sujankumal.com.np"
+                                        placeholder={`example@${METADATA_HOST}`}
                                         autoComplete="email"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}

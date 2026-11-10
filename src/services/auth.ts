@@ -11,6 +11,7 @@ import { authConfig } from '../../auth.config';
 import { logSecurityEvent } from './security-logger';
 import { verifyTotp } from './totp';
 import { verifyTurnstileToken } from './captcha';
+import { METADATA_HOST } from '@/constants/constants';
 
 // Pre-computed constant bcrypt hash to prevent timing attack enumeration for nonexistent accounts
 const DUMMY_BCRYPT_HASH = '$2a$12$7HJLMe2hKd2dC086lxCDqOmCnW2NSiqIdl8OAM7HjNgfWhN52WPpi';
@@ -41,7 +42,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     CredentialProvider({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "email", placeholder: "example@sujankumal.com.np" },
+        email: { label: "Email", type: "email", placeholder: `example@${METADATA_HOST}` },
         password: { label: "Password", type: "password" },
         totpCode: { label: "2FA Code", type: "text" },
         captchaToken: { label: "CAPTCHA Token", type: "text" },

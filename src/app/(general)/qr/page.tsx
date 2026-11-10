@@ -2,6 +2,7 @@ import QR from "@/components/QR/qr";
 import { Metadata } from "next";
 import { Suspense } from 'react';
 import Sidebar from "@/components/Sidebar";
+import { METADATA_BASE_URL } from "@/constants/constants";
 
 export const instant = false;
 
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
   openGraph: {
     images: ['/bird-1024x576-20.png'],
     type: 'website',
-    url: 'https://sujankumal.com.np/',
+    url: `${METADATA_BASE_URL}/qr`,
     siteName: 'Sujan Kumal | Software Engineer',
     title: 'QR | Sujan Kumal | Software Engineer',
     description: "QR generator is a web application that allows users to create QR codes for various purposes, such as sharing links, contact information, and more. It is designed to be user-friendly and efficient, making it easy for anyone to generate QR codes quickly.",

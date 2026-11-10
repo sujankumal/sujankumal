@@ -2,6 +2,7 @@ import QRScanPage from "@/components/QR/qr-scan";
 import { Metadata } from "next";
 import { Suspense } from 'react';
 import Sidebar from "@/components/Sidebar";
+import { METADATA_BASE_URL } from "@/constants/constants";
 
 export const instant = false;
 
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
   openGraph: {
     images: ['/bird-1024x576-20.png'],
     type: 'website',
-    url: 'https://sujankumal.com.np/',
+    url: `${METADATA_BASE_URL}/qr-scan`,
     siteName: 'Sujan Kumal | Software Engineer',
     title: 'QR Scan | Sujan Kumal | Software Engineer',
     description: "QR Scan is a web application that allows users to scan QR codes for various purposes. It is designed to be user-friendly and efficient, making it easy for anyone to scan QR codes quickly.",

@@ -4,6 +4,7 @@ import { Noto_Sans_Mono } from "next/font/google";
 import { useState, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { HexColorPicker } from 'react-colorful';
+import { METADATA_BASE_URL } from '@/constants/constants';
 
 export const revalidate = 86400;
 
@@ -43,7 +44,7 @@ function svgToPng(svgElement: SVGSVGElement, size: number, fg: string, bg: strin
 }
 
 function QR() {
-  const [input, setInput] = useState('https://sujankumal.com.np/QR');
+  const [input, setInput] = useState(`${METADATA_BASE_URL}/QR`);
   const qrRef = useRef<HTMLDivElement | null>(null);
   const [fgColor, setFgColor] = useState('#222222');
   const [bgColor, setBgColor] = useState('#ffffff');

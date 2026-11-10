@@ -6,6 +6,7 @@ import { verifyTurnstileToken } from '@/services/captcha';
 import { sendEmail } from '@/services/email';
 import { logSecurityEvent } from '@/services/security-logger';
 import { getClientIp, authRateLimiter } from '@/lib/rate-limiter';
+import { METADATA_BASE_URL } from '@/constants/constants';
 
 const forgotPasswordSchema = z.object({
   email: z.email('Please enter a valid email address'),
@@ -74,9 +75,8 @@ export async function POST(request: NextRequest) {
       // Derive base URL for the link
       const origin =
         request.headers.get('origin') ||
-        process.env.METADATA_BASE_URL ||
         process.env.NEXTAUTH_URL ||
-        'https://sujankumal.com.np';
+        METADATA_BASE_URL;
 
       const resetLink = `${origin}/reset-password?token=${resetToken}&email=${encodeURIComponent(normalizedEmail)}`;
 

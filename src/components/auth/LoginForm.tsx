@@ -10,6 +10,7 @@ import { useDebounce } from "@/lib/useDebounce";
 import Link from "next/link";
 import { TurnstileWidget } from "./TurnstileWidget";
 import { OtpInput, OtpInputHandle } from "./OtpInput";
+import { METADATA_HOST } from "@/constants/constants";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -335,7 +336,7 @@ export function LoginForm({ nonce }: { nonce?: string }) {
                                             }}
                                             required
                                             disabled={isSubmitting}
-                                            placeholder="example@sujankumal.com.np"
+                                            placeholder={`example@${METADATA_HOST}`}
                                             className={`shadow border text-white ${
                                                 emailError ? 'border-red-500'
                                                 : show_credentials_error ? 'border-red-500'
