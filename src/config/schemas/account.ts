@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const accountSchema = z.object({
     id: z.cuid2().optional(), // Optional if auto-generated on creation
-    userId: z.number().int(),
+    userId: z.string().min(1, "User ID is required"),
     type: z.string().min(1, "Type is required"),
     provider: z.string().min(1, "Provider is required"),
     providerAccountId: z.string().min(1, "Provider Account ID is required"),

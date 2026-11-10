@@ -22,7 +22,7 @@ async function Team() {
 
   const membersToDisplay = teamMembers.length > 0 ? teamMembers : [
     {
-      id: 0,
+      id: "bot",
       name: "Bot",
       image: "/bird-800x800-20.gif",
       profile: {

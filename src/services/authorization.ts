@@ -3,7 +3,7 @@ import { auth } from "@/services/auth";
 import prisma from "@/../prisma/prisma";
 
 type AuthorizedUser = {
-  id: number;
+  id: string;
   email: string | null;
   verified: boolean;
 };

@@ -69,7 +69,7 @@ model Post {
   categories              CategoriesOnPosts[]
   published               Boolean @default(false)
   author                  User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
-  authorId                Int?
+  authorId                String?
   @@index([published, date])
   @@index([year, month])
   @@map(name: "posts")
@@ -106,7 +106,7 @@ model CategoriesOnPosts {
 }
 
 model User {
-  id                  Int                  @default(autoincrement()) @id
+  id                  String               @default(uuid()) @id
   name                String?
   email               String?              @unique
   password            String?
@@ -131,7 +131,7 @@ model User {
 
 model TwoFactorBackupCode {
   id        Int       @default(autoincrement()) @id
-  userId    Int
+  userId    String
   codeHash  String
   used      Boolean   @default(false)
   usedAt    DateTime?
@@ -143,7 +143,7 @@ model TwoFactorBackupCode {
 
 model SecurityLog {
   id        Int       @default(autoincrement()) @id
-  userId    Int?
+  userId    String?
   event     String
   ipAddress String?
   userAgent String?
@@ -158,7 +158,7 @@ model SecurityLog {
 model Profile {
   id           Int        @default(autoincrement()) @id
   author       User?      @relation(fields: [authorId], references: [id])
-  authorId     Int?       @unique
+  authorId     String?    @unique
   status       String?
   image        String?
   about        String?
@@ -169,7 +169,7 @@ model Profile {
 
 model Account {
   id                 String  @id @default(cuid())
-  userId             Int
+  userId             String
   type               String
   provider           String
   providerAccountId  String
@@ -187,7 +187,7 @@ model Account {
 model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique
-  userId       Int
+  userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

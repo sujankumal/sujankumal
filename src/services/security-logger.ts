@@ -13,7 +13,7 @@ export type SecurityEventType =
   | 'SIGNUP_ATTEMPT';
 
 export async function logSecurityEvent(params: {
-  userId?: number | null;
+  userId?: string | null;
   event: SecurityEventType;
   ipAddress?: string | null;
   userAgent?: string | null;

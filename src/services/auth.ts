@@ -33,7 +33,7 @@ class AccountLockedError extends CredentialsSignin {
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
-  adapter: PrismaAdapter(prisma as any),
+  adapter: PrismaAdapter(prisma),
   session: {
     strategy: 'jwt',
   },
@@ -203,7 +203,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         });
 
         return {
-          id: user.id.toString(),
+          id: user.id,
           name: user.name,
           email: user.email,
           verified: user.verified,

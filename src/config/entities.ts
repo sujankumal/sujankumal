@@ -715,7 +715,7 @@ export const adminEntities: AdminEntities = {
         }),
         columns: [
             { field: "event", label: "Event", renderer: "text", sortable: true },
-            { field: "userId", label: "User ID", renderer: "number", sortable: true },
+            { field: "userId", label: "User ID", renderer: "text", sortable: true },
             { field: "ipAddress", label: "IP Address", renderer: "text", sortable: true },
             { field: "userAgent", label: "User Agent", renderer: "text" },
             { field: "details", label: "Details", renderer: "text" },

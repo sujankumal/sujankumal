@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const profileSchema = z.object({
-    authorId: z.coerce.number(),
+    authorId: z.string().uuid().nullable().optional(),
     status: z.string().max(512).nullable().optional(),
     image: z.string().nullable().optional(),
     about: z.string().max(1024).nullable().optional(),
