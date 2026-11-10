@@ -70,10 +70,14 @@ export async function GET(
 
     // --- Query ---
     const includeClause = config?.include ?? {};
-    const [items, total] = await Promise.all([
-      model.findMany({ where: whereClause, orderBy, skip, take: limit, include: includeClause }),
-      model.count({ where: whereClause }),
-    ]);
+    const items = await model.findMany({
+      where: whereClause,
+      orderBy,
+      skip,
+      take: limit,
+      include: includeClause,
+    });
+    const total = await model.count({ where: whereClause });
 
     const processedData = serverConfig?.afterRead
       ? await serverConfig.afterRead(items)
