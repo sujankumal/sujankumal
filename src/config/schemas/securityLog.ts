@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const securityLogSchema = z.object({
     id: z.number().int().optional(),
-    userId: z.string().uuid().nullable().optional(),
+    userId: z.uuid().nullable().optional(),
     event: z.string().min(1, "Event is required"),
     ipAddress: z.string().nullable().optional(),
     userAgent: z.string().nullable().optional(),
