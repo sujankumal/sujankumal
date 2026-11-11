@@ -145,9 +145,22 @@ export default function QRScanPage() {
                 >
                   Copy
                 </button>
-                {/^https?:\/\//.test(result) && (
-                  <a href={result} target="_blank" rel="noreferrer" className="px-3 py-1 bg-gray-800 text-white rounded">Open</a>
-                )}
+                {(() => {
+                  // Strict URL validation — only allow http: and https: schemes.
+                  // Prevents javascript:, data:, vbscript:, protocol-relative (//), and backslash tricks.
+                  let safeUrl: string | null = null;
+                  try {
+                    const parsed = new URL(result);
+                    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+                      safeUrl = parsed.href;
+                    }
+                  } catch {
+                    // Not a valid URL — no link rendered.
+                  }
+                  return safeUrl ? (
+                    <a href={safeUrl} target="_blank" rel="noreferrer noopener" className="px-3 py-1 bg-gray-800 text-white rounded">Open</a>
+                  ) : null;
+                })()}
               </div>
             </div>
           )}

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@/services/auth';
 import prisma from '@/../prisma/prisma';
 import bcrypt from 'bcrypt';
+import { requireVerifiedUser } from '@/services/authorization';
 import {
   generateTotpSecret,
   generateTotpUri,
@@ -12,13 +12,11 @@ import { logSecurityEvent } from '@/services/security-logger';
 
 // GET: Check MFA status or initiate setup
 export async function GET() {
-  const session = await auth();
-  if (!session?.user?.email) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const authorization = await requireVerifiedUser();
+  if (authorization.response) return authorization.response;
 
   const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
+    where: { id: authorization.user.id },
     select: { id: true, email: true, twoFactorEnabled: true },
   });
 
@@ -46,13 +44,11 @@ export async function GET() {
 
 // POST: Verify and activate MFA
 export async function POST(request: Request) {
-  const session = await auth();
-  if (!session?.user?.email) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const authorization = await requireVerifiedUser();
+  if (authorization.response) return authorization.response;
 
   const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
+    where: { id: authorization.user.id },
   });
 
   if (!user) {
@@ -131,13 +127,11 @@ export async function POST(request: Request) {
 
 // DELETE: Disable MFA
 export async function DELETE(request: Request) {
-  const session = await auth();
-  if (!session?.user?.email) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const authorization = await requireVerifiedUser();
+  if (authorization.response) return authorization.response;
 
   const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
+    where: { id: authorization.user.id },
   });
 
   if (!user) {

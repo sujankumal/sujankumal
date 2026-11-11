@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { scanImages } from "@/lib/image-scanner";
+import { requireVerifiedUser } from "@/services/authorization";
 
 export async function GET() {
+    const authorization = await requireVerifiedUser();
+    if (authorization.response) return authorization.response;
+
     try {
         const images = await scanImages();
 

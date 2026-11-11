@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { connection } from "next/server";
 import { auth } from "@/services/auth";
 import prisma from "@/../prisma/prisma";
 
@@ -13,6 +14,7 @@ type AuthorizationResult =
   | { user: null; response: NextResponse };
 
 export async function getCurrentUser(): Promise<AuthorizedUser | null> {
+  await connection(); // auth() reads cookies + new Date() — must run at request time, never prerendered
   const session = await auth();
   const email = session?.user?.email;
 

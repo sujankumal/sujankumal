@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { Modal } from "../Modal";
 import { RefreshCw } from "lucide-react";
@@ -27,7 +27,6 @@ const ITEM_HEIGHT = 170;
 const VIEWPORT_HEIGHT = 600;
 const OVERSCAN = 2;
 const CARD_WIDTH = 170;
-const COLS = 5;
 
 export function ImagePicker({
     open,
@@ -48,6 +47,7 @@ export function ImagePicker({
     };
     const [images, setImages] = useState<ImageFile[]>([]);
     const [loading, setLoading] = useState(false);
+    const [loadError, setLoadError] = useState("");
 
     const [search, setSearch] = useState("");
     const [selected, setSelected] = useState(normalizeImageSelectionValue(value ?? ""));
@@ -58,6 +58,9 @@ export function ImagePicker({
     const [columns, setColumns] = useState(5);
 
     useEffect(() => {
+        const scrollElement = scrollRef.current;
+        if (!open || loading || !scrollElement) return;
+
         const updateColumns = () => {
             if (!scrollRef.current) return;
 
@@ -68,47 +71,68 @@ export function ImagePicker({
 
         updateColumns();
 
-        window.addEventListener("resize", updateColumns);
-
-        return () => window.removeEventListener("resize", updateColumns);
-    }, []);
+        const observer = new ResizeObserver(updateColumns);
+        observer.observe(scrollElement);
+        return () => observer.disconnect();
+    }, [open, loading]);
 
     useEffect(() => {
         setSelected(normalizeImageSelectionValue(value ?? ""));
     }, [value]);
 
-    const loadImages = async (forceRefresh = false) => {
+    const loadImages = useCallback(async (forceRefresh = false) => {
         setLoading(true);
+        setLoadError("");
 
-        try {
-            if (!forceRefresh) {
+        if (!forceRefresh) {
+            try {
                 const cached = sessionStorage.getItem(CACHE_KEY);
                 const time = Number(sessionStorage.getItem(CACHE_TIME));
 
                 if (cached && time && Date.now() - time < MAX_AGE) {
-                    setImages(JSON.parse(cached));
-                    setLoading(false);
-                    return;
+                    const parsed: unknown = JSON.parse(cached);
+                    if (
+                        Array.isArray(parsed) &&
+                        parsed.every(
+                            (image): image is ImageFile =>
+                                typeof image?.path === "string" &&
+                                typeof image?.name === "string" &&
+                                typeof image?.folder === "string"
+                        )
+                    ) {
+                        setImages(parsed);
+                        setLoading(false);
+                        return;
+                    }
                 }
+            } catch (error) {
+                console.warn("Unable to read the cached image library:", error);
             }
+        }
 
+        try {
             const data = await getImageLibrary();
-
             setImages(data);
-            if (data.length) {
+
+            try {
                 sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
                 sessionStorage.setItem(CACHE_TIME, String(Date.now()));
+            } catch (error) {
+                console.warn("Unable to cache the image library:", error);
             }
-        } catch (err) {
-
+        } catch (error) {
+            console.error("Unable to load the image library:", error);
+            setLoadError("Unable to load images. Please try again.");
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
-        loadImages();
-    }, []);
+        if (open) {
+            void loadImages();
+        }
+    }, [open, loadImages]);
 
     const folders = useMemo(() => {
         return [
@@ -130,7 +154,7 @@ export function ImagePicker({
         });
     }, [images, selectedFolder, search]);
 
-    const totalRows = Math.ceil(filteredImages.length / COLS);
+    const totalRows = Math.ceil(filteredImages.length / columns);
 
     const startRow = Math.max(
         0,
@@ -143,13 +167,20 @@ export function ImagePicker({
     );
 
     const visibleImages = filteredImages.slice(
-        startRow * COLS,
-        endRow * COLS
+        startRow * columns,
+        endRow * columns
     );
 
     const topSpacer = startRow * ITEM_HEIGHT;
     const bottomSpacer =
         (totalRows - endRow) * ITEM_HEIGHT;
+
+    useEffect(() => {
+        setScrollTop(0);
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = 0;
+        }
+    }, [filteredImages]);
 
     useEffect(() => {
         const saved = sessionStorage.getItem("image-library-folder");
@@ -176,11 +207,7 @@ export function ImagePicker({
                 <div className="flex justify-end">
                     <button
                         type="button"
-                        onClick={() => {
-                            sessionStorage.removeItem(CACHE_KEY);
-                            sessionStorage.removeItem(CACHE_TIME);
-                            loadImages(true);
-                        }}
+                        onClick={() => void loadImages(true)}
                         className="flex items-center gap-2 rounded border px-2 py-1 text-sm hover:bg-gray-100"
                     >
                         <RefreshCw className="h-3 w-3" />
@@ -214,7 +241,12 @@ export function ImagePicker({
                     </div>
                 </div>
 
-                {!loading && filteredImages.length === 0 && (
+                {!loading && loadError && (
+                    <div role="alert" className="text-center py-4 text-red-600">
+                        {loadError}
+                    </div>
+                )}
+                {!loading && !loadError && filteredImages.length === 0 && (
                     <div className="text-center py-12 text-gray-500">
                         No images found.
                     </div>
@@ -291,11 +323,23 @@ export function ImagePicker({
                                 style={{ height: VIEWPORT_HEIGHT }}
                                 className="overflow-y-auto"
                             >
-                                <div style={{ height: topSpacer }} />
+                                <div
+                                    className="grid gap-x-4"
+                                    style={{
+                                        gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+                                    }}
+                                >
+                                    {topSpacer > 0 && (
+                                        <div
+                                            aria-hidden="true"
+                                            style={{
+                                                height: topSpacer,
+                                                gridColumn: "1 / -1",
+                                            }}
+                                        />
+                                    )}
 
-                                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4 overflow-y-auto">
-
-                                    {filteredImages.map((image) => {
+                                    {visibleImages.map((image) => {
                                         const normalizedPath = normalizeImageSelectionValue(image.path);
 
                                         return (
@@ -303,10 +347,10 @@ export function ImagePicker({
                                                 key={image.path}
                                                 type="button"
                                                 onClick={() => setSelected(normalizedPath)}
-                                                className={`border rounded-lg overflow-hidden transition ${selected === normalizedPath ? "border-orange-500 ring-2 ring-orange-300" : "border-gray-200 hover:border-orange-300"}`}
+                                                className={`h-[170px] border rounded-lg overflow-hidden transition ${selected === normalizedPath ? "border-orange-500 ring-2 ring-orange-300" : "border-gray-200 hover:border-orange-300"}`}
                                             >
 
-                                                <div className="relative aspect-square">
+                                                <div className="relative h-[140px] w-full">
 
                                                     <Image
                                                         src={image.path}
@@ -318,7 +362,7 @@ export function ImagePicker({
 
                                                 </div>
 
-                                                <div className="p-1">
+                                                <div className="h-[30px] w-full p-1">
 
                                                     <div className="truncate text-xs">
                                                         {image.name}
@@ -330,7 +374,15 @@ export function ImagePicker({
 
                                         );
                                     })}
-                                    <div style={{ height: bottomSpacer }} />
+                                    {bottomSpacer > 0 && (
+                                        <div
+                                            aria-hidden="true"
+                                            style={{
+                                                height: bottomSpacer,
+                                                gridColumn: "1 / -1",
+                                            }}
+                                        />
+                                    )}
                                 </div>
                             </div>
                         )}

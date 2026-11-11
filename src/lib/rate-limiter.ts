@@ -134,3 +134,9 @@ export const authRateLimiter = new InMemoryRateLimiter({
   windowMs: 60 * 1000,
   maxRequests: 20,
 });
+
+// 3. Public search limiter: 30 queries per minute (protects DB full-text scan)
+export const searchRateLimiter = new InMemoryRateLimiter({
+  windowMs: 60 * 1000,
+  maxRequests: 30,
+});
