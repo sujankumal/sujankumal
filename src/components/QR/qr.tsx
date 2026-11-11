@@ -44,7 +44,7 @@ function svgToPng(svgElement: SVGSVGElement, size: number, fg: string, bg: strin
 }
 
 function QR() {
-  const [input, setInput] = useState(`${METADATA_BASE_URL}/QR`);
+  const [input, setInput] = useState(`${METADATA_BASE_URL}/qr`);
   const qrRef = useRef<HTMLDivElement | null>(null);
   const [fgColor, setFgColor] = useState('#222222');
   const [bgColor, setBgColor] = useState('#ffffff');

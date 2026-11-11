@@ -1,3 +1,4 @@
+import 'server-only';
 import nodemailer from 'nodemailer';
 import { METADATA_HOST } from '@/constants/constants';
 

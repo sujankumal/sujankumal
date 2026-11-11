@@ -1,3 +1,4 @@
+import 'server-only';
 import crypto from 'crypto';
 
 const RFC4648_BASE32_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';

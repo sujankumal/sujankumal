@@ -1,5 +1,3 @@
-'use server';
-
 import 'server-only'; // Ensures this never leaks to the client
 import prisma from "../../prisma/prisma";
 import bcrypt from "bcrypt";

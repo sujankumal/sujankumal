@@ -1,4 +1,4 @@
-// import { PrismaClient } from '@prisma/client'
+import 'server-only'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '@/../.prisma/app/generated/prisma/client'
 

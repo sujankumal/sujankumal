@@ -1,3 +1,5 @@
+import 'server-only';
+
 /**
  * Server-side verification for Cloudflare Turnstile CAPTCHA tokens.
  */
