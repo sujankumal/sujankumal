@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { checkAdminAuth } from "./_middleware";
 import { buildFilterConditions } from "./_filters";
 import { resolveEntity } from "@/services/entity-resolver";
+import prisma from "@/../prisma/prisma";
 
 // GET - Read entities with pagination, sorting, search, and filtering
 export async function GET(
@@ -70,14 +71,16 @@ export async function GET(
 
     // --- Query ---
     const includeClause = config?.include ?? {};
-    const items = await model.findMany({
-      where: whereClause,
-      orderBy,
-      skip,
-      take: limit,
-      include: includeClause,
-    });
-    const total = await model.count({ where: whereClause });
+    const [items, total] = await prisma.$transaction([
+      model.findMany({
+        where: whereClause,
+        orderBy,
+        skip,
+        take: limit,
+        include: includeClause,
+      }),
+      model.count({ where: whereClause }),
+    ]);
 
     const processedData = serverConfig?.afterRead
       ? await serverConfig.afterRead(items)
