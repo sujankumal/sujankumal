@@ -71,7 +71,7 @@ export async function getSiteConfig(): Promise<SiteConfigType> {
     const linkedinSocial = socials.find(s => s.name.toLowerCase() === 'linkedin');
 
     const name = site?.name + "";
-    const url = METADATA_BASE_URL || siteConfig.url;
+    const url = siteConfig.url || METADATA_BASE_URL;
     const description = site?.description || siteConfig.description;
 
     return {
